@@ -1,0 +1,17 @@
+{
+  "name": "Sistema Absoluto",
+  "short_name": "Sistema",
+  "description": "IA pessoal que aplica o método do Sistema Absoluto",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#131A24",
+  "theme_color": "#131A24",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
