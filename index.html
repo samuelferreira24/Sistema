@@ -555,15 +555,26 @@ const MODOS = {
     rotulo:"Chat",
     dica:"O que você quiser conversar…",
     formato: '{"resposta":"a resposta, do tamanho que a pergunta pedir — curta se for simples, longa se o assunto exigir. Sem seção, sem lista forçada, sem ritual."}',
-    instrucao: "Converse normalmente. Você conhece o método inteiro e a visão de Samuel — isso " +
-      "informa o seu julgamento o tempo todo, mas não precisa aparecer como estrutura toda vez. " +
-      "Nada de forçar Motor/Piloto/Xadrez/Tabuleiro/Arca aqui — essa é a função do modo Conselho, " +
-      "não deste. Responda como alguém de confiança que já sabe todo o contexto seu conversaria: " +
-      "direto, sem repetir a pergunta, sem elogio vazio, sem enfeite. Pode discordar, pode fazer " +
-      "pergunta de volta quando fizer sentido, pode ser breve quando a pergunta for simples. " +
-      "Se a pergunta pedir fato atual que a memória e a biblioteca não têm — preço, data, evento " +
-      "recente, o que mudou — use a ferramenta pesquisar_web sozinho, sem perguntar se pode. Só " +
-      "avise que não achou se a busca também não tiver a resposta."
+    instrucao: "Converse de verdade. Você conhece o método inteiro e a visão de Samuel — isso " +
+      "informa seu julgamento o tempo todo, mas não vira estrutura na resposta. Nada de forçar " +
+      "Motor/Piloto/Xadrez/Tabuleiro/Arca aqui: isso é o modo Conselho, não este.\n\n" +
+      "PENSE ANTES DE RESPONDER. Assunto difícil merece raciocínio desenvolvido, não conclusão " +
+      "seca. Mostre o encadeamento: por que uma coisa leva à outra, o que você considerou e " +
+      "descartou, onde a coisa pode virar. Resposta curta só quando a pergunta for simples de " +
+      "verdade — nunca por economia.\n\n" +
+      "PESQUISE SEM PEDIR LICENÇA. Se a pergunta toca em fato atual, número, preço, ferramenta, " +
+      "lei, evento, alguém no mercado, qualquer coisa que mude com o tempo ou que você não tenha " +
+      "certeza — use pesquisar_web na hora, sozinho. Pode usar várias vezes seguidas, com termos " +
+      "diferentes, pra cruzar fonte e cavar mais fundo. Uma busca rasa é pior que nenhuma. " +
+      "Nunca diga 'não tenho acesso à internet': você tem, use.\n\n" +
+      "TENHA IDEIAS. Não espere ele pedir. Se enxergar um caminho que ele não mencionou, uma " +
+      "conexão entre duas coisas, um risco que ele não viu, ou uma oportunidade escondida no que " +
+      "ele falou — traga. Traga com o custo real junto, e sem cortar possibilidade por parecer " +
+      "ambiciosa demais: quem decide o freio é ele.\n\n" +
+      "SEJA GENTE. Pode discordar com fundamento, apontar quando algo não fecha, fazer pergunta " +
+      "de volta, admitir que não sabe. Português direto, sem elogio vazio, sem enfeite, sem " +
+      "repetir a pergunta antes de responder. Fale de qualquer assunto que ele trouxer — técnico, " +
+      "pessoal, filosófico, bobo — não existe assunto fora do escopo numa conversa."
   },
   conselho: {
     rotulo:"Conselho",
@@ -2568,12 +2579,16 @@ function promptBase(blocos){
     escopo + ctxProj + "\n\n" + m + ctxArq +
     (enxuto ? "" : "\n\nFERRAMENTAS — você pode executar, não só responder:\n" + ferr +
       "\n\nPra usar uma ferramenta, responda SÓ com:\n{\"ferramenta\":\"nome\",\"args\":{}}\n" +
-      "O resultado volta pra você e aí você continua. Use quando precisar de dado real que não está acima. Máximo 3 usos.") +
+      "O resultado volta pra você e aí você continua. Pode usar várias vezes seguidas, inclusive a mesma ferramenta com termos diferentes, pra cruzar fonte e cavar mais fundo. Máximo 6 usos.") +
     "\n\n" + regras +
     "\n\nMODO ATUAL — " + M.rotulo.toUpperCase() + ":\n" +
     (enxuto ? M.instrucao.split(".")[0] + "." : M.instrucao) + "\n\n" +
     "Responda SOMENTE com JSON válido, sem markdown:\n" + M.formato +
-    "\n\nCada campo curto e denso.";
+    "\n\nTAMANHO: siga o que a pergunta pede, não um limite fixo. Pergunta simples, resposta " +
+    "curta. Assunto que exige raciocínio — decisão difícil, comparação, algo que você precisa " +
+    "destrinchar — desenvolva de verdade, com o encadeamento do porquê, não só a conclusão. " +
+    "Densidade não é brevidade: cortar o raciocínio pra caber é pior que uma resposta longa. " +
+    "Dentro de cada campo do JSON você pode usar quebras de linha e vários parágrafos.";
 }
 
 /* ═══ MOTOR ═══ */
@@ -2599,7 +2614,7 @@ async function chamarLocal(txt){
   const r = await fetch(cfg.endpoint.trim(), {method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({model: cfg.modeloLocal || "local",
-      messages:[{role:"user", content:conteudo}], max_tokens:1400, temperature:.7, stream:false})});
+      messages:[{role:"user", content:conteudo}], max_tokens:2600, temperature:.7, stream:false})});
   if(!r.ok) throw new Error("HTTP " + r.status);
   const d = await r.json();
   if(d.choices && d.choices[0]) return d.choices[0].message.content;
@@ -2624,7 +2639,7 @@ async function chamarMotor(txt, forcar){
       });
     const r = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({contents:[{parts:partes}],
-        generationConfig:{temperature:.7, maxOutputTokens:2048}})});
+        generationConfig:{temperature:.85, maxOutputTokens:8192}})});
     if(!r.ok) throw new Error("HTTP " + r.status);
     const d = await r.json();
     return d.candidates[0].content.parts.map(p => p.text || "").join("");
@@ -2633,7 +2648,8 @@ async function chamarMotor(txt, forcar){
                               : "https://openrouter.ai/api/v1/chat/completions";
   const r = await fetch(url, {method:"POST",
     headers:{"Content-Type":"application/json","Authorization":"Bearer " + cfg.chave},
-    body: JSON.stringify({model:modelo, messages:[{role:"user",content:txt}], max_tokens:2048})});
+    body: JSON.stringify({model:modelo, messages:[{role:"user",content:txt}],
+      max_tokens:8192, temperature:.85})});
   if(!r.ok) throw new Error("HTTP " + r.status);
   const d = await r.json();
   return d.choices[0].message.content;
@@ -2656,15 +2672,21 @@ async function ciclo(pergunta, blocos, aoUsar){
   }
   let conversa = promptBase(blocos) + "\n\nPERGUNTA DE SAMUEL:\n" + entrada;
   const usadas = [];
-  for(let volta = 0; volta < 4; volta++){
+  for(let volta = 0; volta < 7; volta++){
     const bruto = await chamarMotor(conversa);
     let obj;
     try{ obj = parseJSON(bruto); }
     catch(e){
-      return {resposta:String(bruto).slice(0,1200), camadas:{}, risco:null,
-              acao:"O motor não devolveu no formato estruturado. Acima está o texto cru.", usadas};
+      /* No Chat, texto corrido não é erro — é a resposta. Nos modos estruturados,
+         entrega o texto cru inteiro em vez de cortar: melhor longo que mutilado. */
+      const texto = String(bruto).trim();
+      if(modo === "chat")
+        return {resposta: texto, camadas:{}, risco:null, acao:"", usadas};
+      return {resposta: texto, camadas:{}, risco:null,
+              acao:"O motor respondeu em texto corrido em vez do formato do modo " +
+                   MODOS[modo].rotulo + ". A resposta está acima, inteira.", usadas};
     }
-    if(obj.ferramenta && FERRAMENTAS[obj.ferramenta] && volta < 3){
+    if(obj.ferramenta && FERRAMENTAS[obj.ferramenta] && volta < 6){
       const nome = obj.ferramenta;
       usadas.push(nome);
       if(aoUsar) aoUsar(nome);
@@ -3021,6 +3043,13 @@ function renderSaida(h){
       (fontes ? '<div class="rota"><p class="rnome" style="font-size:12px">' +
         (h.fontes.length) + ' fonte(s) da pesquisa</p>' + fontes + '</div>' :
         '<p class="note" style="margin:0">Sem fonte específica citada nesta resposta.</p>');
+  }
+
+  /* Chat: texto corrido, com os parágrafos preservados */
+  if(h.modo === "chat" || (!h.modo && !h.camadas)){
+    return '<div class="a" style="white-space:pre-wrap">' + esc(h.resposta) + '</div>' +
+      (h.acao ? '<div class="acao"><div class="lbl">Próxima ação</div><p>' +
+        esc(h.acao) + '</p></div>' : "");
   }
 
   /* Conselho: as 5 Camadas */
