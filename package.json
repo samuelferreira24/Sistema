@@ -1,0 +1,20 @@
+{
+  "name": "sistema-absoluto",
+  "version": "1.0.0",
+  "description": "IA pessoal que aplica o metodo do Sistema Absoluto",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"const f=require('fs');f.mkdirSync('www',{recursive:true});['index.html','manifest.json','sw.js','icon-192.png','icon-512.png'].forEach(a=>{try{f.copyFileSync(a,'www/'+a)}catch(e){console.log('faltou '+a)}});console.log('www pronto')\"",
+    "sync": "npm run build && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

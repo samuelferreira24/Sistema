@@ -1,0 +1,67 @@
+name: Montar APK
+
+# Roda quando você toca em "Run workflow" no celular,
+# ou sozinho a cada mudança no app.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - 'index.html'
+      - 'manifest.json'
+      - 'sw.js'
+      - 'capacitor.config.json'
+      - 'package.json'
+
+jobs:
+  android:
+    name: Compilar Android
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pegar o código
+        uses: actions/checkout@v4
+
+      - name: Preparar o Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Preparar o Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar o Capacitor
+        run: npm install
+
+      - name: Montar a pasta web
+        run: npm run build
+
+      - name: Criar o projeto Android
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+
+      - name: Sincronizar o app web com o nativo
+        run: npx cap sync android
+
+      - name: Compilar o APK
+        working-directory: android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Guardar o APK pra baixar
+        uses: actions/upload-artifact@v4
+        with:
+          name: sistema-absoluto-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+
+      - name: Onde encontrar
+        run: |
+          echo "APK pronto."
+          echo "Baixe em: Actions -> esta execução -> Artifacts -> sistema-absoluto-apk"

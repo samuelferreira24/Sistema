@@ -1,0 +1,41 @@
+{
+ "espaco": "operacao",
+ "versao": 5,
+ "data": "2026-08-28T12:02:33.506278+00:00",
+ "extras": [
+  {
+   "id": "op-1787918553595",
+   "tag": "ESTADO",
+   "titulo": "Dor real do cliente, confirmada",
+   "corpo": "Consolidar planilhas financeiras espalhadas de várias clínicas numa visão única e clara para o chefe. Eles já têm planilha automatizada e bem feita — o problema não é gerar relatório, é juntar o que está separado. Nenhuma automação atende isso hoje."
+  },
+  {
+   "id": "op-1787918553596",
+   "tag": "ESTRUTURA",
+   "titulo": "Dois modos de entrada, uma base só",
+   "corpo": "Modo A, consolidação: o app lê as planilhas que cada clínica já mantém — não força ninguém a mudar hábito. Modo B, entrada direta: o dado é digitado no app. Os dois alimentam a mesma base; o chefe vê um painel só, não importa a origem."
+  },
+  {
+   "id": "op-1787918553597",
+   "tag": "PRINCÍPIO",
+   "titulo": "O limite que não se cruza sem decisão explícita",
+   "corpo": "Escopo é financeiro agregado: entrada, saída, tendência. Se o relatório passar a detalhar procedimento por paciente, vira dado de saúde e entra em regime legal muito mais restrito. Esse limite tem dono nomeado: Samuel."
+  },
+  {
+   "id": "op-1787918553598",
+   "tag": "ESTRUTURA",
+   "titulo": "A peça mais segura é a que não existe",
+   "corpo": "Antes de blindar o banco de dados do cliente, a pergunta é se ele precisa existir. Se o app processar e devolver sem guardar, a responsabilidade sobre o dado quase desaparece. Aplicação direta do passo 2 do Algoritmo."
+  },
+  {
+   "id": "op-1787918553599",
+   "tag": "ESTADO",
+   "titulo": "Canal de entrada e o papel da irmã nº2",
+   "corpo": "Ela não opera nada para Samuel. O ganho dela é subir de hierarquia na própria empresa com apoio de prospecção — ela sobe, ele ganha visibilidade e a recomendação vem de dentro, sem forçar entrada. Nunca pedir nada a ela: só entregar valor."
+  }
+ ],
+ "biblio": [],
+ "tabuleiro": null,
+ "projetos": [],
+ "modulos": []
+}

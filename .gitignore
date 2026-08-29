@@ -1,0 +1,32 @@
+# NUNCA commitar — chave de API e memória são privadas.
+# O código pode ser público (casca vazia não vale nada sozinha).
+# O que está DENTRO dela, não.
+
+*.key
+*.env
+.env
+.env.*
+config.local.*
+segredos.*
+
+# Memória exportada do app — contém decisões, contexto e histórico
+sistema-absoluto-memoria.json
+memoria-*.json
+*-memoria.json
+
+# Biblioteca do coletor
+biblioteca/
+.vistos.json
+
+# Dados de cliente — nunca no repositório, em hipótese nenhuma
+clientes/
+*.xlsx
+*.xls
+*.pptx
+dados-cliente*
+
+# Lixo de sistema
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
