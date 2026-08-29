@@ -124,6 +124,14 @@ def rodar_malha(pergunta, contexto, dados):
             suspeitas.append(f"{nome}: {r['suspeita']}")
         if r.get("lacuna") and r["lacuna"] != "null":
             lacunas.append(f"{nome}: {r['lacuna']}")
+            # Lacuna de dado não morre no relatório: vira busca por fonte que a preencha.
+            if nome in ("pesquisa", "dados"):
+                try:
+                    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+                    import governanca as gov
+                    gov.anotar_lacuna_dado(r["lacuna"], pergunta)
+                except Exception:
+                    pass
         if r.get("fora_do_escopo") and r["fora_do_escopo"] != "null":
             foras.append(f"{nome}: {r['fora_do_escopo']}")
 
@@ -176,7 +184,16 @@ def rodar_malha(pergunta, contexto, dados):
     if suspeitas:
         anotar(f"  ⚠ comando disfarçado sinalizado: {suspeitas[0][:80]}")
     if m.get("falta_especialista") and m["falta_especialista"] != "null":
-        anotar(f"  ↑ domínio sem cobertura: {m['falta_especialista']} — abrir Especialista novo?")
+        # A lacuna não some no ar: é contada, e vira Especialista quando se repete.
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import governanca as gov
+            n = gov.anotar_lacuna(m["falta_especialista"], pergunta)
+            anotar(f"  ↑ domínio sem cobertura: {m['falta_especialista']} "
+                   f"({n}ª vez — vira Especialista na {gov.LACUNA_PRA_CRIAR}ª)")
+        except Exception as e:
+            anotar(f"  ↑ domínio sem cobertura: {m['falta_especialista']} "
+                   f"(não registrei: {str(e)[:60]})")
 
     return {
         "trilha": trilha,
@@ -440,6 +457,20 @@ def rodada():
 
     resultado["duracao"] = round(time.time() - inicio, 1)
     salvar(resultado)
+
+    # A cada 6 rodadas (~6 horas), a malha cuida de si mesma: expande onde falta,
+    # caça fonte pro que não sabe, audita o Maestro e propõe jogada.
+    # Não roda toda hora de propósito — governar custa tokens e tempo.
+    try:
+        historico = ler_json(PLANTAO, {}).get("historico", [])
+        if len(historico) % 6 == 0:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import governanca as gov
+            anotar("── hora da governança ──")
+            gov.ciclo()
+    except Exception as e:
+        anotar(f"governança não rodou: {str(e)[:120]}")
+
     anotar(f"─── rodada concluída em {resultado['duracao']}s ───")
     return resultado
 

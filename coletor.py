@@ -305,13 +305,37 @@ def salvar_vistos(v):
         json.dump(sorted(v), f)
 
 
+def fontes_proprias():
+    """Fontes que a governança descobriu sozinha, ou que Samuel adicionou.
+       Ficam em arquivo separado: o mapa original nunca é reescrito por máquina."""
+    caminho = os.path.expanduser("~/sa/fontes-proprias.json")
+    try:
+        with open(caminho, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def mapa_completo():
+    """O mapa de fábrica somado ao que foi descoberto depois."""
+    todas = {d: list(fs) for d, fs in FONTES.items()}
+    for dominio, lista in fontes_proprias().items():
+        todas.setdefault(dominio, [])
+        existentes = {f.get("url") for f in todas[dominio]}
+        for f in lista:
+            if f.get("url") not in existentes:
+                f["propria"] = True
+                todas[dominio].append(f)
+    return todas
+
+
 def rodar():
     vistos = carregar_vistos()
     novos_total = 0
     hoje = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     resumo = []
 
-    for dominio, fontes in FONTES.items():
+    for dominio, fontes in mapa_completo().items():
         ativos = [f for f in fontes if f.get("ativo")]
         if not ativos:
             continue
@@ -382,7 +406,7 @@ def rodar():
 def status():
     print("\nMAPA DE FONTES — todas as portas cadastradas\n")
     a = r = 0
-    for dominio, fontes in FONTES.items():
+    for dominio, fontes in mapa_completo().items():
         print(f"  {dominio}")
         for f in fontes:
             marca = "ATIVO   " if f.get("ativo") else "represado"

@@ -45,6 +45,17 @@ ok "Espaço livre: ${LIVRE_GB} GB"
 NUCLEOS=$(nproc)
 ok "Núcleos de processamento: ${NUCLEOS}"
 
+# Compilar com todos os núcleos consome memória demais em aparelho de 3 GB —
+# é o que faz o Android matar o processo (signal 9). Aqui a paralelização
+# acompanha a RAM, não o número de núcleos.
+if   [ "$RAM_GB" -ge 8 ]; then JOBS=$NUCLEOS
+elif [ "$RAM_GB" -ge 6 ]; then JOBS=4
+elif [ "$RAM_GB" -ge 4 ]; then JOBS=2
+else                           JOBS=1
+fi
+[ "$JOBS" -gt "$NUCLEOS" ] && JOBS=$NUCLEOS
+ok "Compilação usará ${JOBS} de ${NUCLEOS} núcleos (ajustado à memória)"
+
 # ─────────────────────────────────────────────
 titulo "2. Instalando as ferramentas de compilação"
 
@@ -66,7 +77,9 @@ ok "Compilador e utilitários instalados"
 
 # Vulkan deixa a GPU do celular trabalhar junto — quando existe, dobra a velocidade
 USA_VULKAN=0
-if pkg install -y vulkan-tools vulkan-headers vulkan-loader-android >/dev/null 2>&1; then
+# shaderc traz o glslc, que o cmake exige pro Vulkan. Sem ele, a
+# configuração falha mesmo com o Vulkan instalado e funcionando.
+if pkg install -y vulkan-tools vulkan-headers vulkan-loader-android shaderc glslang >/dev/null 2>&1; then
   if [ -f /system/lib64/libvulkan.so ] || [ -f /vendor/lib64/libvulkan.so ]; then
     USA_VULKAN=1
     ok "GPU disponível via Vulkan — vai acelerar"
@@ -98,10 +111,47 @@ cd "$LLAMA"
 FLAGS="-DCMAKE_BUILD_TYPE=Release -DLLAMA_CURL=OFF -DGGML_LLAMAFILE=OFF"
 [ "$USA_VULKAN" = "1" ] && FLAGS="$FLAGS -DGGML_VULKAN=ON"
 
-cmake -B build $FLAGS >/dev/null 2>&1 || erro "A configuração falhou. Rode 'pkg update' e tente de novo."
+echo "   Configurando a compilação…"
+# O código de saída é confiável; checar CMakeCache.txt não é — ele sobra
+# mesmo quando a configuração falha.
+set +e
+cmake -B build $FLAGS 2>&1 | tail -25
+CONFIG_OK=${PIPESTATUS[0]}
+set -e
+
+# Vulkan quase sempre falha por falta do glslc (compilador de shader), que
+# vem em pacote separado. Tenta instalar; se ainda falhar, segue sem GPU.
+if [ "$CONFIG_OK" != "0" ] && [ "$USA_VULKAN" = "1" ]; then
+  echo
+  aviso "Vulkan falhou. Tentando instalar o compilador de shader que falta…"
+  pkg install -y shaderc glslang 2>/dev/null || true
+  rm -rf build
+  set +e
+  cmake -B build $FLAGS 2>&1 | tail -15
+  CONFIG_OK=${PIPESTATUS[0]}
+  set -e
+
+  if [ "$CONFIG_OK" != "0" ]; then
+    echo
+    aviso "Sem GPU então. Compilando no processador — mais lento, porém funciona."
+    rm -rf build
+    FLAGS="-DCMAKE_BUILD_TYPE=Release -DLLAMA_CURL=OFF -DGGML_LLAMAFILE=OFF"
+    USA_VULKAN=0
+    CAMADAS_GPU=0
+    set +e
+    cmake -B build $FLAGS 2>&1 | tail -20
+    CONFIG_OK=${PIPESTATUS[0]}
+    set -e
+  fi
+fi
+
+if [ "$CONFIG_OK" != "0" ]; then
+  echo
+  erro "A configuração falhou — o motivo real está nas linhas acima."
+fi
 echo "   Compilando — a porcentagem vai subir até 100%:"
 echo
-cmake --build build --config Release -j"$NUCLEOS" --target llama-server llama-cli 2>&1 | \
+cmake --build build --config Release -j"$JOBS" --target llama-server llama-cli 2>&1 | \
   grep -E "^\[|error|Error" | tail -20 || true
 
 [ -f "$LLAMA/build/bin/llama-server" ] || erro "A compilação não gerou o servidor."
