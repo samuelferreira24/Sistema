@@ -2711,6 +2711,108 @@ const esc = s => String(s == null ? "" : s)
 /* Cada modo desenha o que produziu. */
 /* ═══ MANUAL ═══ */
 const MANUAL = [
+  {t:"★ Instalar do zero — visão geral",
+   c:"São duas coisas separadas, e só a primeira é obrigatória.\n\n" +
+     "1) O APP — hospedado no GitHub Pages, funciona com chave de API. Sozinho já resolve: " +
+     "memória, método, chat, pesquisa, protótipos.\n\n" +
+     "2) O TERMUX — motor próprio offline, coletor e automação. Melhora muito, mas não " +
+     "bloqueia nada. Pode deixar pra depois.\n\n" +
+     "As seções seguintes trazem os comandos exatos, já corrigidos pelos erros que apareceram " +
+     "na instalação real."},
+
+  {t:"★ Passo 1 — Subir o app no GitHub",
+   c:"Dos 22 arquivos do pacote, o GitHub precisa de 8: index.html, manifest.json, sw.js, " +
+     "icon-192.png, icon-512.png, package.json, capacitor.config.json e a pasta " +
+     ".github/workflows/build-android.yml.\n\n" +
+     "No site do GitHub: Add file → Upload files → confirma o commit. Espera cerca de 1 minuto " +
+     "pro GitHub Pages publicar.\n\n" +
+     "Os arquivos .py e o motor.sh NÃO vão pro GitHub — eles rodam no Termux, no seu aparelho. " +
+     "Subir só serve de backup."},
+
+  {t:"★ Passo 2 — Ligar o motor de API",
+   c:"Ajustes → Motor. Escolhe Google Gemini, pega a chave grátis em aistudio.google.com " +
+     "(botão 'Get API key'), cola, Salvar, Testar.\n\n" +
+     "Se der HTTP 404, o nome do modelo saiu de linha — troca no campo do meio por um modelo " +
+     "atual do Gemini. Erro 404 quase nunca é chave errada; é modelo desativado.\n\n" +
+     "A chave fica só neste aparelho. Nunca sobe pro GitHub."},
+
+  {t:"★ Passo 3 — Importar a semente",
+   c:"Ajustes → Importar → semente-nucleo.json. Depois troca pra Operação (botão no topo) e " +
+     "importa semente-operacao.json.\n\n" +
+     "Isso traz 16 calibragens, 7 decisões e 6 lições já registradas. A IA nasce sabendo o " +
+     "método em vez de aprender do zero."},
+
+  {t:"★ Passo 4 — Termux (opcional)",
+   c:"Baixe do F-Droid ou do GitHub — NUNCA da Play Store, a versão de lá foi abandonada e " +
+     "quebra na compilação.\n\n" +
+     "Ao abrir, rode um comando por vez:\n\n" +
+     "termux-setup-storage\n" +
+     "(autorize o popup)\n\n" +
+     "termux-wake-lock\n" +
+     "(impede o Android de matar o processo com a tela apagada — sem isso trava)\n\n" +
+     "pkg install python unzip -y\n\n" +
+     "Extraia o zip do sistema em Downloads antes de continuar."},
+
+  {t:"★ Passo 5 — Compilar o motor local",
+   c:"bash ~/storage/downloads/sistema-absoluto/motor.sh\n\n" +
+     "Leva de 30 minutos a 2 horas, dependendo do aparelho. Deixe o carregador ligado.\n\n" +
+     "O script se vira sozinho: escolhe o modelo pela sua memória, e se o Vulkan falhar tenta " +
+     "sem GPU automaticamente. Erros de Vulkan são esperados e ele contorna.\n\n" +
+     "Quando aparecer MOTOR PRÓPRIO INSTALADO, acabou."},
+
+  {t:"★ Passo 6 — Usar o motor local",
+   c:"Ligar (numa aba, deixa parado):\n" +
+     "bash ~/motor/ligar.sh\n\n" +
+     "Testar (em OUTRA aba — menu ≡ → New session):\n" +
+     "bash ~/motor/testar.sh\n\n" +
+     "Depois de abrir uma aba nova, os atalhos 'motor' e 'motor-teste' funcionam.\n\n" +
+     "No app: Ajustes → Motor local → endereço http://127.0.0.1:8080/v1/chat/completions, " +
+     "modelo 'local', Testar.\n\n" +
+     "Se der 'couldn't bind port 8080', o motor JÁ está rodando em outra aba. Não é erro."},
+
+  {t:"★ Passo 7 — Encher a biblioteca",
+   c:"Copie os scripts pra dentro do Termux — a pasta Downloads não permite execução:\n\n" +
+     "mkdir -p ~/sa && cp ~/storage/downloads/sistema-absoluto/*.py ~/sa/ && chmod +x ~/sa/*.py\n\n" +
+     "Depois, um por vez:\n\n" +
+     "python ~/sa/coletor.py\n" +
+     "python ~/sa/base.py --importar\n" +
+     "cp ~/biblioteca/biblioteca-para-o-app.json ~/storage/downloads/\n\n" +
+     "No app: Ajustes → Importar biblioteca → Downloads.\n\n" +
+     "O passo --vetorizar só funciona com modelo que gera vetores. Modelo pequeno não gera — " +
+     "pule, a busca por palavra funciona sem ele."},
+
+  {t:"★ Passo 8 — Automação 24h",
+   c:"Instale o app Termux:API do F-Droid (separado do Termux) e depois:\n\n" +
+     "pkg install termux-api -y\n" +
+     "python ~/sa/orquestrador.py --agendar\n\n" +
+     "Confirme que apareceu 'Scheduling Job 0'. Se aparecer 'Cannot execute file', os scripts " +
+     "estão na pasta errada — refaça o passo 7.\n\n" +
+     "Conferir: termux-job-scheduler --pending\n" +
+     "Cancelar: termux-job-scheduler --cancel-all\n\n" +
+     "Roda de hora em hora, com a tela apagada. Em aparelho com pouca memória o Android mata " +
+     "às vezes — rodada perdida acontece, não é defeito."},
+
+  {t:"★ Atualizar o app depois",
+   c:"Ajustes → Atualizar o app. Escolhe o arquivo novo, toca em Enviar, e ele publica direto " +
+     "no seu repositório.\n\n" +
+     "Precisa de um token do GitHub separado do da Nuvem: github.com → Settings → Developer " +
+     "settings → Fine-grained tokens → escolha SÓ o repositório do app → Contents: Read and write.\n\n" +
+     "Depois de publicar, use 'Recarregar agora' — sem isso o celular mostra a versão antiga " +
+     "guardada em cache. Atualizar NUNCA apaga sua memória: ela vive em outro lugar, separada " +
+     "do código."},
+
+  {t:"★ Quando algo der errado",
+   c:"Rode o auto-teste (Ajustes → Auto-teste) antes de qualquer coisa: ele diz qual peça " +
+     "falhou em vez de você adivinhar.\n\n" +
+     "Erros comuns e o que significam:\n" +
+     "· HTTP 404 no Gemini = modelo saiu de linha, troque o nome\n" +
+     "· 'couldn't bind port' = motor já está rodando, não é erro\n" +
+     "· 'signal 9' = Android matou por falta de memória; feche apps e use wake-lock\n" +
+     "· 'Cannot execute file' = script está na pasta Downloads, copie pra ~/sa\n" +
+     "· 'insuficiência de memória' no app = feche o motor local e outros apps\n\n" +
+     "O Android cria pastas com (1), (2) a cada download repetido. Confirme sempre que está " +
+     "rodando o arquivo da pasta certa."},
+
   {t:"Como o app pensa",
    c:"A memória é sua e não zera. O motor é alugado e trocável. O que faz a IA ser sua não é o " +
      "modelo — é a memória que você acumula e as calibragens que você registra. Trocar de " +
