@@ -48,9 +48,20 @@ ok "Núcleos de processamento: ${NUCLEOS}"
 # ─────────────────────────────────────────────
 titulo "2. Instalando as ferramentas de compilação"
 
-pkg update -y >/dev/null 2>&1 || true
-pkg upgrade -y >/dev/null 2>&1 || true
-pkg install -y git cmake clang make libandroid-spawn wget >/dev/null 2>&1
+# Segura o aparelho acordado: sem isso o Android mata a instalação
+# quando a tela apaga, e o script fica esperando um processo morto.
+termux-wake-lock 2>/dev/null || true
+ok "Aparelho travado acordado"
+
+echo "   Atualizando a lista de pacotes…"
+pkg update -y || true
+
+# O 'upgrade' de 74 pacotes é o que mais demora e NÃO é necessário
+# pra compilar. Pulado de propósito: economiza horas em conexão lenta.
+echo "   Instalando só o necessário (você verá o progresso):"
+echo
+pkg install -y git cmake clang make libandroid-spawn wget || erro "Instalação falhou. Rode 'pkg update' e tente de novo."
+echo
 ok "Compilador e utilitários instalados"
 
 # Vulkan deixa a GPU do celular trabalhar junto — quando existe, dobra a velocidade
@@ -87,7 +98,9 @@ cd "$LLAMA"
 FLAGS="-DCMAKE_BUILD_TYPE=Release -DLLAMA_CURL=OFF -DGGML_LLAMAFILE=OFF"
 [ "$USA_VULKAN" = "1" ] && FLAGS="$FLAGS -DGGML_VULKAN=ON"
 
-cmake -B build $FLAGS >/dev/null 2>&1 || erro "A configuração falhou. Rode 'pkg upgrade' e tente de novo."
+cmake -B build $FLAGS >/dev/null 2>&1 || erro "A configuração falhou. Rode 'pkg update' e tente de novo."
+echo "   Compilando — a porcentagem vai subir até 100%:"
+echo
 cmake --build build --config Release -j"$NUCLEOS" --target llama-server llama-cli 2>&1 | \
   grep -E "^\[|error|Error" | tail -20 || true
 
