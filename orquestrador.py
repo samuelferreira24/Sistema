@@ -80,7 +80,8 @@ def chamar_especialista(esp, nome, pedido, contexto, dados):
     import time as _t
     t0 = _t.time()
     try:
-        bruto = perguntar(esp.montar_prompt(nome, pedido, contexto, dados), limite=700)
+        bruto = perguntar(esp.montar_prompt(nome, pedido, contexto, dados),
+                          limite=700, especialista=nome)
         texto = bruto.replace("```json", "").replace("```", "").strip()
         i, f = texto.find("{"), texto.rfind("}")
         if i >= 0 and f > i:
@@ -233,21 +234,85 @@ def motor_vivo():
             return False
 
 
-def perguntar(texto, limite=700):
-    corpo = json.dumps({
-        "model": "local",
-        "messages": [{"role": "user", "content": texto}],
-        "max_tokens": limite,
-        "temperature": 0.6,
-        "stream": False,
-    }).encode("utf-8")
-    req = urllib.request.Request(MOTOR, data=corpo,
-                                 headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=180) as r:
-        d = json.loads(r.read().decode("utf-8"))
-    if "choices" in d:
-        return d["choices"][0]["message"]["content"]
-    return d.get("content", "")
+def motores():
+    """Vários motores configurados. Cada Especialista pode usar o que resolve
+       melhor o problema dele — é o 'pegar emprestado' aplicado ao motor.
+       Formato de ~/sa/motores.json:
+         {"padrao": {...}, "codigo": {...}, "busca": {...}}
+       Cada um: {"url":"", "chave":"", "modelo":"", "tipo":"openai|gemini"}"""
+    caminho = os.path.join(BASE, "motores.json")
+    try:
+        with open(caminho, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        # Sem o arquivo, o motor único de sempre vira o padrão
+        try:
+            with open(os.path.join(BASE, "motor.json"), encoding="utf-8") as f:
+                return {"padrao": json.load(f)}
+        except Exception:
+            return {"padrao": {"url": MOTOR, "modelo": "local"}}
+
+
+def motor_de(especialista=None):
+    """Qual motor este Especialista usa. Cai no padrão se não tiver o dele."""
+    M = motores()
+    if especialista:
+        esp_cfg = carregar_especialistas()
+        if esp_cfg:
+            e = esp_cfg.todos().get(especialista, {})
+            nome = e.get("motor")
+            if nome and nome in M:
+                return M[nome], nome
+    return M.get("padrao", {"url": MOTOR, "modelo": "local"}), "padrao"
+
+
+def perguntar(texto, limite=700, especialista=None):
+    """Fala com o motor. Se o do Especialista falhar, cai no padrão —
+       um motor fora do ar não pode derrubar a malha inteira."""
+    cfg, nome = motor_de(especialista)
+    tentativas = [(cfg, nome)]
+    if nome != "padrao":
+        tentativas.append((motores().get("padrao", {}), "padrao (reserva)"))
+
+    ultimo_erro = None
+    for c, quem in tentativas:
+        try:
+            url = c.get("url") or MOTOR
+            # Gemini fala outro formato
+            if c.get("tipo") == "gemini" or "generativelanguage" in url:
+                alvo = url if "generateContent" in url else (
+                    "https://generativelanguage.googleapis.com/v1beta/models/" +
+                    (c.get("modelo") or "gemini-3.5-flash") + ":generateContent")
+                if c.get("chave"):
+                    alvo += ("&" if "?" in alvo else "?") + "key=" + c["chave"]
+                corpo = {"contents": [{"parts": [{"text": texto}]}],
+                         "generationConfig": {"temperature": 0.6, "maxOutputTokens": limite * 2}}
+                req = urllib.request.Request(alvo, data=json.dumps(corpo).encode("utf-8"),
+                                             headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=180) as r:
+                    d = json.loads(r.read().decode("utf-8"))
+                return "".join(p.get("text", "")
+                               for p in d["candidates"][0]["content"]["parts"])
+
+            # formato OpenAI: quase todo o resto
+            corpo = {"model": c.get("modelo", "local"),
+                     "messages": [{"role": "user", "content": texto}],
+                     "max_tokens": limite, "temperature": 0.6, "stream": False}
+            cab = {"Content-Type": "application/json"}
+            if c.get("chave"):
+                cab["Authorization"] = "Bearer " + c["chave"]
+            req = urllib.request.Request(url, data=json.dumps(corpo).encode("utf-8"),
+                                         headers=cab)
+            with urllib.request.urlopen(req, timeout=180) as r:
+                d = json.loads(r.read().decode("utf-8"))
+            if "choices" in d:
+                return d["choices"][0]["message"]["content"]
+            return d.get("content", "")
+        except Exception as e:
+            ultimo_erro = e
+            if quem != "padrao (reserva)":
+                anotar(f"    motor '{quem}' falhou ({str(e)[:60]}) — tentando o padrão")
+    raise ultimo_erro or RuntimeError("nenhum motor respondeu")
 
 
 def ler_json(caminho, padrao):

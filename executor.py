@@ -42,27 +42,79 @@ TIMEOUT_CMD = 120        # segundos por comando
 # CAMADA 3 — o que nunca roda, nem se ela pedir
 # ═══════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════
+# CAMADA 3 — o que nunca roda, nem se ela pedir
+#
+# Esta lista foi reescrita para o cenário COM privilégio elevado (Shizuku/rish).
+# A diferença importa: sem privilégio, `pm uninstall` só falha. Com privilégio,
+# desinstala de verdade. Comando que era inofensivo passa a ser destrutivo.
+#
+# Regra que guiou a lista: a IA constrói dentro da pasta de trabalho.
+# Nada que ela faça deveria precisar tocar no sistema, em outro app, ou
+# na tela do aparelho. Se precisar, é você quem faz.
+# ═══════════════════════════════════════════════════════════
+
 PROIBIDO = [
+    # ─── Destruição de dados ───
     (r"\brm\s+(-\w+\s+)*-?\w*[rf]", "apagar em massa"),
     (r"\b(mkfs|fdisk|dd)\b", "mexer em disco"),
     (r">\s*/dev/(sd|block)", "escrever em dispositivo"),
-    (r"\bchmod\b[^|;&]*\b(777|a\+rwx)", "abrir permissão total"),
-    # A raiz do problema não é o chmod: é mexer em / ou no sistema.
-    # Qualquer comando que aponte pra lá é barrado, seja qual for.
     (r"\b(chmod|chown|rm|mv|cp)\b[^|;&]*\s/(\s|$)", "operar sobre a raiz do sistema"),
-    (r"\s/(system|data/data(?!/com\.termux/files/home/sa)|vendor|proc|dev)\b",
-     "tocar em pasta do sistema"),
-    (r"\b(curl|wget)\b.*\|\s*(ba)?sh", "baixar e executar direto"),
-    (r"\bpkg\s+(uninstall|remove)", "desinstalar pacote do sistema"),
-    (r"\b(shutdown|reboot|halt)\b", "desligar o aparelho"),
-    (r"\.ssh|id_rsa|\.gnupg", "tocar em chave de acesso"),
+    (r"\bchmod\b[^|;&]*\b(777|a\+rwx)", "abrir permissão total"),
+
+    # ─── Pastas do sistema (a de trabalho fica de fora) ───
+    (r"\s/(system|vendor|proc|dev|sbin|apex)\b", "tocar em pasta do sistema"),
+    (r"/data/data/(?!com\.termux/files/home/sa)", "tocar em dado de outro app"),
+    (r"/data/(user|misc|system|vendor)\b", "tocar em dado protegido"),
+
+    # ─── Segredo e identidade ───
+    (r"\.ssh|id_rsa|\.gnupg|\.netrc", "tocar em chave de acesso"),
     (r"sa:cfg|sa:nucleo|sa:operacao", "tocar na memória do app"),
+    (r"api\.github\.com|GITHUB_TOKEN|ghp_|github_pat_", "usar o token do GitHub"),
+    (r"\b(motor|especialistas|governanca)\.json\b", "reescrever configuração da malha"),
     (r"executor-estado|executor\.py", "modificar o próprio executor"),
-    (r"\bcrontab\b|termux-job-scheduler", "mexer no agendamento"),
+    (r"\bkeystore\b|\bkeychain\b", "tocar no cofre de credenciais"),
+
+    # ─── Publicar sem você saber ───
     (r"\bgit\s+push\b", "publicar sem você saber"),
-    (r"api\.github\.com|GITHUB_TOKEN", "usar o token do GitHub"),
+    (r"\b(curl|wget)\b.*\|\s*(ba)?sh", "baixar e executar direto"),
+
+    # ═══ A PARTIR DAQUI: só perigoso COM privilégio elevado ═══
+
+    # ─── Controlar o aparelho ───
+    (r"\brish\b|\bshizuku\b", "escalar o próprio privilégio"),
+    (r"\binput\s+(tap|swipe|text|keyevent|touchscreen)", "simular toque na tela"),
+    (r"\buiautomator\b|\bmonkey\b", "automatizar a interface"),
+    (r"\bam\s+(start|broadcast|force-stop|kill)", "abrir ou matar aplicativo"),
+    (r"\bscreencap\b|\bscreenrecord\b", "capturar a tela"),
+
+    # ─── Mexer em outros apps ───
+    (r"\bpm\s+(install|uninstall|disable|enable|clear|grant|revoke)", "instalar ou remover app"),
+    (r"\b(pkg|apt|apt-get)\s+(uninstall|remove|purge|autoremove)", "desinstalar pacote do Termux"),
+    (r"\bcmd\s+(package|notification|appops|activity)", "controlar app pelo sistema"),
+    (r"\bappops\b", "mudar permissão de app"),
+
+    # ─── Mudar o sistema ───
+    (r"\bsettings\s+(put|delete)", "alterar configuração do sistema"),
+    (r"\bsvc\s+(power|wifi|data|bluetooth)", "controlar hardware do aparelho"),
+    (r"\bcontent\s+(insert|update|delete|call)", "escrever em banco do sistema"),
+    (r"\b(setprop|resetprop)\b", "alterar propriedade do sistema"),
+    (r"\bdevice_config\b", "mudar configuração experimental"),
+
+    # ─── Ler o que não é dele ───
+    (r"\bdumpsys\s+(notification|account|user|telephony|wifi)",
+     "ler dado sensível de outro app"),
+    (r"\blogcat\b", "ler o registro do sistema inteiro"),
+    (r"\bsqlite3\b[^|;&]*/data/", "abrir banco de outro app"),
+
+    # ─── Persistência e privilégio ───
+    (r"\b(shutdown|reboot|halt|bootloader|fastboot)\b", "desligar ou reiniciar"),
+    (r"\bsudo\b|\bsu\b\s|\bmagisk\b", "escalar privilégio"),
+    (r"\bcrontab\b|termux-job-scheduler", "mexer no agendamento"),
+    (r"\btermux-(sms|call|camera|location|contact|telephony)", "usar sensor ou dado pessoal"),
+
+    # ─── Sair da cerca ───
     (r"\.\./\.\.", "sair da pasta de trabalho"),
-    (r"\bsudo\b|\bsu\b\s", "escalar privilégio"),
 ]
 
 # Palavras que fazem a tarefa parar e chamar Samuel, em vez de decidir sozinha
@@ -71,6 +123,20 @@ ESCALA = [
     "enviar ao cliente", "publicar", "cnpj", "holding", "banco",
     "cartão", "pix", "transferir", "demitir", "contratar",
 ]
+
+
+def com_privilegio():
+    """Descobre se o Shizuku está ativo. Com privilégio, comando inofensivo
+       vira destrutivo — e o executor precisa saber disso."""
+    if os.path.exists(os.path.expanduser("~/rish")) or \
+       os.path.exists(os.path.expanduser("~/.local/bin/rish")):
+        try:
+            p = subprocess.run("rish -c 'id'", shell=True, capture_output=True,
+                               text=True, timeout=8)
+            return "uid=2000" in (p.stdout or "")   # 2000 = shell do ADB
+        except Exception:
+            return False
+    return False
 
 
 def proibido(cmd):
@@ -187,9 +253,20 @@ def rodar_comando(cmd):
         return {"ok": False, "saida": f"BLOQUEADO: {motivo}. Esse comando nunca roda. "
                                       f"Resolva de outro jeito."}
     os.makedirs(TRABALHO, exist_ok=True)
+
+    # Se o Shizuku estiver ativo no seu terminal, o executor NÃO herda isso.
+    # Ele roda como app comum, sempre. Privilégio elevado é seu, não dele —
+    # e a lista de proibições existe justamente porque um vazamento aqui
+    # transformaria um erro dele em estrago no aparelho inteiro.
+    ambiente = dict(os.environ)
+    for v in ("RISH_APPLICATION_ID", "SHIZUKU_APPLICATION_ID", "ADB_VENDOR_KEYS"):
+        ambiente.pop(v, None)
+    ambiente["PATH"] = ":".join(p for p in ambiente.get("PATH", "").split(":")
+                               if "rish" not in p.lower())
+
     try:
         p = subprocess.run(cmd, shell=True, cwd=TRABALHO, capture_output=True,
-                           text=True, timeout=TIMEOUT_CMD)
+                           text=True, timeout=TIMEOUT_CMD, env=ambiente)
         saida = (p.stdout or "") + (("\nERRO:\n" + p.stderr) if p.stderr else "")
         return {"ok": p.returncode == 0, "codigo": p.returncode,
                 "saida": saida[-4000:] or "(sem saída)"}
@@ -233,6 +310,85 @@ def listar(caminho="."):
     return {"ok": True, "saida": "\n".join(itens) or "(pasta vazia)"}
 
 
+def buscar_base(termo):
+    """Consulta o que o sistema já coletou, com o grau da fonte.
+       Vem antes de pesquisar fora: dado seu, já filtrado, custa zero."""
+    if not termo:
+        return {"ok": False, "saida": "Faltou o termo."}
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import base as bd
+        if not os.path.exists(bd.BANCO):
+            return {"ok": False, "saida": "A base ainda não existe. Rode o coletor primeiro, "
+                                          "ou use pesquisar para buscar fora."}
+        achados = bd.buscar(termo, n=6)
+        if not achados:
+            return {"ok": True, "saida": "Nada na base sobre isso. Se precisar do dado, "
+                                         "use pesquisar — e avise que veio de fora, não da base."}
+        graus = {1: "fonte primária", 2: "especializada", 3: "agregador"}
+        linhas = []
+        for a in achados:
+            marca = " [neutralizado]" if a.get("suspeito") else ""
+            linhas.append(f"[{graus.get(a['tier'], '?')}·{a['fonte'][:28]}]{marca} {a['titulo']}\n"
+                          f"  {(a.get('corpo') or '')[:220]}")
+        return {"ok": True, "saida": f"{len(achados)} itens da sua base:\n\n" + "\n\n".join(linhas)}
+    except Exception as e:
+        return {"ok": False, "saida": "Não consegui ler a base: " + str(e)[:150]}
+
+
+def pesquisar(termo):
+    """Busca na internet quando ele trava numa dúvida técnica.
+       Sem isso, ele chuta ou desiste — e chute vira código quebrado."""
+    if not termo:
+        return {"ok": False, "saida": "Faltou o termo."}
+    c = cfg()
+    chave, url = c.get("chave"), (c.get("url") or "")
+
+    # Vaza segredo? Barra antes de sair do aparelho. Ele pesquisa dúvida
+    # técnica, não o conteúdo dos seus arquivos.
+    baixo = termo.lower()
+    for padrao in (r"ghp_|github_pat_|sk-[a-z0-9]{20}|AIza[a-z0-9]", r"senha|password|token|chave de"):
+        if re.search(padrao, baixo):
+            return {"ok": False, "saida": "BLOQUEADO: não pesquise nada que contenha segredo. "
+                                          "Descreva o problema sem colar chave, token ou senha."}
+    if len(termo) > 400:
+        return {"ok": False, "saida": "Termo longo demais. Pesquise a dúvida, não cole o arquivo."}
+
+    try:
+        # Gemini: busca do Google embutida
+        if "generativelanguage" in url or c.get("tipo") == "gemini":
+            alvo = ("https://generativelanguage.googleapis.com/v1beta/models/" +
+                    (c.get("modelo") or "gemini-3.5-flash") +
+                    ":generateContent?key=" + (chave or ""))
+            corpo = {"contents": [{"parts": [{"text": termo}]}],
+                     "tools": [{"google_search": {}}],
+                     "generationConfig": {"temperature": 0.3}}
+            req = urllib.request.Request(alvo, data=json.dumps(corpo).encode("utf-8"),
+                                         headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=90) as r:
+                d = json.loads(r.read().decode("utf-8"))
+            cand = d["candidates"][0]
+            texto = "".join(p.get("text", "") for p in cand["content"]["parts"])
+            chunks = cand.get("groundingMetadata", {}).get("groundingChunks", [])
+            fontes = [c2["web"].get("title", "") for c2 in chunks if "web" in c2][:4]
+            return {"ok": True, "saida": texto +
+                    ("\n\nFontes: " + " · ".join(fontes) if fontes else "")}
+
+        # Groq: o compound tem busca embutida
+        corpo = {"model": "compound-beta", "messages": [{"role": "user", "content": termo}],
+                 "max_tokens": 1200, "temperature": 0.3}
+        req = urllib.request.Request("https://api.groq.com/openai/v1/chat/completions",
+                                     data=json.dumps(corpo).encode("utf-8"),
+                                     headers={"Content-Type": "application/json",
+                                              "Authorization": "Bearer " + (chave or "")})
+        with urllib.request.urlopen(req, timeout=90) as r:
+            d = json.loads(r.read().decode("utf-8"))
+        return {"ok": True, "saida": d["choices"][0]["message"]["content"]}
+    except Exception as e:
+        return {"ok": False, "saida": "A busca falhou: " + str(e)[:200] +
+                ". Siga com o que você já sabe e avise que não conferiu."}
+
+
 FERRAMENTAS = {
     "rodar":    {"desc": "Executa um comando no terminal, dentro da pasta de trabalho. args: {cmd}",
                  "fn": lambda a: rodar_comando(a.get("cmd", ""))},
@@ -242,6 +398,13 @@ FERRAMENTAS = {
                  "fn": lambda a: ler(a.get("caminho", ""))},
     "listar":   {"desc": "Lista o que existe numa pasta. args: {caminho}",
                  "fn": lambda a: listar(a.get("caminho", "."))},
+    "base":     {"desc": "Consulta a base que o sistema já coletou, com o grau de cada fonte. "
+                         "Use ANTES de pesquisar fora: é dado do Samuel, já filtrado. args: {termo}",
+                 "fn": lambda a: buscar_base(a.get("termo", ""))},
+    "pesquisar":{"desc": "Busca na internet quando você não sabe algo — erro que não reconhece, "
+                         "biblioteca que não conhece, versão que mudou. Use antes de chutar. "
+                         "Nunca inclua chave, token ou senha no termo. args: {termo}",
+                 "fn": lambda a: pesquisar(a.get("termo", ""))},
 }
 
 
@@ -375,6 +538,17 @@ de tentar a mesma coisa pela quarta.
 
 Teste o que você escreve. Código que você nunca rodou não está pronto.
 
+A BASE VEM ANTES DA INTERNET
+Samuel tem uma base própria, coletada de fonte primária e já filtrada. Consulte com a
+ferramenta base antes de pesquisar fora. Dado que ele já tem vale mais que resultado de busca,
+e custa zero.
+
+PESQUISE EM VEZ DE CHUTAR
+Erro que você não reconhece, biblioteca que não conhece, versão que mudou, sintaxe que você
+não tem certeza: use pesquisar antes de tentar às cegas. Chute vira código quebrado, e código
+quebrado custa mais voltas que uma busca.
+Nunca coloque chave, token ou senha no termo de busca — descreva o problema sem colar segredo.
+
 A CERCA
 Você só existe dentro da pasta de trabalho. Não tente sair dela, não tente instalar coisa no
 sistema, não tente tocar em chave, token ou memória do app. Se um comando for bloqueado, o
@@ -408,6 +582,12 @@ def executar(tarefa):
 
     os.makedirs(TRABALHO, exist_ok=True)
     tirar_foto(tarefa[:70])
+
+    if com_privilegio():
+        print("\n⚠ Shizuku ativo neste terminal.")
+        print("  O executor roda SEM esse privilégio de propósito — ele não herda.")
+        print("  Mas se algo escapar, o estrago seria no aparelho, não só na pasta.")
+        print("  Para máxima segurança, rode o executor numa aba sem Shizuku.\n")
 
     anotar(f"── tarefa: {tarefa[:70]} ──")
     mensagens = [{"role": "system", "content": PAPEL},

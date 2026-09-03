@@ -166,6 +166,20 @@
     font:11px inherit;padding:3px 9px;border-radius:5px;cursor:pointer;
     margin-left:6px;flex:none}
 
+  /* ── Título de resposta com serifa — só nos <h1>/<h2> do markdown ── */
+  .md h1,.md h2{font-family:Georgia,"Times New Roman",serif;font-weight:600}
+
+  /* ── Ícones leves embaixo de toda resposta ── */
+  .acoesmsg{display:flex;gap:2px;margin:8px 0 4px}
+  .acoesmsg .ic{background:none;border:0;color:var(--muted);font-size:14px;
+    padding:5px 8px;border-radius:6px;cursor:pointer;line-height:1}
+  .acoesmsg .ic:active{background:var(--surface2);color:var(--text)}
+  .acoesmsg .ic.on{color:var(--acento)}
+
+  /* ── Busca de conversas ── */
+  #buscaConv{margin-bottom:12px}
+  .fix{margin-right:5px;font-size:12px}
+
   .bloco{border-bottom:1px solid var(--line);padding:13px 0}
   .brow{display:flex;justify-content:space-between;align-items:center;gap:10px}
   .btitle{font-size:14.5px;font-weight:700;margin:8px 0 5px;line-height:1.4}
@@ -3713,20 +3727,34 @@ async function copiarContexto(){
 }
 
 function renderProjetos(){
+  const termo = ($("#buscaConv") ? $("#buscaConv").value : "").trim().toLowerCase();
+
   const html = projetos.map(function(p){
     const ativo = p.id === projAtivo;
-    const convs = p.conversas.length
-      ? p.conversas.slice().reverse().map(function(c){
+    let lista = p.conversas.slice().reverse();
+    if(termo) lista = lista.filter(function(c){
+      return c.titulo.toLowerCase().indexOf(termo) >= 0 ||
+        c.hist.some(function(h){ return (h.pergunta||"").toLowerCase().indexOf(termo) >= 0; });
+    });
+    /* Fixadas primeiro, sem embaralhar a ordem entre elas */
+    lista.sort(function(a, b){ return (b.fixada ? 1 : 0) - (a.fixada ? 1 : 0); });
+
+    const convs = lista.length
+      ? lista.map(function(c){
           const on = ativo && c.id === convAtiva;
           const d = new Date(c.criada);
           return '<div class="conv' + (on ? " on" : "") + '">' +
+            (c.fixada ? '<span class="fix">📌</span>' : "") +
             '<button class="cnome" data-abrir="' + esc(p.id) + '|' + esc(c.id) + '">' +
             esc(c.titulo) + ' <span style="color:var(--muted);font-size:11px">(' +
             c.hist.length + ')</span></button>' +
             '<span class="cdata">' + d.getDate() + "/" + (d.getMonth()+1) + '</span>' +
+            '<button class="mini" data-fixar="' + esc(p.id) + '|' + esc(c.id) + '">' +
+            (c.fixada ? "desfixar" : "fixar") + '</button>' +
             '<button class="rm" data-rmconv="' + esc(p.id) + '|' + esc(c.id) + '">×</button></div>';
         }).join("")
-      : '<p class="note" style="margin:0;font-size:12.5px">Nenhuma conversa ainda.</p>';
+      : '<p class="note" style="margin:0;font-size:12.5px">' +
+        (termo ? "Nada encontrado para \"" + esc(termo) + "\"." : "Nenhuma conversa ainda.") + '</p>';
 
     const arqs = p.arquivos.length
       ? p.arquivos.map(function(a){
@@ -3748,7 +3776,7 @@ function renderProjetos(){
       '<button class="ghost" data-visao="' + esc(p.id) + '">Visão</button>' +
       (p.id !== "geral" ? '<button class="ghost" data-rmproj="' + esc(p.id) + '">Excluir</button>' : "") +
       '</div>' +
-      '<div class="lbl">Conversas</div>' + convs +
+      '<div class="lbl">Conversas' + (termo ? " — filtrando" : "") + '</div>' + convs +
       '<div class="lbl" style="margin-top:12px">Arquivos</div>' + arqs +
       '</div>';
   }).join("");
@@ -3756,8 +3784,11 @@ function renderProjetos(){
   $("#projetos").innerHTML =
     '<p class="note">Cada projeto guarda sua própria visão, suas conversas e seus arquivos. ' +
     'A visão do projeto ativo entra em toda resposta — é o recorte que a IA usa.</p>' +
+    '<input class="field" id="buscaConv" placeholder="Buscar em todas as conversas…" ' +
+    'value="' + esc(termo) + '" autocomplete="off">' +
     '<button class="primary" id="novoProj" style="margin-bottom:16px">Novo projeto</button>' +
     html;
+
 }
 
 function renderAnexos(){
@@ -3936,14 +3967,24 @@ function renderFeed(){
   f.innerHTML = hist.map(function(h, i){
     const ferr = (h.usadas && h.usadas.length)
       ? '<div class="ferramenta">usou: ' + esc(h.usadas.join(" → ")) + '</div>' : "";
-    const dec = (h.decisao == null)
-      ? '<div class="decide"><button class="btn btn-ok" data-ok="' + i + '">Aprovar</button>' +
-        '<button class="btn btn-adj" data-adj="' + i + '">Ajustar</button>' +
-        '<button class="btn" data-copiar="' + i + '">Copiar</button></div>'
-      : '<span class="tag ' + (h.decisao === "aprovado" ? "t-sage" : "t-muted") + '">' +
-        (h.decisao === "aprovado" ? "Aprovado · na memória" : "Ajustado · virou calibragem") + "</span>";
+    /* Toda resposta ganha os ícones leves — copiar, regenerar, gostei/não gostei.
+       O Aprovar/Ajustar só aparece quando a conversa virou uma decisão de verdade,
+       identificada pelo campo temDecisao (setado quando o bloco <<<DECISAO>>> apareceu). */
+    const acoes = '<div class="acoesmsg">' +
+      '<button class="ic" data-copiartxt="' + i + '" title="Copiar">⧉</button>' +
+      '<button class="ic" data-regenerar="' + i + '" title="Gerar de novo">↻</button>' +
+      '<button class="ic ' + (h.voto === 1 ? "on" : "") + '" data-voto="' + i + '|1" title="Boa resposta">👍</button>' +
+      '<button class="ic ' + (h.voto === -1 ? "on" : "") + '" data-voto="' + i + '|-1" title="Resposta ruim">👎</button>' +
+      '</div>';
+    const dec = h.temDecisao
+      ? (h.decisao == null
+        ? '<div class="decide"><button class="btn btn-ok" data-ok="' + i + '">Aprovar</button>' +
+          '<button class="btn btn-adj" data-adj="' + i + '">Ajustar</button></div>'
+        : '<span class="tag ' + (h.decisao === "aprovado" ? "t-sage" : "t-muted") + '">' +
+          (h.decisao === "aprovado" ? "Aprovado · na memória" : "Ajustado · virou calibragem") + "</span>")
+      : "";
     return '<div class="item"><div class="q">' + esc(h.pergunta) + "</div>" + ferr +
-      '<div class="a md">' + renderMd(h.resposta) + "</div>" + dec +
+      '<div class="a md">' + renderMd(h.resposta) + "</div>" + acoes + dec +
       '<div class="used">memória: ' + esc((h.blocos || []).join(" · ")) + "</div></div>";
   }).join("");
   f.scrollTop = f.scrollHeight;
@@ -4605,7 +4646,7 @@ async function perguntar(){
     hist.push(o); sHist();
 
     /* Decisão de verdade não morre na conversa: vai para a aba própria. */
-    if(mapa){ decisoes.push(mapa); sDecisoes(); renderDecisoes(); }
+    if(mapa){ o.temDecisao = true; decisoes.push(mapa); sDecisoes(); renderDecisoes(); }
 
     if(falarLigado) falar(o.resposta || "");
   }catch(e){
@@ -4910,6 +4951,39 @@ $("#listaMotores").addEventListener("click", function(e){
     if(!confirm("Remover esse motor?")) return;
     motores = motores.filter(function(m){ return m.id !== r; });
     sMotores(); renderMotores();
+  }
+});
+
+/* Ícones leves em cada resposta: copiar, regenerar, votar */
+$("#feed").addEventListener("click", function(e){
+  const t = e.target;
+  const ct = t.dataset.copiartxt, rg = t.dataset.regenerar, vt = t.dataset.voto;
+
+  if(ct !== undefined){
+    const h = hist[+ct];
+    if(!h) return;
+    navigator.clipboard.writeText(h.resposta).then(function(){
+      const antes = t.textContent; t.textContent = "✓";
+      setTimeout(function(){ t.textContent = antes; }, 1200);
+    }).catch(function(){});
+    return;
+  }
+
+  if(rg !== undefined){
+    const i = +rg, h = hist[i];
+    if(!h || $("#send").disabled) return;
+    hist.splice(i, 1); sHist();
+    $("#input").value = h.pergunta;
+    perguntar();
+    return;
+  }
+
+  if(vt !== undefined){
+    const [i, v] = vt.split("|").map(Number);
+    const h = hist[i];
+    if(!h) return;
+    h.voto = (h.voto === v) ? 0 : v;   /* clicar de novo desfaz */
+    sHist(); renderFeed();
   }
 });
 
@@ -5299,10 +5373,27 @@ $("#lista").addEventListener("click", function(e){
 
 $("#gerarModulo").addEventListener("click", gerarModulo);
 /* Projetos */
+$("#projetos").addEventListener("input", function(e){
+  if(e.target.id !== "buscaConv") return;
+  /* Troca só a lista, preservando o campo e o cursor — refazer tudo perderia o foco */
+  const cursor = e.target.selectionStart;
+  renderProjetos();
+  const campo = $("#buscaConv");
+  campo.focus();
+  campo.setSelectionRange(cursor, cursor);
+});
+
 $("#projetos").addEventListener("click", function(e){
   const t = e.target;
   if(t.id === "novoProj"){ novoProjeto(); return; }
   if(t.dataset.novaconv){ novaConversa(); return; }
+  if(t.dataset.fixar){
+    const [pid, cid] = t.dataset.fixar.split("|");
+    const p = projetos.filter(function(x){ return x.id === pid; })[0];
+    const c = p && p.conversas.filter(function(x){ return x.id === cid; })[0];
+    if(c){ c.fixada = !c.fixada; sProjetos(); renderProjetos(); }
+    return;
+  }
   if(t.dataset.ativar){
     projAtivo = t.dataset.ativar;
     const p = proj();
