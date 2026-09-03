@@ -106,6 +106,66 @@
   .row{display:flex;gap:8px;flex-wrap:wrap}
   .note{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0 0 16px}
 
+  /* ── Markdown na resposta ── */
+  .md{line-height:1.62}
+  .md p{margin:0 0 12px}
+  .md p:last-child{margin-bottom:0}
+  .md h1,.md h2,.md h3,.md h4{margin:18px 0 9px;line-height:1.3;font-weight:600}
+  .md h1{font-size:19px} .md h2{font-size:17px}
+  .md h3{font-size:15.5px} .md h4{font-size:14.5px;color:var(--muted)}
+  .md ul,.md ol{margin:0 0 12px;padding-left:22px}
+  .md li{margin-bottom:5px}
+  .md strong{font-weight:650;color:var(--text)}
+  .md code{background:var(--surface2);padding:1.5px 5px;border-radius:4px;
+    font:12.5px/1.4 var(--mono);color:var(--acento)}
+  .md blockquote{border-left:2px solid var(--acento);padding-left:12px;
+    margin:0 0 12px;color:var(--muted)}
+  .md hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+  .md a{color:var(--acento)}
+  .tw{overflow-x:auto;margin:0 0 14px;-webkit-overflow-scrolling:touch}
+  table.md{width:100%;min-width:340px;border-collapse:collapse;font-size:13.5px}
+  table.md th{text-align:left;font-size:11px;text-transform:uppercase;
+    letter-spacing:.4px;color:var(--muted);padding:7px 9px;
+    border-bottom:1.5px solid var(--line);white-space:nowrap}
+  table.md td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.md tr:last-child td{border-bottom:0}
+
+  /* ── Bloco de código ── */
+  .cod{margin:0 0 14px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .codtop{display:flex;justify-content:space-between;align-items:center;
+    background:var(--surface2);padding:6px 11px;font-size:11px;color:var(--muted);
+    letter-spacing:.4px}
+  .copiar{background:none;border:0;color:var(--acento);font:600 11px inherit;
+    cursor:pointer;padding:3px 7px;border-radius:4px}
+  .copiar:active{background:var(--line)}
+  .cod pre{margin:0;padding:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .cod code{font:12.5px/1.55 var(--mono);color:var(--text);background:none;padding:0}
+
+  /* ── Resposta chegando ao vivo ── */
+  .pisca{display:inline-block;width:8px;color:var(--acento);
+    animation:pisca 1.05s steps(2) infinite}
+  @keyframes pisca{0%,50%{opacity:1}51%,100%{opacity:0}}
+  .item.vivo{opacity:.97}
+
+  /* ── Rodapé com o motor ── */
+  .rodape-motor{display:flex;align-items:center;gap:8px;padding:7px 14px 10px;
+    border-top:1px solid var(--line)}
+  .motor-atual{flex:1;display:flex;align-items:center;gap:7px;background:none;
+    border:0;color:var(--muted);font:12px inherit;cursor:pointer;
+    padding:5px 0;text-align:left;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap}
+  .motor-atual:active{color:var(--text)}
+  .pt{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
+  .pt-ok{background:var(--sage)} .pt-local{background:var(--azul)}
+  .pt-off{background:var(--amber)}
+  .nova{background:none;border:1px solid var(--line);color:var(--muted);
+    font:12px inherit;padding:5px 11px;border-radius:6px;cursor:pointer;flex:none}
+  .nova:active{border-color:var(--acento);color:var(--acento)}
+  .send.parar{background:var(--amber);color:#fff}
+  .mini{background:none;border:1px solid var(--line);color:var(--acento);
+    font:11px inherit;padding:3px 9px;border-radius:5px;cursor:pointer;
+    margin-left:6px;flex:none}
+
   .bloco{border-bottom:1px solid var(--line);padding:13px 0}
   .brow{display:flex;justify-content:space-between;align-items:center;gap:10px}
   .btitle{font-size:14.5px;font-weight:700;margin:8px 0 5px;line-height:1.4}
@@ -242,7 +302,9 @@
   </header>
 
   <div class="tabs">
-    <button class="tab on" data-tab="conselho">Conselho</button>
+    <button class="tab on" data-tab="conselho">Conversa</button>
+    <button class="tab" data-tab="decisoes">Decisões</button>
+    <button class="tab" data-tab="malha">Malha</button>
     <button class="tab" data-tab="projetos">Projetos</button>
     <button class="tab" data-tab="imperio">Império</button>
     <button class="tab" data-tab="acervo">Acervo</button>
@@ -262,25 +324,28 @@
       <button class="sent" data-sent="local" title="Onde estou">📍<span>Local</span></button>
       <button class="sent" data-sent="web" title="Pesquisar na internet">🔎<span>Web</span></button>
     </div>
-    <div class="modos" id="modos">
-      <button class="modo on" data-modo="chat">Chat</button>
-      <button class="modo" data-modo="conselho">Conselho</button>
-      <button class="modo" data-modo="gps">GPS</button>
-      <button class="modo" data-modo="guerra">Guerra</button>
-      <button class="modo" data-modo="arca">Arca</button>
-      <button class="modo" data-modo="brainstorm">Brainstorm</button>
-      <button class="modo" data-modo="mapa">Mapa</button>
-      <button class="modo" data-modo="texto">Texto</button>
-      <button class="modo" data-modo="prototipo">Protótipo</button>
-      <button class="modo" data-modo="diagnostico">Diagnóstico</button>
-    </div>
     <div class="composer">
       <button class="anexo" id="btnAnexo" title="Anexar arquivo">+</button>
       <input type="file" id="arqInput" multiple style="display:none"
              accept=".txt,.md,.csv,.json,.py,.js,.html,.xml,.log,.tsv,.yml,.yaml,.sql,image/*">
-      <textarea id="input" rows="2" placeholder="O que você quiser conversar…"></textarea>
+      <textarea id="input" rows="2" placeholder="Fala."></textarea>
       <button class="send" id="send" disabled>Enviar</button>
+      <button class="send parar" id="parar" style="display:none">Parar</button>
     </div>
+    <div class="rodape-motor">
+      <button class="motor-atual" id="trocaMotor">
+        <span class="pt"></span><span id="motorNome">motor</span>
+      </button>
+      <button class="nova" id="novaConversaRapida" title="Nova conversa">+ nova</button>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-decisoes">
+    <div class="scroll body" id="decisoes"></div>
+  </div>
+
+  <div class="pane" id="pane-malha">
+    <div class="scroll body" id="malhaPane"></div>
   </div>
 
   <div class="pane" id="pane-projetos">
@@ -336,6 +401,39 @@
         <p class="note" style="margin:12px 0 0;font-size:12.5px">
           Gemini: aistudio.google.com · Groq: console.groq.com · OpenRouter: openrouter.ai<br>
           A chave fica só neste aparelho.</p>
+      </div>
+
+      <div class="card">
+        <div class="lbl">Motores</div>
+        <p class="note" style="margin:0 0 12px">Cadastre quantos quiser. Para trocar durante a
+        conversa, toque no nome do motor no rodapé — não precisa voltar aqui.</p>
+        <div id="listaMotores" style="margin-bottom:16px"></div>
+
+        <div class="lbl" style="margin:16px 0 8px">Adicionar motor</div>
+        <select class="field" id="mPreset">
+          <option value="">Escolha o serviço…</option>
+          <option value="gemini">Google Gemini — grátis</option>
+          <option value="groq">Groq — grátis, rápido</option>
+          <option value="openrouter">OpenRouter — vários modelos</option>
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic</option>
+          <option value="local">Motor local (Termux)</option>
+          <option value="outro">Outro — endereço manual</option>
+        </select>
+        <input class="field" id="mNome" placeholder="Nome (como vai aparecer no rodapé)"
+               autocomplete="off">
+        <input class="field" id="mUrl" placeholder="Endereço da API"
+               autocomplete="off" spellcheck="false">
+        <input class="field" id="mModelo" placeholder="Modelo"
+               autocomplete="off" spellcheck="false">
+        <input class="field" id="mChave" type="password" placeholder="Chave de API"
+               autocomplete="new-password">
+        <p id="mDica" class="note" style="margin:0 0 10px;display:none"></p>
+        <div class="row">
+          <button class="primary" id="addMotor">Adicionar</button>
+          <button class="ghost" id="testarMotor">Testar antes</button>
+        </div>
+        <p id="mStatus" class="status" style="display:none"></p>
       </div>
 
       <div class="card">
@@ -635,111 +733,58 @@ const CAMADAS = {motor:"Motor",piloto:"Piloto",xadrez:"Xadrez",tabuleiro:"Tabule
 const TIERS = {1:{rotulo:"fonte primária",cls:"tier1"},2:{rotulo:"especializada",cls:"tier2"},
                3:{rotulo:"agregador",cls:"tier3"}};
 
-/* ═══ MODOS — cada parte do método com formato próprio de saída ═══
-   Conselho analisa. GPS traça rotas. Guerra abre frentes. Arca prepara a queda.
-   Diagnóstico procura o problema antes de ele aparecer. */
-const MODOS = {
-  chat: {
-    rotulo:"Chat",
-    dica:"O que você quiser conversar…",
-    formato: '{"resposta":"a resposta, do tamanho que a pergunta pedir — curta se for simples, longa se o assunto exigir. Sem seção, sem lista forçada, sem ritual."}',
-    instrucao: "Converse de verdade. Você conhece o método inteiro e a visão de Samuel — isso " +
-      "informa seu julgamento o tempo todo, mas não vira estrutura na resposta. Nada de forçar " +
-      "Motor/Piloto/Xadrez/Tabuleiro/Arca aqui: isso é o modo Conselho, não este.\n\n" +
-      "PENSE ANTES DE RESPONDER. Assunto difícil merece raciocínio desenvolvido, não conclusão " +
-      "seca. Mostre o encadeamento: por que uma coisa leva à outra, o que você considerou e " +
-      "descartou, onde a coisa pode virar. Resposta curta só quando a pergunta for simples de " +
-      "verdade — nunca por economia.\n\n" +
-      "PESQUISE SEM PEDIR LICENÇA. Se a pergunta toca em fato atual, número, preço, ferramenta, " +
-      "lei, evento, alguém no mercado, qualquer coisa que mude com o tempo ou que você não tenha " +
-      "certeza — use pesquisar_web na hora, sozinho. Pode usar várias vezes seguidas, com termos " +
-      "diferentes, pra cruzar fonte e cavar mais fundo. Uma busca rasa é pior que nenhuma. " +
-      "Nunca diga 'não tenho acesso à internet': você tem, use.\n\n" +
-      "TENHA IDEIAS. Não espere ele pedir. Se enxergar um caminho que ele não mencionou, uma " +
-      "conexão entre duas coisas, um risco que ele não viu, ou uma oportunidade escondida no que " +
-      "ele falou — traga. Traga com o custo real junto, e sem cortar possibilidade por parecer " +
-      "ambiciosa demais: quem decide o freio é ele.\n\n" +
-      "SEJA GENTE. Pode discordar com fundamento, apontar quando algo não fecha, fazer pergunta " +
-      "de volta, admitir que não sabe. Português direto, sem elogio vazio, sem enfeite, sem " +
-      "repetir a pergunta antes de responder. Fale de qualquer assunto que ele trouxer — técnico, " +
-      "pessoal, filosófico, bobo — não existe assunto fora do escopo numa conversa."
-  },
-  conselho: {
-    rotulo:"Conselho",
-    dica:"A decisão, o problema, ou o próximo passo…",
-    formato: '{"resposta":"direta, 2 a 4 frases","camadas":{"motor":"","piloto":"","xadrez":"","tabuleiro":"","arca":""},"risco":"risco + solução, ou null","acao":"próxima ação concreta"}',
-    instrucao: "Analise pelas 5 Camadas e feche numa próxima ação concreta."
-  },
-  gps: {
-    rotulo:"GPS",
-    dica:"Onde você está e onde quer chegar…",
-    formato: '{"destino":"o ponto B, em uma frase","rotas":[{"nome":"","como":"","custo":"tempo, dinheiro, atenção","risco":"","prazo":"","abre":"o que essa rota destrava depois"}],"recomendada":"nome da rota, com o porquê em uma frase","recalculo":"o fato novo que faria trocar de rota"}',
-    instrucao: "Trace TODAS as rotas viáveis do ponto A ao ponto B — no mínimo três, mais se existirem. " +
-      "Nunca entregue caminho único: o mapa é sempre completo, quem escolhe é Samuel. Para cada rota, " +
-      "o custo real (tempo, dinheiro, atenção), o risco, o prazo e o que ela destrava depois. Recomende " +
-      "uma, mas sem apagar as outras. E diga qual fato novo obrigaria a recalcular a rota."
-  },
-  guerra: {
-    rotulo:"Guerra",
-    dica:"O terreno, as frentes, o que está em jogo…",
-    formato: '{"terreno":"leitura do campo em 2 frases","frentes":[{"nome":"","estado":"","proxima_jogada":"","ameaca":"","depende_de":""}],"restricao_unica":"o único ponto que trava o fluxo inteiro","ordem":"por onde atacar e por quê","jogada_do_oponente":"o que o mercado, o tempo ou o concorrente provavelmente faz em resposta"}',
-    instrucao: "Xadrez é um tabuleiro; guerra são várias frentes ao mesmo tempo, incluindo oponentes " +
-      "que ainda não existem. Abra TODAS as frentes ativas e latentes. Para cada uma: estado, próxima " +
-      "jogada, ameaça, do que depende. Identifique a restrição única — o ponto que trava o fluxo inteiro " +
-      "— e ataque ela primeiro, sem espalhar esforço. Antecipe a resposta do outro lado."
-  },
-  arca: {
-    rotulo:"Arca",
-    dica:"A decisão ou estrutura que precisa sobreviver…",
-    formato: '{"o_que_protege":"em uma frase","cenarios":[{"falha":"","probabilidade":"alta/média/baixa","impacto":"","preparo_antes":"o que construir HOJE, antes da crise","se_acontecer":"o que fazer no dia"}],"fenix":"se a arca não aguentar: o que sobrevive à perda total e como reconstrói a partir disso","dono":"quem é o responsável nomeado por manter isso de pé"}',
-    instrucao: "Arca é preparo antes da crise, nunca reação depois. Liste os modos de falha reais, " +
-      "do mais provável ao mais severo. Para cada um: o que construir HOJE e o que fazer no dia. " +
-      "Depois a Fênix: se a arca não aguentar, o que sobrevive à perda total e como se reconstrói. " +
-      "Nomeie o responsável — requisito sem dono é regra fantasma."
-  },
-  diagnostico: {
-    rotulo:"Diagnóstico",
-    dica:"Deixe vazio pra varredura completa, ou aponte onde olhar…",
-    formato: '{"resposta":"leitura geral em 2 a 4 frases","achados":[{"onde":"interno ou externo","gravidade":"alta/média/baixa","problema":"","solucao":"pronta, não genérica"}],"restricao_unica":"o gargalo real agora","acao":"a única coisa que deveria ser feita primeiro"}',
-    instrucao: "Procure problema que ainda não apareceu. Abaixo vem a varredura automática do sistema " +
-      "— leia os sinais e cruze com a memória e o estado do império. Aponte contradição entre decisões, " +
-      "pendência parada, marco sem movimento, dependência frágil, risco estrutural. Toda falha vem com " +
-      "solução pronta, nunca só o diagnóstico."
-  },
-  brainstorm: {
-    rotulo:"Brainstorm",
-    dica:"O tema pra abrir sem filtro…",
-    formato: '{"resposta":"leitura do tema em 2 frases","grupos":[{"categoria":"","ideias":[{"txt":"","esforco":"baixo/médio/alto","potencial":"baixo/médio/alto"}]}],"ponte":"a ideia que conecta duas categorias diferentes e ninguém veria","acao":"a única que vale testar primeiro, e por quê"}',
-    instrucao: "Abra sem filtro: quantidade antes de qualidade, no mínimo doze ideias, agrupadas por " +
-      "categoria que você mesmo nomeia. Nada é descartado por ser ambicioso — marque esforço e " +
-      "potencial de cada uma e deixe Samuel escolher. Depois procure a ponte: a ligação entre duas " +
-      "categorias que não é óbvia. Só no fim aponte a primeira a testar."
-  },
-  mapa: {
-    rotulo:"Mapa",
-    dica:"O que precisa ser mapeado…",
-    formato: '{"centro":"o núcleo em 2 a 4 palavras","ramos":[{"nome":"","folhas":["","",""]}],"resposta":"o que o mapa mostra, em 2 frases","acao":"o que fazer com esse mapa"}',
-    instrucao: "Monte um mapa mental: um centro, de quatro a seis ramos, e de duas a quatro folhas " +
-      "por ramo. Ramo é dimensão do problema, folha é peça concreta. Curto — cada nome cabe em " +
-      "poucas palavras, porque vai virar desenho."
-  },
-  texto: {
-    rotulo:"Texto",
-    dica:"O que escrever, pra quem, com que objetivo…",
-    formato: '{"titulo":"","texto":"o texto completo, pronto pra usar, com quebras de linha reais","resposta":"o que foi feito e por quê, 2 frases","acao":"o que revisar antes de enviar"}',
-    instrucao: "Escreva o texto pronto pra usar: proposta, mensagem, roteiro, contrato, apresentação, " +
-      "o que for pedido. Português do Brasil, tom profissional sem ser engessado. Sem enfeite, sem " +
-      "elogio vazio. Se faltar dado real (preço, nome, prazo), deixe [entre colchetes] — nunca invente."
-  },
-  prototipo: {
-    rotulo:"Protótipo",
-    dica:"A tela ou peça visual que quer ver funcionando…",
-    formato: '{"nome":"","html":"documento HTML completo e autônomo, com CSS embutido, sem link externo","resposta":"o que foi construído, 2 frases","acao":"o que ajustar na próxima versão"}',
-    instrucao: "Construa um protótipo visual funcionando: HTML completo e autônomo, CSS embutido, " +
-      "nada carregado de fora. Pode usar JavaScript pra interação dentro da própria página. " +
-      "Mobile primeiro. Vai rodar numa caixa isolada, sem acesso a nada do app."
-  }
-};
+/* ═══ O MÉTODO ═══
+   Samuel corrigiu: o método é dele, e a IA tem que sabê-lo — não é um botão
+   para cada peça. Motor, Piloto, Xadrez, Tabuleiro, Arca, Avalanche não são
+   modos: são a cabeça com que ela pensa, o tempo todo, sem anunciar. */
+
+const CABECA = `COMO VOCÊ PENSA
+
+Você conhece o método de Samuel e pensa com ele — sem anunciar, sem virar seção
+na resposta. Ele aparece no julgamento, não no formato:
+
+· MOTOR — isso gira Visão → Dinheiro → Andamento, ou é movimento neutro?
+· PILOTO — cabe na capacidade real de supervisão dele hoje?
+· XADREZ — a jogada de agora, o problema que ela cria depois, e o começo do plano
+· TABULEIRO — segue só a regra declarada, ou existe regra melhor a propor?
+· ARCA + FÊNIX — se der errado, o que sobrevive para reconstruir?
+· AVALANCHE — crescer além da supervisão não é avanço; o freio é dele, não seu
+
+RESTRIÇÃO ÚNICA: hoje é não ter cliente pagando. Otimizar outra coisa antes disso
+é trabalhar na parte errada — diga isso quando for o caso.
+
+COMO VOCÊ RESPONDE
+
+Direto. Sem repetir a pergunta, sem elogio vazio, sem enfeite.
+Tamanho conforme o assunto pede: curto quando é simples, desenvolvido quando é
+difícil. Cortar raciocínio para caber é pior que resposta longa.
+
+Nunca entregue caminho único quando existem vários — mostre o mapa com o custo
+real de cada um. Quem escolhe é Samuel; você não fecha decisão por ele.
+
+Discorde com fundamento quando discordar. Admita quando não souber.
+
+Se a pergunta pede fato atual — preço, lei, número, ferramenta, alguém no mercado —
+use pesquisar_web na hora, sozinho, sem pedir licença. Pode buscar várias vezes com
+termos diferentes para cruzar fonte.
+
+Use markdown quando ajudar: **negrito** para o que importa, tabela para comparar,
+lista quando for lista de verdade, \`\`\` para código.
+
+QUANDO A CONVERSA FOR UMA DECISÃO
+
+Se você entregou caminhos com custo e tradeoff, feche com um bloco assim, para
+Samuel poder guardar na aba Decisões:
+
+<<<DECISAO
+titulo: o que está sendo decidido
+caminhos: caminho A | caminho B | caminho C
+custos: o que cada um custa de verdade — tempo, dinheiro, atenção
+cria_depois: o problema que a escolha gera adiante
+pergunta: o que só ele pode responder
+>>>
+
+Só use isso quando for decisão de verdade. Conversa comum não precisa.`;
 let modo = "chat";
 
 /* ═══ ESTADO ═══ */
@@ -923,6 +968,8 @@ async function load(){
     matriz   = (await L("matriz", null)) || MATRIZ_PADRAO();
     oficina  = await L("oficina", []);
     malha    = (await L("malha", null)) || MALHA_PADRAO();
+    decisoes = await L("decisoes", []);
+    try{ motores = JSON.parse((await ler("sa:motores")) || "[]"); }catch(e){ motores = []; }
     projetos = await L("projetos", []);
     nuvem    = (await L("nuvem_" + espaco, null)) ||
                {token:(nuvem && nuvem.token) || "", gist:"", senha:""};
@@ -1700,7 +1747,7 @@ async function autoTeste(aoAndar){
     const tok = Math.round(p.length/4);
     if(motorAtivo() === "local")
       exigir(tok <= 2200, "prompt de " + tok + " tokens é grande pro motor local");
-    return "~" + tok + " tokens no modo " + MODOS[modo].rotulo;
+    return "~" + tok + " tokens no prompt";
   });
 
   await t("Motor", "Método base sobrevive à memória acumulada", function(){
@@ -1871,16 +1918,15 @@ async function autoTeste(aoAndar){
     return casos.length + " casos ok · corrompido e ruído recusados";
   });
 
-  await t("Lógica", "Modos entregam formatos diferentes", function(){
-    const chaves = {};
-    Object.keys(MODOS).forEach(function(m){
-      const primeira = MODOS[m].formato.match(/"(\w+)"/)[1];
-      chaves[m] = primeira;
-    });
-    const unicos = new Set(Object.values(chaves)).size;
-    exigir(Object.keys(MODOS).length === 10, "esperava 10 modos, achei " + Object.keys(MODOS).length);
-    exigir(unicos >= 5, "os modos entregam formatos parecidos demais");
-    return Object.keys(MODOS).length + " modos · " + unicos + " formatos distintos";
+  await t("Lógica", "O método está na cabeça da IA", function(){
+    const peças = ["MOTOR", "PILOTO", "XADREZ", "TABULEIRO", "ARCA", "AVALANCHE"];
+    const faltam = peças.filter(function(p){ return CABECA.indexOf(p) < 0; });
+    exigir(!faltam.length, "faltam no método: " + faltam.join(", "));
+    exigir(CABECA.indexOf("RESTRIÇÃO ÚNICA") >= 0, "a restrição única sumiu do método");
+    exigir(CABECA.indexOf("<<<DECISAO") >= 0, "o bloco de decisão sumiu");
+    const p = promptBase([]);
+    exigir(p.indexOf("MOTOR") >= 0, "o método não chega no prompt");
+    return peças.length + " peças do método no prompt, sem virar botão";
   });
 
   /* ────────── FERRAMENTAS ────────── */
@@ -1973,7 +2019,6 @@ const VISUAL_PADRAO = () => ({
   tema:"latao", acento:"", bg:"", text:"",
   fonte:15, cantos:8, densidade:100, familia:"sistema",
   sentidos: TODOS_SENTIDOS.map(function(s){ return s.id; }),
-  modos: Object.keys(MODOS),
 });
 const sVisual = () => guardar("sa:visual", JSON.stringify(visual));
 
@@ -2026,11 +2071,7 @@ function renderEscolhas(){
     return '<button class="chip' + (on ? " on" : "") + '" data-vsent="' + s.id + '">' +
            esc(s.rot) + '</button>';
   }).join("");
-  $("#escolherModos").innerHTML = Object.keys(MODOS).map(function(m){
-    const on = visual.modos.indexOf(m) >= 0;
-    return '<button class="chip' + (on ? " on" : "") + '" data-vmodo="' + m + '">' +
-           esc(MODOS[m].rotulo) + '</button>';
-  }).join("");
+
 }
 
 function preencherVisual(){
@@ -2049,6 +2090,291 @@ function preencherVisual(){
     b.classList.toggle("on", b.dataset.tema === visual.tema);
   });
   renderEscolhas();
+}
+
+/* ═══ RECEBER DE OUTRO APP ═══
+   Você seleciona o texto no MyRHub (ou em qualquer app), toca em Compartilhar
+   e escolhe o Sistema Absoluto. Chega aqui pra você decidir onde guardar —
+   nunca entra sozinho: texto de fora é dado, e dado passa pelo Piloto. */
+
+function receberCompartilhado(){
+  const p = new URLSearchParams(location.search);
+  const texto = (p.get("texto") || "").trim();
+  const titulo = (p.get("titulo") || "").trim();
+  const url = (p.get("url") || "").trim();
+  if(!texto && !url) return;
+
+  /* Limpa o endereço pra não repetir se você recarregar */
+  history.replaceState(null, "", location.pathname);
+
+  const corpo = [texto, url].filter(Boolean).join("\n");
+  const f = $("#feed");
+  const cx = document.createElement("div");
+  cx.className = "card";
+  cx.innerHTML =
+    '<div class="lbl">Chegou de outro app</div>' +
+    (titulo ? '<div class="btitle">' + esc(titulo) + '</div>' : "") +
+    '<div class="bbody" style="max-height:220px;overflow:auto;white-space:pre-wrap;' +
+    'margin-bottom:12px">' + esc(corpo.slice(0, 3000)) +
+    (corpo.length > 3000 ? "\n\n[…cortado, " + corpo.length + " caracteres no total]" : "") +
+    '</div>' +
+    '<input class="field" id="tituloComp" placeholder="Um título curto pra achar depois"' +
+    ' value="' + esc(titulo || corpo.slice(0, 50)) + '">' +
+    '<div class="row">' +
+    '<button class="primary" data-comp="memoria">Guardar na memória</button>' +
+    '<button class="ghost" data-comp="conversa">Usar na conversa</button>' +
+    '<button class="ghost" data-comp="descartar">Descartar</button>' +
+    '</div>' +
+    '<p class="note" style="margin:10px 0 0;font-size:12px">Vai entrar como CONTEXTO: ' +
+    'dado que a IA lê, nunca ordem que ela obedece.</p>';
+  f.appendChild(cx);
+  f.scrollTop = f.scrollHeight;
+
+  cx.addEventListener("click", function(e){
+    const acao = e.target.dataset.comp;
+    if(!acao) return;
+    if(acao === "descartar"){ cx.remove(); return; }
+    if(acao === "conversa"){
+      $("#input").value = ($("#input").value + "\n\n" + corpo).trim();
+      $("#send").disabled = false;
+      cx.remove();
+      document.querySelector('[data-tab="conselho"]').click();
+      return;
+    }
+    const t = ($("#tituloComp").value || "").trim() || corpo.slice(0, 50);
+    extras.push({id:"comp-" + Date.now(), tag:"CONTEXTO",
+                 titulo: t.slice(0, 90), corpo: corpo.slice(0, 6000),
+                 origem: "compartilhado", quando: Date.now()});
+    sExtras(); renderAcervo();
+    cx.innerHTML = '<div class="lbl">Guardado</div><p class="note" style="margin:0">' +
+      esc(t.slice(0, 60)) + ' entrou na memória do espaço ' +
+      (espaco === "nucleo" ? "Núcleo" : "Operação") + '.</p>';
+    setTimeout(function(){ cx.remove(); }, 4000);
+  });
+}
+
+/* ═══ MARKDOWN ═══
+   A IA responde em markdown; aqui vira HTML legível. Escrito à mão porque
+   trazer biblioteca externa quebraria o funcionamento offline. */
+
+function renderMd(txt){
+  if(!txt) return "";
+  const blocos = [];
+
+  /* Tira os blocos de código antes de tudo, para o resto não estragá-los */
+  let s = String(txt).replace(/```(\w*)\n?([\s\S]*?)```/g, function(_, lang, cod){
+    blocos.push({lang: lang || "", cod: cod.replace(/\n$/, "")});
+    return "\u0000COD" + (blocos.length - 1) + "\u0000";
+  });
+
+  s = esc(s);
+
+  /* Tabela: precisa vir antes das listas, senão os pipes se perdem */
+  s = s.replace(/(^\|.+\|\n\|[-: |]+\|\n(?:\|.*\|\n?)*)/gm, function(t){
+    const linhas = t.trim().split("\n").filter(function(l){ return l.trim(); });
+    if(linhas.length < 2) return t;
+    const cel = l => l.replace(/^\||\|$/g, "").split("|").map(function(c){ return c.trim(); });
+    const cab = cel(linhas[0]);
+    const corpo = linhas.slice(2).map(cel);
+    return '<div class="tw"><table class="md"><thead><tr>' +
+      cab.map(function(c){ return "<th>" + c + "</th>"; }).join("") +
+      "</tr></thead><tbody>" +
+      corpo.map(function(r){
+        return "<tr>" + r.map(function(c){ return "<td>" + c + "</td>"; }).join("") + "</tr>";
+      }).join("") + "</tbody></table></div>";
+  });
+
+  s = s.replace(/^######\s+(.+)$/gm, "<h6>$1</h6>")
+       .replace(/^#####\s+(.+)$/gm, "<h5>$1</h5>")
+       .replace(/^####\s+(.+)$/gm, "<h4>$1</h4>")
+       .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
+       .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
+       .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>")
+       .replace(/^\s*[-*_]{3,}\s*$/gm, "<hr>")
+       .replace(/^&gt;\s?(.+)$/gm, "<blockquote>$1</blockquote>");
+
+  /* Listas: agrupa itens seguidos num <ul> ou <ol> só */
+  s = s.replace(/((?:^[-*+]\s+.+\n?)+)/gm, function(b){
+    return "<ul>" + b.trim().split("\n").map(function(l){
+      return "<li>" + l.replace(/^[-*+]\s+/, "") + "</li>";
+    }).join("") + "</ul>";
+  });
+  s = s.replace(/((?:^\d+\.\s+.+\n?)+)/gm, function(b){
+    return "<ol>" + b.trim().split("\n").map(function(l){
+      return "<li>" + l.replace(/^\d+\.\s+/, "") + "</li>";
+    }).join("") + "</ol>";
+  });
+
+  s = s.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+       .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
+       .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+       .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+                '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+  /* Parágrafos: só no que sobrou de texto solto */
+  s = s.split(/\n{2,}/).map(function(p){
+    const t = p.trim();
+    if(!t) return "";
+    if(/^<(h[1-6]|ul|ol|table|div|blockquote|hr|pre)/.test(t)) return t;
+    if(/^\u0000COD\d+\u0000$/.test(t)) return t;
+    return "<p>" + t.replace(/\n/g, "<br>") + "</p>";
+  }).join("");
+
+  /* Devolve os blocos de código, agora com botão de copiar */
+  s = s.replace(/\u0000COD(\d+)\u0000/g, function(_, i){
+    const b = blocos[+i];
+    return '<div class="cod"><div class="codtop"><span>' + esc(b.lang || "código") +
+      '</span><button class="copiar" data-cod="' + i + '">copiar</button></div>' +
+      "<pre><code>" + esc(b.cod) + "</code></pre></div>";
+  });
+
+  /* Guarda o texto puro para o botão copiar devolver o original */
+  renderMd.ultimos = blocos;
+  return s;
+}
+
+/* ═══ DECISÕES ═══
+   O mapa dos caminhos, com o custo de cada um. Não é histórico de conversa:
+   é o que ficou em aberto esperando Samuel escolher. */
+
+let decisoes = [];
+const sDecisoes = () => guardar(k("decisoes"), JSON.stringify(decisoes));
+
+function renderDecisoes(){
+  const el = $("#decisoes");
+  if(!el) return;
+  const abertas = decisoes.filter(function(d){ return d.status === "aberta"; });
+  const fechadas = decisoes.filter(function(d){ return d.status !== "aberta"; });
+
+  if(!decisoes.length){
+    el.innerHTML = '<div class="empty"><h2>Nenhuma decisão em aberto.</h2>' +
+      '<p>Quando a conversa virar escolha real — com caminhos e custo — ela aparece ' +
+      'aqui para você decidir sem pressa.</p></div>';
+    return;
+  }
+
+  const cartao = function(d){
+    const caminhos = (d.caminhos || []).map(function(c, i){
+      const esc2 = esc(c);
+      return '<div class="rlinha"><div class="rk">' + String.fromCharCode(65 + i) +
+             '</div><div>' + esc2 +
+             (d.status === "aberta"
+               ? ' <button class="mini" data-escolher="' + d.id + '" data-op="' + i + '">escolher</button>'
+               : (d.escolhido === i ? ' <span class="tag t-ok">escolhido</span>' : "")) +
+             '</div></div>';
+    }).join("");
+    return '<div class="card"><div class="btitle">' + esc(d.titulo) + '</div>' +
+      (d.custos ? '<p class="note" style="margin:6px 0 10px"><b>Custo:</b> ' + esc(d.custos) + '</p>' : "") +
+      caminhos +
+      (d.criaDepois ? '<div class="risco" style="margin-top:10px"><div class="lbl">Cria depois</div>' +
+        '<p>' + esc(d.criaDepois) + '</p></div>' : "") +
+      (d.pergunta ? '<div class="acao"><div class="lbl">Só você responde</div><p>' +
+        esc(d.pergunta) + '</p></div>' : "") +
+      '<div class="row" style="margin-top:10px">' +
+      (d.status === "aberta"
+        ? '<button class="ghost" data-adiar="' + d.id + '">adiar</button>'
+        : '<span class="note" style="margin:0">' + esc(d.status) + "</span>") +
+      '<button class="rm" data-apagardec="' + d.id + '">apagar</button></div></div>';
+  };
+
+  el.innerHTML =
+    (abertas.length ? '<div class="lbl" style="margin-bottom:10px">Em aberto — ' +
+      abertas.length + '</div>' + abertas.map(cartao).join("") : "") +
+    (fechadas.length ? '<div class="lbl" style="margin:20px 0 10px">Já decididas</div>' +
+      fechadas.slice().reverse().map(cartao).join("") : "");
+}
+
+/* ═══ MALHA — os especialistas, sem precisar conversar com eles ═══ */
+
+function renderMalhaPane(){
+  const el = $("#malhaPane");
+  if(!el) return;
+  el.innerHTML = renderMalha();
+}
+
+/* ═══ MOTORES ═══ */
+
+function nomeMotorAtual(){
+  const a = motorAtivo();
+  if(a === "local") return "local";
+  if(a === "pago") return (cfg.modelo || "pago").split("/").pop();
+  return cfg.prov + (cfg.modelo ? " · " + cfg.modelo.split("/").pop().slice(0, 18) : "");
+}
+
+function atualizarRodape(){
+  const n = $("#motorNome");
+  if(n) n.textContent = nomeMotorAtual();
+  const pt = document.querySelector(".motor-atual .pt");
+  if(pt) pt.className = "pt " + (motorAtivo() === "local" ? "pt-local"
+    : cfg.chave ? "pt-ok" : "pt-off");
+}
+
+/* ═══ MOTORES ═══
+   Cadastre quantos quiser. Cada um guarda endereço, chave e modelo.
+   Trocar é um toque no rodapé — não precisa ir em Ajustes toda vez. */
+
+let motores = [];
+const sMotores = () => guardar("sa:motores", JSON.stringify(motores));
+
+const PRESETS = {
+  gemini:     {nome:"Gemini",     url:"", tipo:"gemini",
+               modelo:"gemini-3.5-flash", onde:"aistudio.google.com"},
+  groq:       {nome:"Groq",       url:"https://api.groq.com/openai/v1/chat/completions",
+               tipo:"openai", modelo:"llama-3.3-70b-versatile", onde:"console.groq.com"},
+  openrouter: {nome:"OpenRouter", url:"https://openrouter.ai/api/v1/chat/completions",
+               tipo:"openai", modelo:"", onde:"openrouter.ai"},
+  openai:     {nome:"OpenAI",     url:"https://api.openai.com/v1/chat/completions",
+               tipo:"openai", modelo:"", onde:"platform.openai.com"},
+  anthropic:  {nome:"Anthropic",  url:"https://api.anthropic.com/v1/messages",
+               tipo:"anthropic", modelo:"", onde:"console.anthropic.com"},
+  local:      {nome:"Motor local", url:"http://127.0.0.1:8080/v1/chat/completions",
+               tipo:"openai", modelo:"local", onde:"Termux"},
+  outro:      {nome:"",           url:"", tipo:"openai", modelo:"", onde:""},
+};
+
+function motoresSalvos(){ return motores; }
+
+function aplicarMotor(m){
+  if(!m) return;
+  motores.forEach(function(x){ x.ativo = (x.id === m.id); });
+  /* Espelha no cfg, que é o que o resto do app já usa */
+  cfg.prov = m.tipo === "gemini" ? "gemini"
+           : m.tipo === "anthropic" ? "pago"
+           : m.url.indexOf("groq.com") >= 0 ? "groq"
+           : m.url.indexOf("openrouter") >= 0 ? "openrouter"
+           : m.url.indexOf("127.0.0.1") >= 0 || m.url.indexOf("localhost") >= 0 ? "local"
+           : "pago";
+  cfg.modelo = m.modelo;
+  cfg.chave = m.chave || "";
+  cfg.urlPago = m.url;
+  if(cfg.prov === "local"){ cfg.endpoint = m.url; cfg.modeloLocal = m.modelo; }
+  sCfg(); sMotores(); atualizarRodape(); renderSub();
+  if($("#listaMotores")) renderMotores();
+}
+
+function renderMotores(){
+  const el = $("#listaMotores");
+  if(!el) return;
+  if(!motores.length){
+    el.innerHTML = '<p class="note" style="margin:0">Nenhum motor cadastrado. ' +
+      'Adicione o primeiro abaixo.</p>';
+    return;
+  }
+  el.innerHTML = motores.map(function(m){
+    const falta = !m.chave && m.tipo !== "openai-local" &&
+                  m.url.indexOf("127.0.0.1") < 0;
+    return '<div class="diag"><div class="dbola ' +
+      (m.ativo ? "db-ok" : falta ? "db-mau" : "db-aten") + '"></div>' +
+      '<div class="dtxt">' + esc(m.nome || "sem nome") +
+      (m.ativo ? ' <span class="tag t-ok">em uso</span>' : "") +
+      (falta ? ' <span class="tag t-muted">sem chave</span>' : "") +
+      '<div class="dsub">' + esc(m.modelo || "modelo não definido") +
+      (m.url ? " · " + esc(m.url.replace(/^https?:\/\//, "").split("/")[0]) : "") +
+      '</div></div>' +
+      (m.ativo ? "" : '<button class="mini" data-usar="' + m.id + '">usar</button>') +
+      '<button class="rm" data-rmmotor="' + m.id + '">×</button></div>';
+  }).join("");
 }
 
 /* ═══ PROJETOS, CONVERSAS E ARQUIVOS ═══ */
@@ -2793,7 +3119,6 @@ const FERRAMENTAS = {
 
 /* ═══ PROMPT ═══ */
 function promptBase(blocos){
-  const M = MODOS[modo];
   /* Motor local tem contexto curto. Prompt grande demais é truncado e a resposta
      sai pior — então aqui o prompt encolhe sozinho, sem perder o essencial. */
   const enxuto = motorAtivo() === "local";
@@ -2860,15 +3185,7 @@ function promptBase(blocos){
     (enxuto ? "" : "\n\nFERRAMENTAS — você pode executar, não só responder:\n" + ferr +
       "\n\nPra usar uma ferramenta, responda SÓ com:\n{\"ferramenta\":\"nome\",\"args\":{}}\n" +
       "O resultado volta pra você e aí você continua. Pode usar várias vezes seguidas, inclusive a mesma ferramenta com termos diferentes, pra cruzar fonte e cavar mais fundo. Máximo 6 usos.") +
-    "\n\n" + regras +
-    "\n\nMODO ATUAL — " + M.rotulo.toUpperCase() + ":\n" +
-    (enxuto ? M.instrucao.split(".")[0] + "." : M.instrucao) + "\n\n" +
-    "Responda SOMENTE com JSON válido, sem markdown:\n" + M.formato +
-    "\n\nTAMANHO: siga o que a pergunta pede, não um limite fixo. Pergunta simples, resposta " +
-    "curta. Assunto que exige raciocínio — decisão difícil, comparação, algo que você precisa " +
-    "destrinchar — desenvolva de verdade, com o encadeamento do porquê, não só a conclusão. " +
-    "Densidade não é brevidade: cortar o raciocínio pra caber é pior que uma resposta longa. " +
-    "Dentro de cada campo do JSON você pode usar quebras de linha e vários parágrafos.";
+    "\n\n" + regras + "\n\n" + CABECA;
 }
 
 /* ═══ MOTOR ═══ */
@@ -2878,7 +3195,7 @@ function motorAtivo(){
   if(!navigator.onLine && temLocal()) return "local";
   return cfg.prov;
 }
-async function chamarLocal(txt){
+async function chamarLocal(txt, aoStream){
   /* Modelos de visão locais (LLaVA, Qwen-VL, moondream no llama.cpp) aceitam
      imagem no mesmo formato da OpenAI. Visão offline é possível — depende só
      do modelo que estiver rodando no Termux. */
@@ -2891,21 +3208,77 @@ async function chamarLocal(txt){
         image_url:{url:"data:" + (a.mime || "image/jpeg") + ";base64," + a.base64}});
     });
   }
+  const corpoL = {model: cfg.modeloLocal || "local",
+                  messages:[{role:"user", content:conteudo}],
+                  max_tokens:2600, temperature:.7};
+  if(aoStream){
+    try{ return await comStream(cfg.endpoint.trim(), corpoL,
+                                {"Content-Type":"application/json"}, aoStream); }
+    catch(e){ if(e.name === "AbortError") throw e; }
+  }
   const r = await fetch(cfg.endpoint.trim(), {method:"POST",
     headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({model: cfg.modeloLocal || "local",
-      messages:[{role:"user", content:conteudo}], max_tokens:2600, temperature:.7, stream:false})});
+    body: JSON.stringify(Object.assign({}, corpoL, {stream:false}))});
   if(!r.ok) throw new Error("HTTP " + r.status);
   const d = await r.json();
   if(d.choices && d.choices[0]) return d.choices[0].message.content;
   if(d.content) return d.content;
   throw new Error("resposta inesperada do motor local");
 }
-async function chamarMotor(txt, forcar){
+/* Streaming: a resposta chega pedaço a pedaço, em vez de tudo no fim.
+   É a diferença entre esperar em branco e ver a IA pensando.
+   Se o motor não suportar, cai no modo normal sem quebrar nada. */
+let pararAtual = null;
+
+async function comStream(url, corpo, cabecalhos, aoStream){
+  const ctrl = new AbortController();
+  pararAtual = ctrl;
+  try{
+    const r = await fetch(url, {method:"POST", headers:cabecalhos, signal:ctrl.signal,
+      body: JSON.stringify(Object.assign({}, corpo, {stream:true}))});
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    if(!r.body) throw new Error("SEM_STREAM");
+
+    const leitor = r.body.getReader();
+    const dec = new TextDecoder();
+    let acumulado = "", sobra = "";
+
+    while(true){
+      const {done, value} = await leitor.read();
+      if(done) break;
+      sobra += dec.decode(value, {stream:true});
+      const linhas = sobra.split("\n");
+      sobra = linhas.pop() || "";
+      for(const linha of linhas){
+        const l = linha.trim();
+        if(!l.startsWith("data:")) continue;
+        const dado = l.slice(5).trim();
+        if(dado === "[DONE]") continue;
+        try{
+          const j = JSON.parse(dado);
+          const p = j.choices && j.choices[0] && j.choices[0].delta &&
+                    j.choices[0].delta.content;
+          if(p){ acumulado += p; if(aoStream) aoStream(acumulado); }
+          if(j.usage) registrarUso(j);
+        }catch(e){}
+      }
+    }
+    return acumulado;
+  }finally{
+    pararAtual = null;
+  }
+}
+
+function pararResposta(){
+  if(pararAtual){ pararAtual.abort(); pararAtual = null; return true; }
+  return false;
+}
+
+async function chamarMotor(txt, forcar, aoStream){
   const alvo = forcar || motorAtivo();
   if(alvo === "local"){
     if(!temLocal()) throw new Error("SEM_LOCAL");
-    return chamarLocal(txt);
+    return chamarLocal(txt, aoStream);
   }
   if(!cfg.chave) throw new Error("SEM_CHAVE");
 
@@ -2920,10 +3293,14 @@ async function chamarMotor(txt, forcar){
   if(alvo === "pago"){
     const url = (cfg.urlPago || "").trim();
     if(!url) throw new Error("SEM_ENDERECO_PAGO");
-    const r = await fetch(url, {method:"POST",
-      headers:{"Authorization":"Bearer " + cfg.chave, "Content-Type":"application/json"},
-      body: JSON.stringify({model: modelo, messages:[{role:"user", content:txt}],
-        max_tokens:8192, temperature:.85})});
+    const corpo = {model: modelo, messages:[{role:"user", content:txt}],
+                   max_tokens:8192, temperature:.85};
+    const cab = {"Authorization":"Bearer " + cfg.chave, "Content-Type":"application/json"};
+    if(aoStream){
+      try{ return await comStream(url, corpo, cab, aoStream); }
+      catch(e){ if(e.name === "AbortError") throw e; }
+    }
+    const r = await fetch(url, {method:"POST", headers:cab, body: JSON.stringify(corpo)});
     if(!r.ok) throw new Error("HTTP " + r.status);
     const d = await r.json();
     registrarUso(d);
@@ -2932,27 +3309,82 @@ async function chamarMotor(txt, forcar){
   }
 
   if(alvo === "gemini"){
-    const url = "https://generativelanguage.googleapis.com/v1beta/models/" +
-      encodeURIComponent(modelo) + ":generateContent?key=" + encodeURIComponent(cfg.chave);
     const partes = [{text:txt}];
     arquivos().filter(function(a){ return a.anexado && (a.imagem || a.audio) && a.base64; })
       .slice(0,4).forEach(function(a){
         partes.push({inline_data:{mime_type:a.mime, data:a.base64}});
       });
+    const corpoG = {contents:[{parts:partes}],
+                    generationConfig:{temperature:.85, maxOutputTokens:8192}};
+
+    /* O Gemini transmite por outro caminho (streamGenerateContent) e num formato
+       próprio — por isso não dá para reaproveitar o comStream do padrão OpenAI. */
+    if(aoStream){
+      try{
+        const urlS = "https://generativelanguage.googleapis.com/v1beta/models/" +
+          encodeURIComponent(modelo) + ":streamGenerateContent?alt=sse&key=" +
+          encodeURIComponent(cfg.chave);
+        const ctrl = new AbortController();
+        pararAtual = ctrl;
+        const rs = await fetch(urlS, {method:"POST", signal:ctrl.signal,
+          headers:{"Content-Type":"application/json"}, body: JSON.stringify(corpoG)});
+        if(!rs.ok || !rs.body) throw new Error("SEM_STREAM");
+        const leitor = rs.body.getReader(), dec = new TextDecoder();
+        let acc = "", sobra = "";
+        while(true){
+          const {done, value} = await leitor.read();
+          if(done) break;
+          sobra += dec.decode(value, {stream:true});
+          const linhas = sobra.split("\n");
+          sobra = linhas.pop() || "";
+          for(const l of linhas){
+            const t = l.trim();
+            if(!t.startsWith("data:")) continue;
+            try{
+              const j = JSON.parse(t.slice(5).trim());
+              const c = j.candidates && j.candidates[0];
+              const p = c && c.content && c.content.parts;
+              if(p){ acc += p.map(function(x){ return x.text || ""; }).join(""); aoStream(acc); }
+              if(j.usageMetadata) registrarUso(j);
+            }catch(e){}
+          }
+        }
+        pararAtual = null;
+        if(acc) return acc;
+      }catch(e){
+        pararAtual = null;
+        if(e.name === "AbortError") throw e;
+        /* streaming indisponível: segue no caminho normal, sem quebrar */
+      }
+    }
+
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/" +
+      encodeURIComponent(modelo) + ":generateContent?key=" + encodeURIComponent(cfg.chave);
     const r = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({contents:[{parts:partes}],
-        generationConfig:{temperature:.85, maxOutputTokens:8192}})});
+      body: JSON.stringify(corpoG)});
     if(!r.ok) throw new Error("HTTP " + r.status);
     const d = await r.json();
     registrarUso(d);
-    return d.candidates[0].content.parts.map(p => p.text || "").join("");
+    /* Resposta bloqueada por filtro vem sem candidates — avisar em vez de quebrar */
+    const cand = d.candidates && d.candidates[0];
+    if(!cand || !cand.content || !cand.content.parts){
+      if(d.choices && d.choices[0]) return d.choices[0].message.content;
+      throw new Error(d.promptFeedback && d.promptFeedback.blockReason
+        ? "resposta bloqueada (" + d.promptFeedback.blockReason + ")"
+        : "o Gemini não devolveu conteúdo");
+    }
+    return cand.content.parts.map(function(p){ return p.text || ""; }).join("");
   }
   const url = alvo === "groq" ? "https://api.groq.com/openai/v1/chat/completions"
                               : "https://openrouter.ai/api/v1/chat/completions";
-  const r = await fetch(url, {method:"POST",
-    headers:{"Content-Type":"application/json","Authorization":"Bearer " + cfg.chave},
-    body: JSON.stringify({model:modelo, messages:[{role:"user",content:txt}],
-      max_tokens:8192, temperature:.85})});
+  const corpoR = {model:modelo, messages:[{role:"user",content:txt}],
+                  max_tokens:8192, temperature:.85};
+  const cabR = {"Content-Type":"application/json","Authorization":"Bearer " + cfg.chave};
+  if(aoStream){
+    try{ return await comStream(url, corpoR, cabR, aoStream); }
+    catch(e){ if(e.name === "AbortError") throw e; }
+  }
+  const r = await fetch(url, {method:"POST", headers:cabR, body: JSON.stringify(corpoR)});
   if(!r.ok) throw new Error("HTTP " + r.status);
   const d = await r.json();
   registrarUso(d);
@@ -2965,47 +3397,71 @@ function parseJSON(t){
   return JSON.parse(s);
 }
 
-/* Ciclo com ferramentas: a IA pede, o app executa, devolve, ela continua. */
-async function ciclo(pergunta, blocos, aoUsar){
-  let entrada = pergunta;
-  if(modo === "diagnostico"){
-    const sinais = varrer().map(x =>
-      "[" + x.onde + " · " + x.nivel + "] " + x.txt + " — " + x.sub).join("\n");
-    entrada = "VARREDURA AUTOMÁTICA DO SISTEMA (sinais reais, medidos agora):\n" + sinais +
-      "\n\n" + (pergunta || "Varredura completa: aponte o que está errado e o que fazer.");
-  }
-  let conversa = promptBase(blocos) + "\n\nPERGUNTA DE SAMUEL:\n" + entrada;
+/* Ciclo com ferramentas: a IA pede, o app executa, devolve, ela continua.
+   A resposta final vem em texto livre — é isso que permite streaming e markdown. */
+
+/* O bloco de decisão que a IA emite quando o assunto merece ser guardado. */
+function extrairDecisao(texto){
+  const m = texto.match(/<<<DECISAO([\s\S]*?)>>>/);
+  if(!m) return null;
+  const campos = {};
+  m[1].split("\n").forEach(function(l){
+    const p = l.indexOf(":");
+    if(p > 0) campos[l.slice(0, p).trim().toLowerCase()] = l.slice(p + 1).trim();
+  });
+  if(!campos.titulo) return null;
+  return {
+    id: "dec-" + Date.now(),
+    titulo: campos.titulo,
+    caminhos: (campos.caminhos || "").split("|").map(function(x){ return x.trim(); }).filter(Boolean),
+    custos: campos.custos || "",
+    criaDepois: campos.cria_depois || "",
+    pergunta: campos.pergunta || "",
+    quando: Date.now(),
+    status: "aberta",
+  };
+}
+
+const semBlocoDecisao = t => String(t).replace(/<<<DECISAO[\s\S]*?>>>/g, "").trim();
+
+async function ciclo(pergunta, blocos, aoUsar, aoStream){
+  let conversa = promptBase(blocos) + "\n\nPERGUNTA DE SAMUEL:\n" + pergunta;
   const usadas = [];
+
   for(let volta = 0; volta < 7; volta++){
-    const bruto = await chamarMotor(conversa);
-    let obj;
-    try{ obj = parseJSON(bruto); }
-    catch(e){
-      /* No Chat, texto corrido não é erro — é a resposta. Nos modos estruturados,
-         entrega o texto cru inteiro em vez de cortar: melhor longo que mutilado. */
-      const texto = String(bruto).trim();
-      if(modo === "chat")
-        return {resposta: texto, camadas:{}, risco:null, acao:"", usadas};
-      return {resposta: texto, camadas:{}, risco:null,
-              acao:"O motor respondeu em texto corrido em vez do formato do modo " +
-                   MODOS[modo].rotulo + ". A resposta está acima, inteira.", usadas};
+    /* Só a última volta é transmitida ao vivo: as intermediárias são a IA
+       pedindo ferramenta, e mostrar isso seria ruído. */
+    const bruto = await chamarMotor(conversa, null, volta > 0 ? aoStream : null);
+    const texto = String(bruto).trim();
+
+    /* Pedido de ferramenta vem como JSON puro; resposta vem como texto. */
+    let pedido = null;
+    if(texto.indexOf('"ferramenta"') >= 0 && texto.length < 900){
+      try{
+        let j = texto.replace(/```json/gi, "").replace(/```/g, "").trim();
+        const i = j.indexOf("{"), f = j.lastIndexOf("}");
+        if(i >= 0 && f > i) j = j.slice(i, f + 1);
+        const o = JSON.parse(j);
+        if(o.ferramenta && FERRAMENTAS[o.ferramenta]) pedido = o;
+      }catch(e){}
     }
-    if(obj.ferramenta && FERRAMENTAS[obj.ferramenta] && volta < 6){
-      const nome = obj.ferramenta;
-      usadas.push(nome);
-      if(aoUsar) aoUsar(nome);
+
+    if(pedido && volta < 6){
+      usadas.push(pedido.ferramenta);
+      if(aoUsar) aoUsar(pedido.ferramenta);
       let res;
-      try{ res = await FERRAMENTAS[nome].exec(obj.args || {}); }
+      try{ res = await FERRAMENTAS[pedido.ferramenta].exec(pedido.args || {}); }
       catch(e){ res = "Erro ao executar: " + e.message; }
-      conversa += "\n\nVocê pediu " + nome + ". Resultado:\n" + String(res).slice(0,3000) +
-                  "\n\nContinue. Se já tem o suficiente, responda no formato final.";
+      conversa += "\n\nVocê pediu " + pedido.ferramenta + ". Resultado:\n" +
+                  String(res).slice(0, 3000) +
+                  "\n\nContinue. Quando tiver o suficiente, responda a Samuel.";
       continue;
     }
-    obj.usadas = usadas;
-    return obj;
+
+    return {resposta: semBlocoDecisao(texto), decisao: extrairDecisao(texto), usadas};
   }
-  return {resposta:"Consultei as ferramentas mas não fechei uma resposta.", camadas:{},
-          risco:null, acao:"Tente reformular.", usadas};
+  return {resposta: "Consultei as ferramentas mas não fechei uma resposta.",
+          decisao: null, usadas};
 }
 
 /* ═══ RENDER ═══ */
@@ -3472,30 +3928,53 @@ function renderFeed(){
   if(!hist.length){
     f.innerHTML = '<div class="empty"><h2>' +
       (espaco === "nucleo" ? "Fala." : "O que a operação precisa resolver?") +
-      '</h2><p>Chat conversa normal, sabendo o método — sem estrutura forçada. Os outros nove ' +
-      'modos são pra quando você quer o ritual completo: Conselho pelas 5 Camadas, GPS traça ' +
-      'todas as rotas, Guerra abre as frentes, Arca prepara a queda antes dela vir, Diagnóstico ' +
-      'varre o sistema sozinho.</p></div>';
+      '</h2><p>Conversa normal. O método está na cabeça dela — Motor, Piloto, Xadrez, ' +
+      'Tabuleiro, Arca — e aparece no julgamento, não como formulário.<br><br>' +
+      'Quando virar decisão de verdade, ela vai para a aba Decisões.</p></div>';
     return;
   }
-  f.innerHTML = hist.map(function(h,i){
-    const risco = (h.risco && h.risco !== "null")
-      ? '<div class="risco"><div class="lbl">Sentinela</div><p>' + esc(h.risco) + '</p></div>' : "";
-    const dec = (h.decisao == null)
-      ? '<div class="decide"><button class="btn btn-ok" data-ok="'+i+'">Aprovar</button>' +
-        '<button class="btn btn-adj" data-adj="'+i+'">Ajustar</button></div>'
-      : '<span class="tag ' + (h.decisao === "aprovado" ? "t-sage" : "t-muted") + '">' +
-        (h.decisao === "aprovado" ? "Aprovado · na memória" : "Ajustado · virou calibragem") + '</span>';
+  f.innerHTML = hist.map(function(h, i){
     const ferr = (h.usadas && h.usadas.length)
-      ? '<div class="ferramenta">executou: ' + esc(h.usadas.join(" → ")) + '</div>' : "";
-    const selo = h.modo && h.modo !== "conselho"
-      ? '<span class="tag t-acento" style="margin-bottom:8px">' + esc(MODOS[h.modo].rotulo) + '</span>' : "";
-    return '<div class="item"><div class="q">' + esc(h.pergunta) + '</div>' + selo + ferr +
-      renderSaida(h) + risco +
-      (h.acao ? '<div class="acao"><div class="lbl">Próxima ação</div><p>' + esc(h.acao) + '</p></div>' : "") +
-      dec + '<div class="used">memória: ' + esc((h.blocos||[]).join(" · ")) + '</div></div>';
+      ? '<div class="ferramenta">usou: ' + esc(h.usadas.join(" → ")) + '</div>' : "";
+    const dec = (h.decisao == null)
+      ? '<div class="decide"><button class="btn btn-ok" data-ok="' + i + '">Aprovar</button>' +
+        '<button class="btn btn-adj" data-adj="' + i + '">Ajustar</button>' +
+        '<button class="btn" data-copiar="' + i + '">Copiar</button></div>'
+      : '<span class="tag ' + (h.decisao === "aprovado" ? "t-sage" : "t-muted") + '">' +
+        (h.decisao === "aprovado" ? "Aprovado · na memória" : "Ajustado · virou calibragem") + "</span>";
+    return '<div class="item"><div class="q">' + esc(h.pergunta) + "</div>" + ferr +
+      '<div class="a md">' + renderMd(h.resposta) + "</div>" + dec +
+      '<div class="used">memória: ' + esc((h.blocos || []).join(" · ")) + "</div></div>";
   }).join("");
   f.scrollTop = f.scrollHeight;
+}
+
+/* A bolha que cresce enquanto a resposta chega. */
+function bolhaViva(pergunta){
+  const f = $("#feed");
+  const d = document.createElement("div");
+  d.className = "item vivo";
+  d.innerHTML = '<div class="q">' + esc(pergunta) + '</div>' +
+                '<div class="ferramenta" id="vivoFerr" style="display:none"></div>' +
+                '<div class="a md" id="vivoTxt"><span class="pisca">▍</span></div>';
+  f.appendChild(d);
+  f.scrollTop = f.scrollHeight;
+  return {
+    texto: function(t){
+      const el = document.getElementById("vivoTxt");
+      if(!el) return;
+      el.innerHTML = renderMd(t) + '<span class="pisca">▍</span>';
+      f.scrollTop = f.scrollHeight;
+    },
+    ferramenta: function(nome){
+      const el = document.getElementById("vivoFerr");
+      if(!el) return;
+      el.style.display = "";
+      el.textContent = "usando: " + nome;
+      f.scrollTop = f.scrollHeight;
+    },
+    remover: function(){ d.remove(); },
+  };
 }
 
 function renderTabuleiro(){
@@ -4091,41 +4570,65 @@ async function processarFila(){
 
 async function perguntar(){
   const q = $("#input").value.trim();
-  if(!q && modo !== "diagnostico") return;
+  if(!q) return;
   if(!cfg.chave && !temLocal()){
     alert("Configure o motor em Ajustes.");
     document.querySelector('[data-tab="ajustes"]').click();
     return;
   }
-  const rotulo = q || "Varredura completa do sistema";
-  if(!conv()) novaConversa(rotulo.slice(0,42));
-  $("#input").value = ""; $("#input").style.height = "auto"; $("#send").disabled = true;
-  const blocos = recuperar(q || "diagnóstico risco estado império");
-  if(!navigator.onLine && !temLocal()){ consultaOffline(rotulo, blocos); return; }
+  if(!conv()) novaConversa(q.slice(0, 42));
+  $("#input").value = ""; $("#input").style.height = "auto";
+  $("#send").disabled = true;
+  $("#send").style.display = "none";
+  $("#parar").style.display = "";
 
-  const f = $("#feed");
-  const tmp = document.createElement("p");
-  tmp.className = "status";
-  tmp.textContent = modo === "diagnostico" ? "varrendo o sistema…" : "aplicando o método…";
-  f.appendChild(tmp); f.scrollTop = f.scrollHeight;
+  const blocos = recuperar(q);
+  if(!navigator.onLine && !temLocal()){
+    $("#send").style.display = ""; $("#parar").style.display = "none";
+    consultaOffline(q, blocos);
+    return;
+  }
 
+  const viva = bolhaViva(q);
   try{
-    const o = await ciclo(q, blocos, function(nome){ tmp.textContent = "executando " + nome + "…"; });
-    o.pergunta = rotulo; o.modo = modo; o.id = "h-" + Date.now();
-    o.blocos = blocos.map(function(b){ return b.titulo; }); o.decisao = null;
+    const o = await ciclo(q, blocos,
+      function(nome){ viva.ferramenta(nome); },
+      function(parcial){ viva.texto(parcial); });
+    const mapa = o.decisao;   /* o bloco <<<DECISAO>>>, se houver */
+    delete o.decisao;         /* aqui decisao volta a significar aprovado/ajustado */
+
+    viva.remover();
+    o.pergunta = q;
+    o.id = "h-" + Date.now();
+    o.blocos = blocos.map(function(b){ return b.titulo; });
+    o.decisao = null;
     hist.push(o); sHist();
-    if(falarLigado) falar(o.resposta || o.texto || "");
+
+    /* Decisão de verdade não morre na conversa: vai para a aba própria. */
+    if(mapa){ decisoes.push(mapa); sDecisoes(); renderDecisoes(); }
+
+    if(falarLigado) falar(o.resposta || "");
   }catch(e){
-    tmp.remove();
-    const p = document.createElement("p"); p.className = "err";
-    p.textContent = e.message === "SEM_CHAVE" ? "Sem chave de API. Configure em Ajustes."
-      : e.message === "SEM_LOCAL" ? "Motor local não configurado."
-      : e.message === "LIMITE_GASTO" ? "Limite de gasto atingido. Em Ajustes → Gasto do motor pago " +
-        "você aumenta o limite, zera o contador, ou troca pra um motor grátis."
-      : e.message === "SEM_ENDERECO_PAGO" ? "Falta o endereço da API do motor pago, em Ajustes → Motor."
-      : motorAtivo() === "local" ? "O motor local não respondeu (" + e.message + ")."
-      : "O motor não respondeu (" + e.message + ").";
-    f.appendChild(p); $("#send").disabled = false; return;
+    viva.remover();
+    if(e.name === "AbortError"){
+      const p = document.createElement("p");
+      p.className = "status";
+      p.textContent = "parado por você.";
+      $("#feed").appendChild(p);
+    }else{
+      const p = document.createElement("p"); p.className = "err";
+      p.textContent = e.message === "SEM_CHAVE" ? "Sem chave de API. Configure em Ajustes."
+        : e.message === "SEM_LOCAL" ? "Motor local não configurado."
+        : e.message === "LIMITE_GASTO" ? "Limite de gasto atingido. Em Ajustes → Gasto do motor " +
+          "pago você aumenta o limite, zera o contador, ou troca para um motor grátis."
+        : e.message === "SEM_ENDERECO_PAGO" ? "Falta o endereço da API do motor pago, em Ajustes."
+        : motorAtivo() === "local" ? "O motor local não respondeu (" + e.message + ")."
+        : "O motor não respondeu (" + e.message + ").";
+      $("#feed").appendChild(p);
+    }
+  }finally{
+    $("#send").style.display = ""; $("#parar").style.display = "none";
+    $("#send").disabled = !$("#input").value.trim();
   }
   renderFeed(); renderSub();
 }
@@ -4317,7 +4820,9 @@ Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
     Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(x){ x.classList.remove("on"); });
     Array.prototype.forEach.call(document.querySelectorAll(".pane"), function(x){ x.classList.remove("on"); });
     t.classList.add("on"); $("#pane-" + t.dataset.tab).classList.add("on");
-    if(t.dataset.tab === "ajustes"){ medirEspaco(); preencherCusto(); preencherVisual(); }
+    if(t.dataset.tab === "ajustes"){ medirEspaco(); preencherCusto(); preencherVisual(); renderMotores(); }
+  if(t.dataset.tab === "decisoes") renderDecisoes();
+  if(t.dataset.tab === "malha") renderMalhaPane();
   });
 });
 
@@ -4339,7 +4844,149 @@ $("#input").addEventListener("input", function(e){
 $("#input").addEventListener("keydown", function(e){
   if(e.key === "Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); perguntar(); }
 });
+/* ── Motores ── */
+$("#mPreset").addEventListener("change", function(){
+  const p = PRESETS[$("#mPreset").value];
+  if(!p) return;
+  $("#mNome").value = p.nome;
+  $("#mUrl").value = p.url;
+  $("#mModelo").value = p.modelo;
+  const d = $("#mDica");
+  if(p.onde){
+    d.style.display = "block";
+    d.textContent = "Chave em " + p.onde +
+      (p.tipo === "gemini" ? " — o endereço fica em branco, o app monta sozinho." : "");
+  }else d.style.display = "none";
+});
+
+$("#addMotor").addEventListener("click", function(){
+  const nome = $("#mNome").value.trim();
+  const url = $("#mUrl").value.trim();
+  const modelo = $("#mModelo").value.trim();
+  const chave = $("#mChave").value.trim();
+  const tipo = (PRESETS[$("#mPreset").value] || {}).tipo || "openai";
+  const st = $("#mStatus"); st.style.display = "block";
+
+  if(!nome){ st.textContent = "dê um nome ao motor."; return; }
+  if(tipo !== "gemini" && !url){ st.textContent = "falta o endereço da API."; return; }
+  if(url && url.indexOf("http") !== 0){
+    st.textContent = "o endereço precisa começar com http.";
+    return;
+  }
+  motores.push({id:"m-" + Date.now(), nome:nome, url:url, modelo:modelo,
+                chave:chave, tipo:tipo, ativo:false});
+  sMotores(); renderMotores();
+  ["mNome","mUrl","mModelo","mChave"].forEach(function(i){ $("#" + i).value = ""; });
+  $("#mPreset").value = "";
+  $("#mDica").style.display = "none";
+  st.textContent = nome + " adicionado. Toque em 'usar' para ativar.";
+});
+
+$("#testarMotor").addEventListener("click", async function(){
+  const st = $("#mStatus"); st.style.display = "block"; st.textContent = "testando…";
+  const antes = JSON.parse(JSON.stringify(cfg));
+  const tipo = (PRESETS[$("#mPreset").value] || {}).tipo || "openai";
+  cfg.prov = tipo === "gemini" ? "gemini" : "pago";
+  cfg.modelo = $("#mModelo").value.trim();
+  cfg.chave = $("#mChave").value.trim();
+  cfg.urlPago = $("#mUrl").value.trim();
+  try{
+    await chamarMotor("Responda apenas: ok");
+    st.textContent = "funcionando. Pode adicionar.";
+  }catch(e){
+    st.textContent = "não respondeu (" + e.message + "). Confira endereço, chave e modelo.";
+  }finally{
+    cfg = antes;
+  }
+});
+
+$("#listaMotores").addEventListener("click", function(e){
+  const u = e.target.dataset.usar, r = e.target.dataset.rmmotor;
+  if(u){
+    aplicarMotor(motores.filter(function(m){ return m.id === u; })[0]);
+    return;
+  }
+  if(r){
+    if(!confirm("Remover esse motor?")) return;
+    motores = motores.filter(function(m){ return m.id !== r; });
+    sMotores(); renderMotores();
+  }
+});
+
 $("#send").addEventListener("click", perguntar);
+
+$("#parar").addEventListener("click", function(){
+  if(!pararResposta()){
+    $("#parar").style.display = "none";
+    $("#send").style.display = "";
+  }
+});
+
+/* Trocar de motor sem sair da conversa */
+$("#trocaMotor").addEventListener("click", function(){
+  const lista = motoresSalvos();
+  if(!lista.length){
+    if(confirm("Nenhum motor cadastrado ainda. Ir para Ajustes?"))
+      document.querySelector('[data-tab="ajustes"]').click();
+    return;
+  }
+  const nomes = lista.map(function(m, i){ return (i+1) + ") " + m.nome; }).join("\n");
+  const esc2 = prompt("Qual motor usar?\n\n" + nomes + "\n\nDigite o número:");
+  if(!esc2) return;
+  const m = lista[parseInt(esc2, 10) - 1];
+  if(!m) return;
+  aplicarMotor(m);
+});
+
+$("#novaConversaRapida").addEventListener("click", function(){
+  novaConversa("");
+  renderFeed(); renderSub();
+});
+
+/* Copiar bloco de código */
+document.addEventListener("click", function(e){
+  if(!e.target.classList || !e.target.classList.contains("copiar")) return;
+  const pre = e.target.closest(".cod").querySelector("code");
+  navigator.clipboard.writeText(pre.textContent).then(function(){
+    const antes = e.target.textContent;
+    e.target.textContent = "copiado";
+    setTimeout(function(){ e.target.textContent = antes; }, 1400);
+  }).catch(function(){ alert("Não consegui copiar."); });
+});
+
+/* Aba Decisões */
+$("#decisoes").addEventListener("click", function(e){
+  const esc2 = e.target.dataset.escolher, ad = e.target.dataset.adiar,
+        ap = e.target.dataset.apagardec;
+  if(esc2){
+    const d = decisoes.filter(function(x){ return x.id === esc2; })[0];
+    if(!d) return;
+    d.status = "decidida";
+    d.escolhido = parseInt(e.target.dataset.op, 10);
+    d.quandoDecidiu = Date.now();
+    sDecisoes();
+    extras.push({id: "dec-" + Date.now(), tag: "DECISÃO", criada: Date.now(), resultado: null,
+      titulo: d.titulo.slice(0, 70),
+      corpo: "Escolhido: " + (d.caminhos[d.escolhido] || "") +
+             "\nCusto: " + (d.custos || "") +
+             "\nCria depois: " + (d.criaDepois || "")});
+    sExtras(); renderAcervo(); renderDecisoes();
+    return;
+  }
+  if(ad){
+    const d = decisoes.filter(function(x){ return x.id === ad; })[0];
+    if(d){ d.status = "adiada"; sDecisoes(); renderDecisoes(); }
+    return;
+  }
+  if(ap){
+    if(!confirm("Apagar essa decisão?")) return;
+    decisoes = decisoes.filter(function(x){ return x.id !== ap; });
+    sDecisoes(); renderDecisoes();
+  }
+});
+
+/* Aba Malha: mesma lógica do Império, chamada direto */
+$("#malhaPane").addEventListener("click", function(e){ acoesDaMalha(e, renderMalhaPane); });
 
 $("#feed").addEventListener("click", function(e){
   const cp = e.target.dataset.copiar, bx = e.target.dataset.baixar;
@@ -4375,10 +5022,11 @@ $("#vistaImperio").addEventListener("click", function(e){
   renderImperio();
 });
 
-$("#imperio").addEventListener("click", function(e){
+/* A malha é usada em dois lugares (Império e aba Malha). Uma função só,
+   com o render passado por fora, evita duas cópias que divergem. */
+function acoesDaMalha(e, redesenhar){
   const t = e.target;
 
-  /* ---- Malha de especialistas ---- */
   if(t.id === "verRota"){
     const p = $("#testeRota").value.trim();
     if(!p) return;
@@ -4394,7 +5042,7 @@ $("#imperio").addEventListener("click", function(e){
         ? '<p class="note" style="margin:9px 0 0;font-size:12px">Nenhum gatilho bateu — caiu no ' +
           'padrão. Se esse assunto se repete, vale abrir um especialista pra ele.</p>' : "") +
       '</div>';
-    return;
+    return true;
   }
 
   if(t.id === "criarEsp"){
@@ -4404,28 +5052,26 @@ $("#imperio").addEventListener("click", function(e){
       .map(function(g){ return g.trim(); }).filter(Boolean);
     const papel = ($("#espPapel").value || "").trim();
     const st = $("#espStatus"); st.style.display = "block";
-
     if(!nome || !resolve || !gat.length){
       st.textContent = "preencha nome, o que resolve, e pelo menos uma palavra-gatilho.";
-      return;
+      return true;
     }
     if(todosEspecialistas().some(function(x){ return x.id === nome; })){
       st.textContent = "'" + nome + "' já existe.";
-      return;
+      return true;
     }
-    malha.proprios.push({id:nome, resolve:resolve, gatilhos:gat,
-                         papel:papel, proprio:true, estado:"NÃO VERIFICADO",
-                         criado:Date.now()});
-    sMalha(); renderImperio();
-    return;
+    malha.proprios.push({id:nome, resolve:resolve, gatilhos:gat, papel:papel,
+                         proprio:true, estado:"NÃO VERIFICADO", criado:Date.now()});
+    sMalha(); redesenhar();
+    return true;
   }
 
   const rme = t.dataset.rmesp;
   if(rme){
-    if(!confirm("Remover o especialista '" + rme + "'?")) return;
+    if(!confirm("Remover o especialista '" + rme + "'?")) return true;
     malha.proprios = malha.proprios.filter(function(x){ return x.id !== rme; });
-    sMalha(); renderImperio();
-    return;
+    sMalha(); redesenhar();
+    return true;
   }
 
   if(t.id === "exportarMalha"){
@@ -4442,8 +5088,14 @@ $("#imperio").addEventListener("click", function(e){
     URL.revokeObjectURL(url);
     alert("Baixado.\n\nCopie para ~/sa/ no Termux — o orquestrador passa a usar esses " +
           "especialistas também.");
-    return;
+    return true;
   }
+  return false;
+}
+
+$("#imperio").addEventListener("click", function(e){
+  if(acoesDaMalha(e, renderImperio)) return;
+  const t = e.target;
 
   /* ---- Matriz de Jetro ---- */
   const jid = t.dataset.jocupar;
@@ -4855,7 +5507,6 @@ $("#escolherModos").addEventListener("click", function(e){
       Array.prototype.forEach.call(document.querySelectorAll(".modo"), function(b){
         b.classList.toggle("on", b.dataset.modo === modo);
       });
-      $("#input").placeholder = MODOS[modo].dica;
     }
   } else visual.modos.push(m);
   aplicarVisual(); renderEscolhas(); sVisual();
@@ -5040,8 +5691,7 @@ Array.prototype.forEach.call(document.querySelectorAll(".modo"), function(b){
     Array.prototype.forEach.call(document.querySelectorAll(".modo"), function(x){ x.classList.remove("on"); });
     b.classList.add("on");
     modo = b.dataset.modo;
-    $("#input").placeholder = MODOS[modo].dica;
-    $("#send").disabled = modo !== "diagnostico" && !$("#input").value.trim();
+    $("#send").disabled = !$("#input").value.trim();
   });
 });
 
@@ -5208,12 +5858,14 @@ window.addEventListener("offline", renderSub);
   await load();
   aplicarVisual();
   renderTudo();
+  atualizarRodape();
   marcarSentidos();
   try{
     const at = JSON.parse((await ler(k("atualizacao"))) || "null");
     if(at){ $("#attRepo").value = at.repo || ""; $("#attCaminho").value = at.caminho || "index.html"; }
   }catch(e){}
   if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged = function(){};
+  receberCompartilhado();
   if(navigator.onLine || temLocal()) processarFila();
 })();
 
