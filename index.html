@@ -32,19 +32,52 @@
   .scroll::-webkit-scrollbar{width:4px}
   .scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
 
-  header{border-bottom:1px solid var(--line);padding:12px 16px;flex-shrink:0}
-  .hrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  h1{font-size:18px;font-weight:700;margin:0;letter-spacing:-.01em}
-  .sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:5px 0 0}
-  .espacos{display:flex;gap:6px;margin-top:9px}
+  /* ── Barra fina no topo, com hambúrguer ── */
+  .topo{display:flex;align-items:center;gap:11px;padding:11px 14px;
+        border-bottom:1px solid var(--line);flex-shrink:0}
+  .hamb{background:none;border:0;color:var(--text);font-size:19px;
+        padding:2px 4px;line-height:1;flex-shrink:0}
+  .topo-titulo{flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.01em;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chatsub{font-family:var(--mono);font-size:10.5px;color:var(--muted);
+    padding:8px 14px 0;margin:0;flex-shrink:0}
+
+  /* ── Véu escurece atrás do menu; toca pra fechar ── */
+  .veu{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;
+       pointer-events:none;transition:opacity .18s;z-index:40}
+  .veu.on{opacity:1;pointer-events:auto}
+
+  /* ── Menu lateral — desliza da esquerda, igual o drawer do Claude ── */
+  .menu{position:fixed;top:0;bottom:0;left:0;width:82%;max-width:320px;
+        background:var(--surface);border-right:1px solid var(--line);
+        transform:translateX(-100%);transition:transform .2s ease;
+        z-index:41;display:flex;flex-direction:column;padding:20px 0 14px}
+  .menu.aberto{transform:translateX(0)}
+  .menu-topo{padding:0 20px 18px}
+  .menu-topo h1{font-family:Georgia,"Times New Roman",serif;font-size:22px;
+    font-weight:600;line-height:1.15;margin:0}
+  .mitem{display:flex;align-items:center;gap:12px;background:none;border:0;
+    color:var(--text);font-size:14.5px;padding:11px 20px;text-align:left;width:100%}
+  .mitem.on{background:var(--surface2);color:var(--acento)}
+  .mic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+  .menu-linha{border-top:1px solid var(--line);margin:10px 20px}
+  .menu-fix-cab{font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--muted);padding:6px 20px}
+  .menu-fixados{flex:1;overflow-y:auto;min-height:0}
+  .menu-fixados .mitem{font-size:13.5px;padding:8px 20px}
+  .menu-fundo{padding:12px 20px 0;border-top:1px solid var(--line);flex-shrink:0}
+  .menu-fundo .espacos{margin-top:0;margin-bottom:10px}
+
+  /* ── Lista de conversas — busca em tudo, cartão por conversa ── */
+  .convglobal{padding:12px 0;border-bottom:1px solid var(--line)}
+  .cg-topo{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .cg-titulo{font-size:14.5px;font-weight:500}
+  .cg-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+
+  .espacos{display:flex;gap:6px}
   .esp{flex:1;background:none;border:1px solid var(--line);color:var(--muted);
        padding:6px 0;border-radius:6px;font-size:11.5px;font-weight:500}
   .esp.on{border-color:var(--acento);color:var(--acento);background:rgba(255,255,255,.03)}
-
-  .tabs{display:flex;border-bottom:1px solid var(--line);flex-shrink:0}
-  .tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;
-       color:var(--muted);padding:11px 0;font-size:12.5px;font-weight:500}
-  .tab.on{color:var(--text);border-bottom-color:var(--acento)}
 
   .pane{flex:1;min-height:0;display:none;flex-direction:column}
   .pane.on{display:flex}
@@ -303,29 +336,53 @@
 </head>
 <body>
 <div id="app">
-  <header>
-    <div class="hrow">
-      <h1>Sistema Absoluto</h1>
-      <span class="tag t-acento" id="selo">Núcleo · CPF</span>
-    </div>
-    <p class="sub" id="sub">carregando…</p>
-    <div class="espacos">
-      <button class="esp on" data-esp="nucleo">Núcleo · CPF</button>
-      <button class="esp" data-esp="operacao">Operação · CNPJ</button>
-    </div>
-  </header>
 
-  <div class="tabs">
-    <button class="tab on" data-tab="conselho">Conversa</button>
-    <button class="tab" data-tab="decisoes">Decisões</button>
-    <button class="tab" data-tab="malha">Malha</button>
-    <button class="tab" data-tab="projetos">Projetos</button>
-    <button class="tab" data-tab="imperio">Império</button>
-    <button class="tab" data-tab="acervo">Acervo</button>
-    <button class="tab" data-tab="ajustes">Ajustes</button>
+  <!-- ═══ BARRA FINA — hambúrguer abre o menu, igual o Claude ═══ -->
+  <div class="topo">
+    <button class="hamb" id="abrirMenu" aria-label="Menu">☰</button>
+    <span class="topo-titulo" id="topoTitulo">Conversa</span>
+    <span class="tag t-acento" id="selo">Núcleo</span>
+  </div>
+
+  <!-- ═══ MENU LATERAL ═══ -->
+  <div class="veu" id="veuMenu"></div>
+  <nav class="menu" id="menuLateral">
+    <div class="menu-topo">
+      <h1>Sistema<br>Absoluto</h1>
+    </div>
+    <button class="mitem" data-ir="conselho">
+      <span class="mic">💬</span> Conversas
+    </button>
+    <button class="mitem" data-ir="projetos"><span class="mic">🗂</span> Projetos</button>
+    <button class="mitem" data-ir="imperio"><span class="mic">👑</span> Império</button>
+    <button class="mitem" data-ir="malha"><span class="mic">🕸</span> Malha</button>
+    <button class="mitem" data-ir="decisoes"><span class="mic">⚖</span> Decisões</button>
+    <button class="mitem" data-ir="acervo"><span class="mic">📚</span> Acervo</button>
+    <button class="mitem" data-ir="ajustes"><span class="mic">⚙</span> Ajustes</button>
+
+    <div class="menu-linha"></div>
+    <div class="menu-fix-cab">Fixados</div>
+    <div id="menuFixados" class="menu-fixados"></div>
+
+    <div class="menu-fundo">
+      <div class="espacos">
+        <button class="esp on" data-esp="nucleo">Núcleo · CPF</button>
+        <button class="esp" data-esp="operacao">Operação · CNPJ</button>
+      </div>
+      <button class="primary" id="novaDoMenu">+ Nova conversa</button>
+    </div>
+  </nav>
+
+  <!-- ═══ CONVERSAS — tela própria, busca em tudo, igual o Claude ═══ -->
+  <div class="pane" id="pane-conselho-lista">
+    <div class="scroll body" style="padding:14px">
+      <input class="field" id="buscaGlobal" placeholder="Pesquisar conversas…" autocomplete="off">
+      <div id="listaConversas"></div>
+    </div>
   </div>
 
   <div class="pane on" id="pane-conselho">
+    <p class="chatsub" id="chatSub"></p>
     <div class="scroll body" id="feed"></div>
     <div class="chips-arq" id="anexos"></div>
     <div class="sentidos" id="sentidos">
@@ -1943,6 +2000,17 @@ async function autoTeste(aoAndar){
     return peças.length + " peças do método no prompt, sem virar botão";
   });
 
+  await t("Lógica", "Menu lateral cobre todas as seções", function(){
+    const secoes = ["conselho","projetos","imperio","malha","decisoes","acervo","ajustes"];
+    const semTitulo = secoes.filter(function(s){ return !TITULOS_SECAO[s]; });
+    exigir(!semTitulo.length, "sem título de topo: " + semTitulo.join(", "));
+    exigir(typeof irPara === "function", "irPara sumiu");
+    exigir(typeof irParaChat === "function", "irParaChat sumiu");
+    exigir(typeof renderListaConversas === "function", "renderListaConversas sumiu");
+    exigir(typeof todasConversas === "function", "todasConversas sumiu");
+    return secoes.length + " seções com título, navegação presente";
+  });
+
   /* ────────── FERRAMENTAS ────────── */
   await t("Ferramentas", "Todas executam sem quebrar", async function(){
     const args = {buscar_biblioteca:{termo:"teste"}, buscar_memoria:{termo:"teste"},
@@ -2152,7 +2220,7 @@ function receberCompartilhado(){
       $("#input").value = ($("#input").value + "\n\n" + corpo).trim();
       $("#send").disabled = false;
       cx.remove();
-      document.querySelector('[data-tab="conselho"]').click();
+      irParaChat();
       return;
     }
     const t = ($("#tituloComp").value || "").trim() || corpo.slice(0, 50);
@@ -2422,7 +2490,7 @@ function abrirConversa(pid, cid){
   projAtivo = pid; convAtiva = cid;
   hist = conv() ? conv().hist : [];
   sProjetos(); renderTudo();
-  document.querySelector('[data-tab="conselho"]').click();
+  irParaChat();
 }
 
 const EXT_TEXTO = ["txt","md","csv","tsv","json","py","js","html","xml","log","yml","yaml","sql","css"];
@@ -3774,6 +3842,8 @@ function renderProjetos(){
       (ativo ? '<button class="primary" data-novaconv="1">Nova conversa</button>'
              : '<button class="ghost" data-ativar="' + esc(p.id) + '">Ativar</button>') +
       '<button class="ghost" data-visao="' + esc(p.id) + '">Visão</button>' +
+      '<button class="ghost" data-fixarproj="' + esc(p.id) + '">' +
+      (p.fixado ? "Desfixar" : "Fixar") + '</button>' +
       (p.id !== "geral" ? '<button class="ghost" data-rmproj="' + esc(p.id) + '">Excluir</button>' : "") +
       '</div>' +
       '<div class="lbl">Conversas' + (termo ? " — filtrando" : "") + '</div>' + convs +
@@ -4563,7 +4633,8 @@ function renderSub(){
   const p = proj(), c = conv();
   const ondeEstou = (p && p.id !== "geral" ? p.nome : "") +
     (c ? (p && p.id !== "geral" ? " · " : "") + c.titulo : "");
-  $("#sub").textContent = (ondeEstou ? ondeEstou + " · " : "") +
+  const chatSub = $("#chatSub");
+  if(chatSub) chatSub.textContent = (ondeEstou ? ondeEstou + " · " : "") +
     mem().length + " blocos" +
     (biblio.length ? " · " + biblio.length + " na biblioteca" : "") +
     " · motor: " + nome + (navigator.onLine ? "" : " · offline") +
@@ -4576,6 +4647,8 @@ function renderSub(){
 function renderTudo(){
   renderFeed(); renderProjetos(); renderAnexos(); renderImperio();
   renderAcervo(); renderModulos(); renderMotorCfg(); renderSub();
+  renderMenuFixados();
+  if($("#pane-conselho-lista").classList.contains("on")) renderListaConversas();
 }
 
 /* ═══ AÇÕES ═══ */
@@ -4614,7 +4687,7 @@ async function perguntar(){
   if(!q) return;
   if(!cfg.chave && !temLocal()){
     alert("Configure o motor em Ajustes.");
-    document.querySelector('[data-tab="ajustes"]').click();
+    irPara("ajustes");
     return;
   }
   if(!conv()) novaConversa(q.slice(0, 42));
@@ -4856,15 +4929,159 @@ function rodarModulo(id){
 }
 
 /* ═══ EVENTOS ═══ */
-Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
-  t.addEventListener("click", function(){
-    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(x){ x.classList.remove("on"); });
-    Array.prototype.forEach.call(document.querySelectorAll(".pane"), function(x){ x.classList.remove("on"); });
-    t.classList.add("on"); $("#pane-" + t.dataset.tab).classList.add("on");
-    if(t.dataset.tab === "ajustes"){ medirEspaco(); preencherCusto(); preencherVisual(); renderMotores(); }
-  if(t.dataset.tab === "decisoes") renderDecisoes();
-  if(t.dataset.tab === "malha") renderMalhaPane();
+/* ═══ NAVEGAÇÃO — menu lateral no lugar da faixa de abas ═══ */
+
+const TITULOS_SECAO = {conselho:"Conversas", projetos:"Projetos", imperio:"Império",
+  malha:"Malha", decisoes:"Decisões", acervo:"Acervo", ajustes:"Ajustes"};
+
+function fecharMenu(){
+  $("#menuLateral").classList.remove("aberto");
+  $("#veuMenu").classList.remove("on");
+}
+function abrirMenuLateral(){
+  $("#menuLateral").classList.add("aberto");
+  $("#veuMenu").classList.add("on");
+}
+
+/* Vai para uma seção do menu. "conselho" leva pra LISTA de conversas —
+   igual o Claude, tocar em "Conversas" não abre direto um chat específico. */
+function irPara(secao){
+  fecharMenu();
+  Array.prototype.forEach.call(document.querySelectorAll(".mitem"), function(x){ x.classList.remove("on"); });
+  Array.prototype.forEach.call(document.querySelectorAll(".pane"), function(x){ x.classList.remove("on"); });
+  const item = document.querySelector('[data-ir="' + secao + '"]');
+  if(item) item.classList.add("on");
+  $("#topoTitulo").textContent = TITULOS_SECAO[secao] || secao;
+
+  if(secao === "conselho"){
+    $("#pane-conselho-lista").classList.add("on");
+    renderListaConversas();
+  }else{
+    const p = $("#pane-" + secao);
+    if(p) p.classList.add("on");
+  }
+  if(secao === "ajustes"){ medirEspaco(); preencherCusto(); preencherVisual(); renderMotores(); }
+  if(secao === "decisoes") renderDecisoes();
+  if(secao === "malha") renderMalhaPane();
+  if(secao === "projetos") renderProjetos();
+}
+
+/* Pula direto pro chat, sem passar pela lista — usado ao abrir uma conversa
+   específica, ou quando uma sugestão vai virar pergunta na hora. */
+function irParaChat(){
+  fecharMenu();
+  Array.prototype.forEach.call(document.querySelectorAll(".mitem"), function(x){ x.classList.remove("on"); });
+  Array.prototype.forEach.call(document.querySelectorAll(".pane"), function(x){ x.classList.remove("on"); });
+  const item = document.querySelector('[data-ir="conselho"]');
+  if(item) item.classList.add("on");
+  $("#topoTitulo").textContent = "Conversa";
+  $("#pane-conselho").classList.add("on");
+}
+
+/* Todas as conversas, de todos os projetos, achatadas numa lista só —
+   é a peça que faltava: hoje elas viviam escondidas dentro de Projetos. */
+function todasConversas(){
+  const fora = [];
+  projetos.forEach(function(p){
+    p.conversas.forEach(function(c){
+      fora.push({pid:p.id, pnome:p.nome, cid:c.id, titulo:c.titulo,
+                criada:c.criada, n:c.hist.length, fixada:!!c.fixada});
+    });
   });
+  return fora;
+}
+
+function renderListaConversas(){
+  const termo = ($("#buscaGlobal").value || "").trim().toLowerCase();
+  let lista = todasConversas();
+  if(termo) lista = lista.filter(function(c){ return c.titulo.toLowerCase().indexOf(termo) >= 0; });
+  lista.sort(function(a, b){
+    if(!!b.fixada - !!a.fixada) return (b.fixada?1:0) - (a.fixada?1:0);
+    return b.criada - a.criada;
+  });
+
+  $("#listaConversas").innerHTML = lista.length ? lista.map(function(c){
+    const d = new Date(c.criada);
+    const agora = Date.now(), min = Math.round((agora - c.criada) / 60000);
+    const quando = min < 60 ? "Há " + Math.max(1,min) + " min"
+                 : min < 1440 ? "Há " + Math.round(min/60) + "h"
+                 : d.getDate() + "/" + (d.getMonth()+1);
+    return '<div class="convglobal" data-abrirglobal="' + esc(c.pid) + '|' + esc(c.cid) + '">' +
+      '<div class="cg-topo"><span class="cg-titulo">' +
+      (c.fixada ? '<span class="fix">📌</span> ' : "") + esc(c.titulo) + '</span>' +
+      '<button class="mini" data-fixarglobal="' + esc(c.pid) + '|' + esc(c.cid) + '">' +
+      (c.fixada ? "desfixar" : "fixar") + '</button></div>' +
+      '<div class="cg-sub">' + quando + ' · ' + esc(c.pnome) +
+      ' · ' + c.n + ' mensagens</div></div>';
+  }).join("") : '<div class="empty"><h2>' +
+    (termo ? "Nada encontrado." : "Nenhuma conversa ainda.") + '</h2>' +
+    (termo ? "" : "<p>Toque em + Nova conversa no menu para começar.</p>") + '</div>';
+}
+
+/* Projeto fixado é conceito novo — separado de "ativo". Um projeto pode
+   estar fixado no menu sem ser o que você está usando agora. */
+function toggleFixarProjeto(pid){
+  const p = projetos.filter(function(x){ return x.id === pid; })[0];
+  if(p){ p.fixado = !p.fixado; sProjetos(); renderMenuFixados(); }
+}
+
+function renderMenuFixados(){
+  const projFix = projetos.filter(function(p){ return p.fixado; });
+  const convFix = todasConversas().filter(function(c){ return c.fixada; });
+  const el = $("#menuFixados");
+  if(!projFix.length && !convFix.length){
+    el.innerHTML = '<p class="note" style="margin:0;font-size:12px;padding:0 16px">' +
+      'Nada fixado ainda.</p>';
+    return;
+  }
+  el.innerHTML =
+    projFix.map(function(p){
+      return '<button class="mitem mfix" data-abrirprojfix="' + esc(p.id) + '">' +
+        '<span class="mic">🗂</span>' + esc(p.nome) + '</button>';
+    }).join("") +
+    convFix.map(function(c){
+      return '<button class="mitem mfix" data-abrirglobal="' + esc(c.pid) + '|' + esc(c.cid) + '">' +
+        '<span class="mic">💬</span>' + esc(c.titulo) + '</button>';
+    }).join("");
+}
+
+Array.prototype.forEach.call(document.querySelectorAll(".mitem"), function(t){
+  t.addEventListener("click", function(){ if(t.dataset.ir) irPara(t.dataset.ir); });
+});
+$("#abrirMenu").addEventListener("click", abrirMenuLateral);
+$("#veuMenu").addEventListener("click", fecharMenu);
+$("#novaDoMenu").addEventListener("click", function(){
+  novaConversa(); irParaChat();
+});
+$("#buscaGlobal").addEventListener("input", function(){
+  const cursor = this.selectionStart;
+  renderListaConversas();
+  const campo = $("#buscaGlobal");
+  campo.focus(); campo.setSelectionRange(cursor, cursor);
+});
+$("#listaConversas").addEventListener("click", function(e){
+  const ag = e.target.dataset.abrirglobal, fg = e.target.dataset.fixarglobal;
+  if(fg){
+    const [pid, cid] = fg.split("|");
+    const p = projetos.filter(function(x){ return x.id === pid; })[0];
+    const c = p && p.conversas.filter(function(x){ return x.id === cid; })[0];
+    if(c){ c.fixada = !c.fixada; sProjetos(); renderListaConversas(); }
+    return;
+  }
+  const alvo = ag || (e.target.closest(".convglobal") &&
+    e.target.closest(".convglobal").dataset.abrirglobal);
+  if(alvo){ const [pid, cid] = alvo.split("|"); abrirConversa(pid, cid); }
+});
+$("#menuFixados").addEventListener("click", function(e){
+  const t = e.target.closest("[data-abrirglobal],[data-abrirprojfix]");
+  if(!t) return;
+  if(t.dataset.abrirglobal){
+    const [pid, cid] = t.dataset.abrirglobal.split("|");
+    abrirConversa(pid, cid);
+  }else if(t.dataset.abrirprojfix){
+    projAtivo = t.dataset.abrirprojfix; sProjetos();
+    irPara("projetos"); renderProjetos();
+  }
 });
 
 Array.prototype.forEach.call(document.querySelectorAll(".esp"), function(b){
@@ -5001,7 +5218,7 @@ $("#trocaMotor").addEventListener("click", function(){
   const lista = motoresSalvos();
   if(!lista.length){
     if(confirm("Nenhum motor cadastrado ainda. Ir para Ajustes?"))
-      document.querySelector('[data-tab="ajustes"]').click();
+      irPara("ajustes");
     return;
   }
   const nomes = lista.map(function(m, i){ return (i+1) + ") " + m.nome; }).join("\n");
@@ -5358,7 +5575,7 @@ $("#lista").addEventListener("click", function(e){
     $("#input").value = "Melhore esta ferramenta: " + o_que.trim() +
       "\n\nVersão atual (" + f.nome + "):\n" + f.html.slice(0, 4000);
     $("#send").disabled = false;
-    document.querySelector('[data-tab="conselho"]').click();
+    irParaChat();
     return;
   }
   if(e.target.id === "addBloco"){
@@ -5391,7 +5608,12 @@ $("#projetos").addEventListener("click", function(e){
     const [pid, cid] = t.dataset.fixar.split("|");
     const p = projetos.filter(function(x){ return x.id === pid; })[0];
     const c = p && p.conversas.filter(function(x){ return x.id === cid; })[0];
-    if(c){ c.fixada = !c.fixada; sProjetos(); renderProjetos(); }
+    if(c){ c.fixada = !c.fixada; sProjetos(); renderProjetos(); renderMenuFixados(); }
+    return;
+  }
+  if(t.dataset.fixarproj){
+    const p = projetos.filter(function(x){ return x.id === t.dataset.fixarproj; })[0];
+    if(p){ p.fixado = !p.fixado; sProjetos(); renderProjetos(); renderMenuFixados(); }
     return;
   }
   if(t.dataset.ativar){
