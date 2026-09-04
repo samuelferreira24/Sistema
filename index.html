@@ -11,12 +11,19 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
+  /* ═══ TEMA ESCURO — preto e dourado ═══ */
   :root{
-    --bg:#131A24; --surface:#1B2430; --surface2:#243040; --line:#2E3A4B;
-    --text:#E8E3D9; --muted:#8A94A3; --brass:#B08D57; --amber:#C77B3E; --sage:#7A9471;
-    --azul:#5B8CA8; --acento:var(--brass);
+    --bg:#0B0B0D; --surface:#141416; --surface2:#1D1D20; --line:#2A2A2E;
+    --text:#F0EDE6; --muted:#8E8B85; --brass:#C9A227; --amber:#C77B3E; --sage:#7A9471;
+    --azul:#5B8CA8; --acento:var(--brass); --sobreAcento:#0B0B0D;
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  }
+  /* ═══ TEMA CLARO — branco e dourado ═══ */
+  body.claro{
+    --bg:#FAF8F4; --surface:#FFFFFF; --surface2:#F2EFE9; --line:#E2DDD3;
+    --text:#1A1A1C; --muted:#6E6A63; --brass:#A8842B; --acento:var(--brass);
+    --sobreAcento:#FFFFFF;
   }
   body.operacao{--acento:var(--azul)}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -53,7 +60,8 @@
         transform:translateX(-100%);transition:transform .2s ease;
         z-index:41;display:flex;flex-direction:column;padding:20px 0 14px}
   .menu.aberto{transform:translateX(0)}
-  .menu-topo{padding:0 20px 18px}
+  .menu-topo{padding:0 20px 18px;display:flex;align-items:center;gap:13px}
+  #logoSA{width:38px;height:41px;flex-shrink:0}
   .menu-topo h1{font-family:Georgia,"Times New Roman",serif;font-size:22px;
     font-weight:600;line-height:1.15;margin:0}
   .mitem{display:flex;align-items:center;gap:12px;background:none;border:0;
@@ -105,7 +113,7 @@
   .voltar{font-size:22px}
   .menu-linha-fundo{display:flex;align-items:center;gap:10px}
   .avatar{width:40px;height:40px;border-radius:50%;background:var(--acento);
-    color:#131A24;font:700 13px var(--sans);border:0;flex-shrink:0;
+    color:var(--sobreAcento);font:700 13px var(--sans);border:0;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;letter-spacing:.5px}
 
   /* ═══ BARRA DE COMPOSIÇÃO — quatro ações, uma linha ═══ */
@@ -121,7 +129,7 @@
   .cbtn:active{border-color:var(--acento);color:var(--acento)}
   .cmotor{width:auto;border-radius:19px;padding:0 13px;gap:7px;font-size:12.5px;
     max-width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-  .cenviar{background:var(--acento);border-color:var(--acento);color:#131A24;font-weight:700}
+  .cenviar{background:var(--acento);border-color:var(--acento);color:var(--sobreAcento);font-weight:700}
   .cenviar:disabled{background:none;border-color:var(--line);color:var(--muted);font-weight:400}
   .cenviar.parando{background:var(--amber);border-color:var(--amber);color:#fff}
 
@@ -174,7 +182,9 @@
 
   .pane{flex:1;min-height:0;display:none;flex-direction:column}
   .pane.on{display:flex}
-  .body{padding:16px}
+  /* O que rola precisa esticar dentro do pane. Sem isto a altura vira zero:
+     o chat cola no topo e as outras telas abrem em branco. */
+  .body{padding:16px;flex:1;min-height:0}
 
   .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
        padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap;display:inline-block}
@@ -222,7 +232,7 @@
     color:var(--text);padding:9px 11px;font-size:13.5px;margin-bottom:8px;line-height:1.5}
   textarea.field{resize:vertical}
   select.field{appearance:none}
-  .primary{background:var(--acento);border:none;color:var(--bg);padding:9px 16px;border-radius:6px;
+  .primary{background:var(--acento);border:none;color:var(--sobreAcento);padding:9px 16px;border-radius:6px;
     font-size:13px;font-weight:600}
   .ghost{background:none;border:1px solid var(--line);color:var(--muted);padding:9px 14px;
     border-radius:6px;font-size:13px}
@@ -434,6 +444,7 @@
     <span class="topo-titulo" id="topoTitulo">Conversa</span>
     <button class="hamb" id="btnNovaTopo" aria-label="Nova conversa" style="display:none">✎</button>
     <button class="hamb" id="btnAcoes" aria-label="Ações" style="display:none">⋮</button>
+    <button class="hamb" id="btnTema" aria-label="Tema" title="Claro ou escuro">◐</button>
     <span class="tag t-acento" id="selo">Núcleo</span>
   </div>
 
@@ -441,6 +452,18 @@
   <div class="veu" id="veuMenu"></div>
   <nav class="menu" id="menuLateral">
     <div class="menu-topo">
+      <svg id="logoSA" viewBox="0 0 100 108" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ouro" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#E8CE8F"/><stop offset="45%" stop-color="#C9A227"/>
+    <stop offset="100%" stop-color="#8C6D1F"/></linearGradient></defs>
+  <g stroke="url(#ouro)" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M50 4 L94 29 L94 79 L50 104 L6 79 L6 29 Z"/>
+    <path d="M50 26 L72 39 L50 52 L28 39 Z"/>
+    <path d="M6 29 L28 39 L28 66"/>
+    <path d="M94 29 L72 39 L72 66"/>
+    <path d="M50 52 L50 82 L38 70 M50 82 L62 70"/>
+  </g>
+</svg>
       <h1>Sistema<br>Absoluto</h1>
     </div>
     <button class="mitem" data-ir="conselho">
@@ -5256,6 +5279,19 @@ Array.prototype.forEach.call(document.querySelectorAll(".mitem"), function(t){
 });
 $("#abrirMenu").addEventListener("click", abrirMenuLateral);
 $("#veuMenu").addEventListener("click", fecharMenu);
+/* ═══ TEMA CLARO / ESCURO ═══ */
+function aplicarTema(claro){
+  document.body.classList.toggle("claro", claro);
+  const btn = $("#btnTema");
+  if(btn) btn.textContent = claro ? "◑" : "◐";
+  /* A barra do sistema acompanha, senão fica um bloco destoante no topo */
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", claro ? "#FAF8F4" : "#0B0B0D");
+  guardar("sa:tema", claro ? "claro" : "escuro");
+}
+$("#btnTema").addEventListener("click", function(){
+  aplicarTema(!document.body.classList.contains("claro"));
+});
 $("#btnConfig").addEventListener("click", function(){ irPara("ajustes"); });
 $("#novaDoMenu").addEventListener("click", function(){
   novaConversa(); irParaChat();
@@ -6506,6 +6542,7 @@ window.addEventListener("offline", renderSub);
     console.log("IndexedDB indisponível, usando armazenamento simples");
   }
   await load();
+  try{ aplicarTema((await ler("sa:tema")) === "claro"); }catch(e){}
   aplicarVisual();
   renderTudo();
   atualizarRodape();
