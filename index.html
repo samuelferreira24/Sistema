@@ -74,6 +74,99 @@
   .cg-titulo{font-size:14.5px;font-weight:500}
   .cg-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
 
+  /* ── Tela do projeto ── */
+  #telaProjeto{padding:16px 14px}
+  .tp-titulo{font-family:Georgia,"Times New Roman",serif;font-size:24px;
+    font-weight:600;margin:0 0 4px;line-height:1.2}
+  .tp-meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 0 20px}
+  .tp-bloco{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+  .tp-cab{display:flex;justify-content:space-between;align-items:center;
+    font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--muted);margin-bottom:9px}
+  .tp-corpo{font-size:13.5px;line-height:1.6;margin:0;color:var(--text)}
+  .tp-sub{font-size:12px;color:var(--muted);margin:6px 0 0}
+  .barra-cap{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+  .barra-fill{height:100%;background:var(--acento);border-radius:3px;min-width:2px}
+
+  /* ── Folha de ações — sobe de baixo, igual o menu dos três pontinhos ── */
+  .folha{position:fixed;left:0;right:0;bottom:0;background:var(--surface);
+    border-top:1px solid var(--line);border-radius:16px 16px 0 0;
+    transform:translateY(100%);transition:transform .22s ease;
+    z-index:42;padding:8px 0 22px;max-width:760px;margin:0 auto}
+  .folha.aberta{transform:translateY(0)}
+  .folha-cab{font-size:12px;color:var(--muted);padding:10px 20px 12px;
+    border-bottom:1px solid var(--line);margin-bottom:6px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .facao{display:flex;align-items:center;gap:14px;width:100%;background:none;
+    border:0;color:var(--text);font-size:15px;padding:13px 20px;text-align:left}
+  .facao:active{background:var(--surface2)}
+  .facao.perigo{color:var(--vermelho,#C0524A)}
+  .fic{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+  .voltar{font-size:22px}
+  .menu-linha-fundo{display:flex;align-items:center;gap:10px}
+  .avatar{width:40px;height:40px;border-radius:50%;background:var(--acento);
+    color:#131A24;font:700 13px var(--sans);border:0;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;letter-spacing:.5px}
+
+  /* ═══ BARRA DE COMPOSIÇÃO — quatro ações, uma linha ═══ */
+  .composer{border-top:1px solid var(--line);padding:10px 12px 12px;flex-shrink:0}
+  .composer textarea{width:100%;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;color:var(--text);font:15px/1.5 var(--sans);padding:12px 14px;
+    resize:none;max-height:140px;margin-bottom:9px}
+  .composer textarea:focus{outline:none;border-color:var(--acento)}
+  .barra-acoes{display:flex;align-items:center;gap:8px}
+  .cbtn{background:none;border:1px solid var(--line);color:var(--muted);
+    width:38px;height:38px;border-radius:50%;font-size:17px;line-height:1;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0}
+  .cbtn:active{border-color:var(--acento);color:var(--acento)}
+  .cmotor{width:auto;border-radius:19px;padding:0 13px;gap:7px;font-size:12.5px;
+    max-width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .cenviar{background:var(--acento);border-color:var(--acento);color:#131A24;font-weight:700}
+  .cenviar:disabled{background:none;border-color:var(--line);color:var(--muted);font-weight:400}
+  .cenviar.parando{background:var(--amber);border-color:var(--amber);color:#fff}
+
+  /* ═══ FOLHAS — mesmo desenho em todas ═══ */
+  .folha-topo{display:flex;align-items:center;justify-content:space-between;
+    padding:6px 18px 14px}
+  .folha-tit{font-size:15.5px;font-weight:600}
+  .fx{background:none;border:0;color:var(--text);font-size:17px;width:24px;padding:0}
+  .cards3{display:flex;gap:9px;padding:0 16px 14px}
+  .card3{flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:12px;
+    padding:16px 6px 12px;color:var(--text);font-size:12.5px;
+    display:flex;flex-direction:column;align-items:center;gap:9px}
+  .card3:active{border-color:var(--acento)}
+  .c3ic{width:40px;height:40px;border-radius:50%;background:var(--surface);
+    display:flex;align-items:center;justify-content:center;font-size:17px}
+  .grupo{margin:0 16px 12px;background:var(--surface2);border:1px solid var(--line);
+    border-radius:12px;overflow:hidden}
+  .linha{display:flex;align-items:center;gap:13px;width:100%;background:none;border:0;
+    color:var(--text);font-size:14.5px;padding:13px 15px;text-align:left;
+    border-bottom:1px solid var(--line)}
+  .grupo .linha:last-child{border-bottom:0}
+  button.linha:active{background:var(--surface)}
+  .lic{width:34px;height:34px;border-radius:50%;background:var(--surface);
+    display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .ltxt{flex:1;display:flex;flex-direction:column;gap:2px}
+  .ltxt small{font-size:11.5px;color:var(--muted);font-weight:400}
+  .lseta{color:var(--muted);font-size:17px}
+  .chave{width:44px;height:25px;border-radius:13px;background:var(--line);
+    position:relative;flex-shrink:0;transition:background .16s}
+  .chave::after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;
+    border-radius:50%;background:var(--muted);transition:transform .16s,background .16s}
+  .chave.on{background:var(--acento)}
+  .chave.on::after{transform:translateX(19px);background:#fff}
+
+  /* Motor escolhido dentro da folha */
+  .lmotor{display:flex;align-items:center;gap:13px;width:100%;background:none;border:0;
+    color:var(--text);font-size:14.5px;padding:13px 15px;text-align:left;
+    border-bottom:1px solid var(--line)}
+  .lmotor:last-child{border-bottom:0}
+  .lmotor:active{background:var(--surface)}
+  .lmotor .lm-nome{flex:1;display:flex;flex-direction:column;gap:2px}
+  .lmotor .lm-nome small{font-size:11.5px;color:var(--muted)}
+  .lmotor.ativo .lm-nome{color:var(--acento)}
+  .lm-check{color:var(--acento);font-size:15px}
+
   .espacos{display:flex;gap:6px}
   .esp{flex:1;background:none;border:1px solid var(--line);color:var(--muted);
        padding:6px 0;border-radius:6px;font-size:11.5px;font-weight:500}
@@ -117,9 +210,6 @@
   .used{margin-top:11px;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.5}
   .ferramenta{font-family:var(--mono);font-size:10.5px;color:var(--sage);padding:0 0 8px}
 
-  .composer{border-top:1px solid var(--line);padding:12px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
-  .composer textarea{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;
-    color:var(--text);padding:10px 12px;font-size:14px;line-height:1.5;resize:none;max-height:120px}
   .send{background:var(--acento);border:none;color:var(--bg);padding:12px 16px;border-radius:8px;
     font-size:13px;font-weight:600}
   .send:disabled{background:var(--surface);color:var(--muted)}
@@ -340,7 +430,10 @@
   <!-- ═══ BARRA FINA — hambúrguer abre o menu, igual o Claude ═══ -->
   <div class="topo">
     <button class="hamb" id="abrirMenu" aria-label="Menu">☰</button>
+    <button class="hamb voltar" id="btnVoltar" aria-label="Voltar" style="display:none">←</button>
     <span class="topo-titulo" id="topoTitulo">Conversa</span>
+    <button class="hamb" id="btnNovaTopo" aria-label="Nova conversa" style="display:none">✎</button>
+    <button class="hamb" id="btnAcoes" aria-label="Ações" style="display:none">⋮</button>
     <span class="tag t-acento" id="selo">Núcleo</span>
   </div>
 
@@ -358,7 +451,6 @@
     <button class="mitem" data-ir="malha"><span class="mic">🕸</span> Malha</button>
     <button class="mitem" data-ir="decisoes"><span class="mic">⚖</span> Decisões</button>
     <button class="mitem" data-ir="acervo"><span class="mic">📚</span> Acervo</button>
-    <button class="mitem" data-ir="ajustes"><span class="mic">⚙</span> Ajustes</button>
 
     <div class="menu-linha"></div>
     <div class="menu-fix-cab">Fixados</div>
@@ -369,7 +461,10 @@
         <button class="esp on" data-esp="nucleo">Núcleo · CPF</button>
         <button class="esp" data-esp="operacao">Operação · CNPJ</button>
       </div>
-      <button class="primary" id="novaDoMenu">+ Nova conversa</button>
+      <div class="menu-linha-fundo">
+        <button class="avatar" id="btnConfig" title="Configurações">SA</button>
+        <button class="primary" id="novaDoMenu" style="flex:1">+ Nova conversa</button>
+      </div>
     </div>
   </nav>
 
@@ -385,30 +480,23 @@
     <p class="chatsub" id="chatSub"></p>
     <div class="scroll body" id="feed"></div>
     <div class="chips-arq" id="anexos"></div>
-    <div class="sentidos" id="sentidos">
-      <button class="sent" data-sent="camera" title="Foto">📷<span>Foto</span></button>
-      <button class="sent" data-sent="galeria" title="Galeria">🖼<span>Galeria</span></button>
-      <button class="sent" data-sent="ditar" title="Ditar">🎙<span>Ditar</span></button>
-      <button class="sent" data-sent="gravar" title="Gravar áudio">⏺<span>Gravar</span></button>
-      <button class="sent" data-sent="falar" title="Ler em voz alta">🔊<span>Falar</span></button>
-      <button class="sent" data-sent="scanner" title="Ler código">▦<span>Scanner</span></button>
-      <button class="sent" data-sent="local" title="Onde estou">📍<span>Local</span></button>
-      <button class="sent" data-sent="web" title="Pesquisar na internet">🔎<span>Web</span></button>
-    </div>
     <div class="composer">
-      <button class="anexo" id="btnAnexo" title="Anexar arquivo">+</button>
       <input type="file" id="arqInput" multiple style="display:none"
              accept=".txt,.md,.csv,.json,.py,.js,.html,.xml,.log,.tsv,.yml,.yaml,.sql,image/*">
-      <textarea id="input" rows="2" placeholder="Fala."></textarea>
-      <button class="send" id="send" disabled>Enviar</button>
-      <button class="send parar" id="parar" style="display:none">Parar</button>
+      <textarea id="input" rows="1" placeholder="Fala."></textarea>
+      <div class="barra-acoes">
+        <button class="cbtn" id="btnMais" title="Adicionar ao chat">+</button>
+        <button class="cbtn cmotor" id="trocaMotor" title="Trocar de motor">
+          <span class="pt"></span><span id="motorNome">motor</span>
+        </button>
+        <div style="flex:1"></div>
+        <button class="cbtn" id="btnVoz" title="Mensagem de voz">🎙</button>
+        <button class="cbtn cenviar" id="send" title="Enviar" disabled>↑</button>
+      </div>
     </div>
-    <div class="rodape-motor">
-      <button class="motor-atual" id="trocaMotor">
-        <span class="pt"></span><span id="motorNome">motor</span>
-      </button>
-      <button class="nova" id="novaConversaRapida" title="Nova conversa">+ nova</button>
-    </div>
+
+  <div class="pane" id="pane-projeto">
+    <div class="scroll body" id="telaProjeto"></div>
   </div>
 
   <div class="pane" id="pane-decisoes">
@@ -760,6 +848,60 @@ for nome, conteudo in arquivos.items():
     </div>
   </div>
 </div>
+
+<!-- ═══ AÇÕES DA CONVERSA — a folha que sobe pelos três pontinhos ═══ -->
+<div class="veu" id="veuAcoes"></div>
+<div class="folha" id="folhaAcoes">
+  <div class="folha-cab" id="folhaTitulo">Conversa</div>
+  <button class="facao" data-facao="renomear"><span class="fic">✎</span> Renomear</button>
+  <button class="facao" data-facao="fixar"><span class="fic">📌</span> <span id="txtFixar">Fixar</span></button>
+  <button class="facao" data-facao="mudar"><span class="fic">🗂</span> Mudar de projeto</button>
+  <button class="facao" data-facao="copiar"><span class="fic">⧉</span> Copiar conversa</button>
+  <button class="facao perigo" data-facao="apagar"><span class="fic">🗑</span> Apagar</button>
+</div>
+
+<!-- ═══ ADICIONAR AO CHAT ═══ -->
+<div class="veu" id="veuMais"></div>
+<div class="folha" id="folhaMais">
+  <div class="folha-topo">
+    <button class="fx" id="fecharMais">✕</button>
+    <span class="folha-tit">Adicionar ao chat</span>
+    <span style="width:24px"></span>
+  </div>
+  <div class="cards3">
+    <button class="card3" data-sent="camera"><span class="c3ic">📷</span>Câmera</button>
+    <button class="card3" data-sent="galeria"><span class="c3ic">🖼</span>Fotos</button>
+    <button class="card3" id="card3Arq"><span class="c3ic">📄</span>Arquivos</button>
+  </div>
+  <div class="grupo">
+    <button class="linha" data-sent="scanner"><span class="lic">▦</span>
+      <span class="ltxt">Ler código</span><span class="lseta">›</span></button>
+    <button class="linha" data-sent="local"><span class="lic">📍</span>
+      <span class="ltxt">Onde estou</span><span class="lseta">›</span></button>
+  </div>
+  <div class="grupo">
+    <div class="linha"><span class="lic">🔎</span>
+      <span class="ltxt">Busca na web<small>a IA pesquisa sozinha quando precisar</small></span>
+      <span class="chave" id="chaveWeb"></span></div>
+    <div class="linha"><span class="lic">🔊</span>
+      <span class="ltxt">Ler em voz alta<small>fala a resposta quando chega</small></span>
+      <span class="chave" id="chaveFalar"></span></div>
+  </div>
+</div>
+
+<!-- ═══ SELECIONAR MOTOR ═══ -->
+<div class="veu" id="veuMotor"></div>
+<div class="folha" id="folhaMotor">
+  <div class="folha-topo">
+    <button class="fx" id="fecharMotor">✕</button>
+    <span class="folha-tit">Selecionar motor</span>
+    <span style="width:24px"></span>
+  </div>
+  <div id="listaEscolhaMotor" class="grupo"></div>
+  <p class="note" style="padding:0 20px;margin:12px 0 0;font-size:12px">
+    Para cadastrar ou editar motores, vá em Ajustes.</p>
+</div>
+
 <iframe id="caixa-teste" sandbox="allow-scripts"></iframe>
 
 <script>
@@ -834,10 +976,6 @@ Nunca entregue caminho único quando existem vários — mostre o mapa com o cus
 real de cada um. Quem escolhe é Samuel; você não fecha decisão por ele.
 
 Discorde com fundamento quando discordar. Admita quando não souber.
-
-Se a pergunta pede fato atual — preço, lei, número, ferramenta, alguém no mercado —
-use pesquisar_web na hora, sozinho, sem pedir licença. Pode buscar várias vezes com
-termos diferentes para cruzar fonte.
 
 Use markdown quando ajudar: **negrito** para o que importa, tabela para comparar,
 lista quando for lista de verdade, \`\`\` para código.
@@ -1227,6 +1365,9 @@ async function espaco_usado(){
    paradas. Cada uma degrada sozinha se o aparelho não tiver. */
 
 let falarLigado = false, reconhecendo = null, gravador = null, pedacos = [];
+/* Deixa a IA pesquisar sozinha. Ligado por padrão — desligue para respostas
+   só com a memória própria, sem consultar a internet. */
+let webLigado = true;
 
 function temSentido(n){
   if(n === "camera" || n === "galeria") return true;
@@ -3245,7 +3386,17 @@ function promptBase(blocos){
         a.conteudo.slice(0, limite)).join("\n\n") + "\nARQUIVOS>>>";
   }
 
-  const ferr = Object.keys(FERRAMENTAS).map(n => "- " + n + ": " + FERRAMENTAS[n].desc).join("\n");
+  /* A chave de busca não é enfeite: desligada, a ferramenta some do prompt
+     e a IA responde só com a memória própria. */
+  const ferr = Object.keys(FERRAMENTAS)
+    .filter(n => webLigado || n !== "pesquisar_web")
+    .map(n => "- " + n + ": " + FERRAMENTAS[n].desc).join("\n");
+  const instrBusca = webLigado
+    ? "\n\nSe a pergunta pede fato atual — preço, lei, número, ferramenta, alguém no " +
+      "mercado — use pesquisar_web na hora, sozinho, sem pedir licença. Pode buscar " +
+      "várias vezes com termos diferentes para cruzar fonte."
+    : "\n\nA busca na internet está desligada. Responda com a memória própria e diga " +
+      "quando algo precisaria de conferência externa.";
 
   /* Versão curta das regras: mesmo conteúdo, sem a explicação longa. */
   const regras = enxuto
@@ -3267,7 +3418,7 @@ function promptBase(blocos){
     (enxuto ? "" : "\n\nFERRAMENTAS — você pode executar, não só responder:\n" + ferr +
       "\n\nPra usar uma ferramenta, responda SÓ com:\n{\"ferramenta\":\"nome\",\"args\":{}}\n" +
       "O resultado volta pra você e aí você continua. Pode usar várias vezes seguidas, inclusive a mesma ferramenta com termos diferentes, pra cruzar fonte e cavar mais fundo. Máximo 6 usos.") +
-    "\n\n" + regras + "\n\n" + CABECA;
+    "\n\n" + regras + "\n\n" + CABECA + instrBusca;
 }
 
 /* ═══ MOTOR ═══ */
@@ -3795,70 +3946,22 @@ async function copiarContexto(){
 }
 
 function renderProjetos(){
-  const termo = ($("#buscaConv") ? $("#buscaConv").value : "").trim().toLowerCase();
-
+  /* Lista enxuta. O conteúdo do projeto agora vive na tela dele, não aqui —
+     era isso que deixava a tela pesada e escondia as conversas. */
   const html = projetos.map(function(p){
     const ativo = p.id === projAtivo;
-    let lista = p.conversas.slice().reverse();
-    if(termo) lista = lista.filter(function(c){
-      return c.titulo.toLowerCase().indexOf(termo) >= 0 ||
-        c.hist.some(function(h){ return (h.pergunta||"").toLowerCase().indexOf(termo) >= 0; });
-    });
-    /* Fixadas primeiro, sem embaralhar a ordem entre elas */
-    lista.sort(function(a, b){ return (b.fixada ? 1 : 0) - (a.fixada ? 1 : 0); });
-
-    const convs = lista.length
-      ? lista.map(function(c){
-          const on = ativo && c.id === convAtiva;
-          const d = new Date(c.criada);
-          return '<div class="conv' + (on ? " on" : "") + '">' +
-            (c.fixada ? '<span class="fix">📌</span>' : "") +
-            '<button class="cnome" data-abrir="' + esc(p.id) + '|' + esc(c.id) + '">' +
-            esc(c.titulo) + ' <span style="color:var(--muted);font-size:11px">(' +
-            c.hist.length + ')</span></button>' +
-            '<span class="cdata">' + d.getDate() + "/" + (d.getMonth()+1) + '</span>' +
-            '<button class="mini" data-fixar="' + esc(p.id) + '|' + esc(c.id) + '">' +
-            (c.fixada ? "desfixar" : "fixar") + '</button>' +
-            '<button class="rm" data-rmconv="' + esc(p.id) + '|' + esc(c.id) + '">×</button></div>';
-        }).join("")
-      : '<p class="note" style="margin:0;font-size:12.5px">' +
-        (termo ? "Nada encontrado para \"" + esc(termo) + "\"." : "Nenhuma conversa ainda.") + '</p>';
-
-    const arqs = p.arquivos.length
-      ? p.arquivos.map(function(a){
-          return '<div class="arq"><span class="aicone">' + esc(a.ext) + '</span>' +
-            '<div style="flex:1"><div class="anome">' + esc(a.nome) + '</div>' +
-            '<div class="atam">' + esc(a.resumo) + '</div></div>' +
-            '<button class="rm" data-rmarq="' + esc(a.id) + '">×</button></div>';
-        }).join("")
-      : '<p class="note" style="margin:0;font-size:12.5px">Nenhum arquivo.</p>';
-
-    return '<div class="proj' + (ativo ? " on" : "") + '">' +
-      '<p class="pnome2">' + esc(p.nome) +
-      (ativo ? '<span class="tag t-acento">ativo</span>' : "") + '</p>' +
-      '<p class="pvisao">' + esc(p.visao || "Sem visão definida.") + '</p>' +
-      '<div class="pmeta">' + p.conversas.length + " conversas · " + p.arquivos.length + " arquivos</div>" +
-      '<div class="row" style="margin-bottom:10px">' +
-      (ativo ? '<button class="primary" data-novaconv="1">Nova conversa</button>'
-             : '<button class="ghost" data-ativar="' + esc(p.id) + '">Ativar</button>') +
-      '<button class="ghost" data-visao="' + esc(p.id) + '">Visão</button>' +
-      '<button class="ghost" data-fixarproj="' + esc(p.id) + '">' +
-      (p.fixado ? "Desfixar" : "Fixar") + '</button>' +
-      (p.id !== "geral" ? '<button class="ghost" data-rmproj="' + esc(p.id) + '">Excluir</button>' : "") +
-      '</div>' +
-      '<div class="lbl">Conversas' + (termo ? " — filtrando" : "") + '</div>' + convs +
-      '<div class="lbl" style="margin-top:12px">Arquivos</div>' + arqs +
-      '</div>';
+    const d = new Date(p.criado || Date.now());
+    return '<div class="convglobal" data-abrirproj="' + esc(p.id) + '">' +
+      '<div class="cg-topo"><span class="cg-titulo">' +
+      (p.fixado ? '<span class="fix">📌</span> ' : "") + esc(p.nome) +
+      (ativo ? ' <span class="tag t-acento">ativo</span>' : "") + '</span></div>' +
+      '<div class="cg-sub">' + p.conversas.length + " conversas · " +
+      p.arquivos.length + " arquivos</div></div>";
   }).join("");
 
   $("#projetos").innerHTML =
-    '<p class="note">Cada projeto guarda sua própria visão, suas conversas e seus arquivos. ' +
-    'A visão do projeto ativo entra em toda resposta — é o recorte que a IA usa.</p>' +
-    '<input class="field" id="buscaConv" placeholder="Buscar em todas as conversas…" ' +
-    'value="' + esc(termo) + '" autocomplete="off">' +
-    '<button class="primary" id="novoProj" style="margin-bottom:16px">Novo projeto</button>' +
+    '<button class="primary" id="novoProj" style="margin-bottom:16px">+ Novo projeto</button>' +
     html;
-
 }
 
 function renderAnexos(){
@@ -4692,13 +4795,15 @@ async function perguntar(){
   }
   if(!conv()) novaConversa(q.slice(0, 42));
   $("#input").value = ""; $("#input").style.height = "auto";
-  $("#send").disabled = true;
-  $("#send").style.display = "none";
-  $("#parar").style.display = "";
+  $("#send").disabled = false;
+  $("#send").textContent = "■";
+  $("#send").classList.add("parando");
+  $("#send").title = "Parar";
 
   const blocos = recuperar(q);
   if(!navigator.onLine && !temLocal()){
-    $("#send").style.display = ""; $("#parar").style.display = "none";
+    $("#send").textContent = "↑"; $("#send").classList.remove("parando");
+    $("#send").disabled = !$("#input").value.trim();
     consultaOffline(q, blocos);
     return;
   }
@@ -4741,7 +4846,9 @@ async function perguntar(){
       $("#feed").appendChild(p);
     }
   }finally{
-    $("#send").style.display = ""; $("#parar").style.display = "none";
+    $("#send").textContent = "↑";
+    $("#send").classList.remove("parando");
+    $("#send").title = "Enviar";
     $("#send").disabled = !$("#input").value.trim();
   }
   renderFeed(); renderSub();
@@ -4929,10 +5036,108 @@ function rodarModulo(id){
 }
 
 /* ═══ EVENTOS ═══ */
+/* ═══ TELA DO PROJETO — lugar próprio, não um cartão na lista ═══ */
+
+let projVendo = null;
+
+function abrirProjeto(pid){
+  projVendo = pid;
+  fecharMenu();
+  Array.prototype.forEach.call(document.querySelectorAll(".pane"), function(x){ x.classList.remove("on"); });
+  $("#pane-projeto").classList.add("on");
+  renderTelaProjeto();
+  ajustarTopo("projeto");
+}
+
+function renderTelaProjeto(){
+  const p = projetos.filter(function(x){ return x.id === projVendo; })[0];
+  if(!p){ irPara("projetos"); return; }
+
+  /* A "visão" do projeto sempre foi a instrução personalizada dele —
+     só nunca teve um lugar decente pra ser lida e editada. */
+  const convs = p.conversas.slice().reverse();
+  const usado = p.arquivos.reduce(function(s, a){ return s + (a.texto || "").length; }, 0);
+  const teto = 400000;   /* limite prático por projeto */
+  const pct = Math.min(100, Math.round(usado / teto * 100));
+
+  $("#telaProjeto").innerHTML =
+    '<h2 class="tp-titulo">' + esc(p.nome) + '</h2>' +
+    '<p class="tp-meta">' + p.conversas.length + " conversas · " +
+      p.arquivos.length + " arquivos" +
+      (p.id === projAtivo ? ' · <span class="tag t-acento">ativo</span>' : "") + '</p>' +
+
+    '<div class="tp-bloco"><div class="tp-cab">Instruções do projeto' +
+    '<button class="mini" data-editarvisao="' + esc(p.id) + '">editar</button></div>' +
+    '<p class="tp-corpo">' + (p.visao ? esc(p.visao) : "Sem instruções ainda.") + '</p></div>' +
+
+    '<div class="tp-bloco"><div class="tp-cab">Conhecimento do projeto</div>' +
+    '<div class="barra-cap"><div class="barra-fill" style="width:' + pct + '%"></div></div>' +
+    '<p class="tp-sub">' + pct + "% da capacidade utilizada</p>" +
+    (p.arquivos.length ? p.arquivos.map(function(a){
+        return '<div class="arq"><span class="aicone">' + esc(a.ext) + '</span>' +
+          '<div style="flex:1"><div class="anome">' + esc(a.nome) + '</div>' +
+          '<div class="atam">' + esc(a.resumo) + '</div></div>' +
+          '<button class="rm" data-rmarq="' + esc(a.id) + '">×</button></div>';
+      }).join("") : '<p class="tp-sub">Nenhum arquivo ainda.</p>') +
+    '<button class="ghost" id="addConteudo" style="margin-top:10px">+ Adicionar conteúdo</button>' +
+    '</div>' +
+
+    '<div class="tp-cab" style="margin-top:20px">Conversas</div>' +
+    (convs.length ? convs.map(function(c){
+        const d = new Date(c.criada);
+        return '<div class="convglobal" data-abrirglobal="' + esc(p.id) + '|' + esc(c.id) + '">' +
+          '<div class="cg-topo"><span class="cg-titulo">' +
+          (c.fixada ? '<span class="fix">📌</span> ' : "") + esc(c.titulo) + '</span></div>' +
+          '<div class="cg-sub">' + d.getDate() + "/" + (d.getMonth()+1) +
+          " · " + c.hist.length + ' mensagens</div></div>';
+      }).join("") : '<p class="tp-sub">Nenhuma conversa neste projeto.</p>') +
+
+    '<div class="row" style="margin-top:18px">' +
+    (p.id === projAtivo
+      ? '<button class="primary" data-novaconv="1">Nova conversa</button>'
+      : '<button class="primary" data-ativar="' + esc(p.id) + '">Ativar projeto</button>') +
+    '<button class="ghost" data-fixarproj="' + esc(p.id) + '">' +
+      (p.fixado ? "Desfixar" : "Fixar") + '</button>' +
+    (p.id !== "geral" ? '<button class="rm" data-rmproj="' + esc(p.id) + '">Excluir</button>' : "") +
+    '</div>';
+}
+
+/* ═══ AÇÕES DA CONVERSA ═══ */
+
+function abrirAcoes(){
+  const c = conv();
+  if(!c) return;
+  $("#folhaTitulo").textContent = c.titulo;
+  $("#txtFixar").textContent = c.fixada ? "Desfixar" : "Fixar";
+  $("#folhaAcoes").classList.add("aberta");
+  $("#veuAcoes").classList.add("on");
+}
+function fecharAcoes(){
+  $("#folhaAcoes").classList.remove("aberta");
+  $("#veuAcoes").classList.remove("on");
+}
+
+/* ═══ TOPO CONTEXTUAL — muda conforme onde você está ═══ */
+
+function ajustarTopo(onde){
+  const noChat = onde === "chat";
+  const emProjeto = onde === "projeto";
+  $("#abrirMenu").style.display = (noChat || emProjeto) ? "none" : "";
+  $("#btnVoltar").style.display = (noChat || emProjeto) ? "" : "none";
+  $("#btnNovaTopo").style.display = noChat ? "" : "none";
+  $("#btnAcoes").style.display = noChat ? "" : "none";
+  if(noChat){
+    const p = proj();
+    $("#topoTitulo").textContent = p ? p.nome : "Conversa";
+  }else if(emProjeto){
+    $("#topoTitulo").textContent = "Projeto";
+  }
+}
+
 /* ═══ NAVEGAÇÃO — menu lateral no lugar da faixa de abas ═══ */
 
 const TITULOS_SECAO = {conselho:"Conversas", projetos:"Projetos", imperio:"Império",
-  malha:"Malha", decisoes:"Decisões", acervo:"Acervo", ajustes:"Ajustes"};
+  malha:"Malha", decisoes:"Decisões", acervo:"Acervo", ajustes:"Ajustes", projeto:"Projeto"};
 
 function fecharMenu(){
   $("#menuLateral").classList.remove("aberto");
@@ -4964,6 +5169,7 @@ function irPara(secao){
   if(secao === "decisoes") renderDecisoes();
   if(secao === "malha") renderMalhaPane();
   if(secao === "projetos") renderProjetos();
+  ajustarTopo(secao);
 }
 
 /* Pula direto pro chat, sem passar pela lista — usado ao abrir uma conversa
@@ -4974,8 +5180,8 @@ function irParaChat(){
   Array.prototype.forEach.call(document.querySelectorAll(".pane"), function(x){ x.classList.remove("on"); });
   const item = document.querySelector('[data-ir="conselho"]');
   if(item) item.classList.add("on");
-  $("#topoTitulo").textContent = "Conversa";
   $("#pane-conselho").classList.add("on");
+  ajustarTopo("chat");
 }
 
 /* Todas as conversas, de todos os projetos, achatadas numa lista só —
@@ -5050,6 +5256,7 @@ Array.prototype.forEach.call(document.querySelectorAll(".mitem"), function(t){
 });
 $("#abrirMenu").addEventListener("click", abrirMenuLateral);
 $("#veuMenu").addEventListener("click", fecharMenu);
+$("#btnConfig").addEventListener("click", function(){ irPara("ajustes"); });
 $("#novaDoMenu").addEventListener("click", function(){
   novaConversa(); irParaChat();
 });
@@ -5079,8 +5286,7 @@ $("#menuFixados").addEventListener("click", function(e){
     const [pid, cid] = t.dataset.abrirglobal.split("|");
     abrirConversa(pid, cid);
   }else if(t.dataset.abrirprojfix){
-    projAtivo = t.dataset.abrirprojfix; sProjetos();
-    irPara("projetos"); renderProjetos();
+    abrirProjeto(t.dataset.abrirprojfix);
   }
 });
 
@@ -5204,14 +5410,12 @@ $("#feed").addEventListener("click", function(e){
   }
 });
 
-$("#send").addEventListener("click", perguntar);
-
-$("#parar").addEventListener("click", function(){
-  if(!pararResposta()){
-    $("#parar").style.display = "none";
-    $("#send").style.display = "";
-  }
+$("#send").addEventListener("click", function(){
+  if($("#send").classList.contains("parando")){ pararResposta(); return; }
+  perguntar();
 });
+
+
 
 /* Trocar de motor sem sair da conversa */
 $("#trocaMotor").addEventListener("click", function(){
@@ -5600,20 +5804,74 @@ $("#projetos").addEventListener("input", function(e){
   campo.setSelectionRange(cursor, cursor);
 });
 
-$("#projetos").addEventListener("click", function(e){
-  const t = e.target;
-  if(t.id === "novoProj"){ novoProjeto(); return; }
-  if(t.dataset.novaconv){ novaConversa(); return; }
-  if(t.dataset.fixar){
-    const [pid, cid] = t.dataset.fixar.split("|");
-    const p = projetos.filter(function(x){ return x.id === pid; })[0];
-    const c = p && p.conversas.filter(function(x){ return x.id === cid; })[0];
-    if(c){ c.fixada = !c.fixada; sProjetos(); renderProjetos(); renderMenuFixados(); }
+/* ── Topo contextual ── */
+$("#btnVoltar").addEventListener("click", function(){
+  /* Do chat volta pra lista de conversas; do projeto, pra lista de projetos */
+  if($("#pane-projeto").classList.contains("on")) irPara("projetos");
+  else irPara("conselho");
+});
+$("#btnNovaTopo").addEventListener("click", function(){ novaConversa(); irParaChat(); });
+$("#btnAcoes").addEventListener("click", abrirAcoes);
+$("#veuAcoes").addEventListener("click", fecharAcoes);
+
+/* ── Folha de ações da conversa ── */
+$("#folhaAcoes").addEventListener("click", function(e){
+  const b = e.target.closest("[data-facao]");
+  if(!b) return;
+  const c = conv(), p = proj();
+  if(!c) return fecharAcoes();
+
+  if(b.dataset.facao === "renomear"){
+    const novo = prompt("Novo nome da conversa:", c.titulo);
+    if(novo && novo.trim()){ c.titulo = novo.trim(); sProjetos(); renderSub(); }
+  }
+  else if(b.dataset.facao === "fixar"){
+    c.fixada = !c.fixada; sProjetos(); renderMenuFixados();
+  }
+  else if(b.dataset.facao === "mudar"){
+    const outros = projetos.filter(function(x){ return x.id !== p.id; });
+    if(!outros.length){ alert("Só existe um projeto. Crie outro primeiro."); return fecharAcoes(); }
+    const nomes = outros.map(function(x, i){ return (i+1) + ") " + x.nome; }).join("\n");
+    const esc2 = prompt("Mover para qual projeto?\n\n" + nomes + "\n\nDigite o número:");
+    const alvo = outros[parseInt(esc2, 10) - 1];
+    if(alvo){
+      p.conversas = p.conversas.filter(function(x){ return x.id !== c.id; });
+      alvo.conversas.push(c);
+      projAtivo = alvo.id; sProjetos(); renderTudo();
+      ajustarTopo("chat");
+    }
+  }
+  else if(b.dataset.facao === "copiar"){
+    const txt = c.hist.map(function(h){
+      return "VOCÊ: " + h.pergunta + "\n\n" + (h.resposta || "");
+    }).join("\n\n———\n\n");
+    navigator.clipboard.writeText(txt).then(function(){ alert("Conversa copiada."); })
+      .catch(function(){ alert("Não consegui copiar."); });
+  }
+  else if(b.dataset.facao === "apagar"){
+    if(!confirm('Apagar a conversa "' + c.titulo + '"? Isso não volta.')) return;
+    p.conversas = p.conversas.filter(function(x){ return x.id !== c.id; });
+    convAtiva = p.conversas.length ? p.conversas[p.conversas.length-1].id : null;
+    hist = conv() ? conv().hist : [];
+    sProjetos(); renderTudo(); fecharAcoes(); irPara("conselho");
     return;
   }
+  fecharAcoes();
+});
+
+/* ── Tela do projeto ── */
+$("#telaProjeto").addEventListener("click", function(e){
+  const t = e.target;
+  if(t.dataset.editarvisao){
+    const p = projetos.filter(function(x){ return x.id === t.dataset.editarvisao; })[0];
+    const v = prompt("Instruções do projeto — o recorte que a IA usa em toda resposta:", p.visao || "");
+    if(v !== null){ p.visao = v.trim(); sProjetos(); renderTelaProjeto(); }
+    return;
+  }
+  if(t.id === "addConteudo"){ $("#arqInput").click(); return; }
   if(t.dataset.fixarproj){
     const p = projetos.filter(function(x){ return x.id === t.dataset.fixarproj; })[0];
-    if(p){ p.fixado = !p.fixado; sProjetos(); renderProjetos(); renderMenuFixados(); }
+    if(p){ p.fixado = !p.fixado; sProjetos(); renderTelaProjeto(); renderMenuFixados(); }
     return;
   }
   if(t.dataset.ativar){
@@ -5621,37 +5879,38 @@ $("#projetos").addEventListener("click", function(e){
     const p = proj();
     convAtiva = p.conversas.length ? p.conversas[p.conversas.length-1].id : null;
     hist = conv() ? conv().hist : [];
-    sProjetos(); renderTudo(); return;
+    sProjetos(); renderTudo(); renderTelaProjeto();
+    return;
   }
-  if(t.dataset.visao){ editarVisao(t.dataset.visao); return; }
-  if(t.dataset.abrir){
-    const par = t.dataset.abrir.split("|");
-    abrirConversa(par[0], par[1]); return;
-  }
-  if(t.dataset.rmconv){
-    const par = t.dataset.rmconv.split("|");
-    if(!confirm("Apagar esta conversa?")) return;
-    const p = projetos.filter(function(x){ return x.id === par[0]; })[0];
-    p.conversas = p.conversas.filter(function(c){ return c.id !== par[1]; });
-    if(convAtiva === par[1]){
-      convAtiva = p.conversas.length ? p.conversas[p.conversas.length-1].id : null;
-      hist = conv() ? conv().hist : [];
-    }
-    sProjetos(); renderTudo(); return;
-  }
+  if(t.dataset.novaconv){ novaConversa(); irParaChat(); return; }
   if(t.dataset.rmproj){
-    if(!confirm("Apagar o projeto e tudo dentro dele?")) return;
+    const p = projetos.filter(function(x){ return x.id === t.dataset.rmproj; })[0];
+    if(!confirm('Excluir o projeto "' + p.nome + '" e tudo dentro dele?')) return;
     projetos = projetos.filter(function(x){ return x.id !== t.dataset.rmproj; });
-    if(projAtivo === t.dataset.rmproj){
-      projAtivo = "geral";
-      const p = proj();
-      convAtiva = p.conversas.length ? p.conversas[p.conversas.length-1].id : null;
-      hist = conv() ? conv().hist : [];
-    }
-    sProjetos(); renderTudo(); return;
+    if(projAtivo === t.dataset.rmproj){ projAtivo = "geral"; convAtiva = null; hist = []; }
+    sProjetos(); renderTudo(); irPara("projetos");
+    return;
   }
-  if(t.dataset.rmarq){ removerArquivo(t.dataset.rmarq); return; }
+  if(t.dataset.rmarq){
+    const p = projetos.filter(function(x){ return x.id === projVendo; })[0];
+    p.arquivos = p.arquivos.filter(function(a){ return a.id !== t.dataset.rmarq; });
+    sProjetos(); renderTelaProjeto();
+    return;
+  }
+  const card = t.closest("[data-abrirglobal]");
+  if(card){
+    const [pid, cid] = card.dataset.abrirglobal.split("|");
+    abrirConversa(pid, cid);
+  }
 });
+
+$("#projetos").addEventListener("click", function(e){
+  const t = e.target;
+  if(t.id === "novoProj"){ novoProjeto(); return; }
+  const card = t.closest("[data-abrirproj]");
+  if(card) abrirProjeto(card.dataset.abrirproj);
+});
+
 
 /* ═══ PLANTÃO — o que o orquestrador fez enquanto o app estava fechado ═══ */
 const orqBase = () => ($("#orqEndereco").value.trim() || "http://127.0.0.1:8081").replace(/\/$/, "");
@@ -5885,23 +6144,101 @@ $("#btnBLE").addEventListener("click", varrerBLE);
 $("#btnNFC").addEventListener("click", lerNFC);
 $("#btnRede").addEventListener("click", infoRede);
 
-/* Sentidos */
-$("#sentidos").addEventListener("click", function(e){
-  const b = e.target.closest ? e.target.closest(".sent") : null;
-  const s2 = b ? b.dataset.sent : e.target.dataset.sent;
-  if(!s2) return;
+/* ═══ FOLHA "ADICIONAR AO CHAT" ═══ */
+
+function abrirMais(){
+  $("#chaveWeb").classList.toggle("on", !!webLigado);
+  $("#chaveFalar").classList.toggle("on", !!falarLigado);
+  $("#folhaMais").classList.add("aberta");
+  $("#veuMais").classList.add("on");
+}
+function fecharMais(){
+  $("#folhaMais").classList.remove("aberta");
+  $("#veuMais").classList.remove("on");
+}
+
+$("#btnMais").addEventListener("click", abrirMais);
+$("#fecharMais").addEventListener("click", fecharMais);
+$("#veuMais").addEventListener("click", fecharMais);
+$("#card3Arq").addEventListener("click", function(){ fecharMais(); $("#arqInput").click(); });
+
+$("#folhaMais").addEventListener("click", function(e){
+  /* As chaves ficam ligadas/desligadas; o resto executa e fecha */
+  if(e.target.id === "chaveWeb" || e.target.closest(".linha") &&
+     e.target.closest(".linha").querySelector("#chaveWeb")){
+    webLigado = !webLigado;
+    $("#chaveWeb").classList.toggle("on", webLigado);
+    return;
+  }
+  if(e.target.id === "chaveFalar" || e.target.closest(".linha") &&
+     e.target.closest(".linha").querySelector("#chaveFalar")){
+    falarLigado = !falarLigado;
+    if(!falarLigado) window.speechSynthesis.cancel();
+    $("#chaveFalar").classList.toggle("on", falarLigado);
+    return;
+  }
+  const b = e.target.closest("[data-sent]");
+  if(!b) return;
+  const s2 = b.dataset.sent;
+  fecharMais();
   if(s2 === "camera")  abrirCamera(true);
   if(s2 === "galeria") abrirCamera(false);
-  if(s2 === "ditar")   ditar();
-  if(s2 === "gravar")  gravarAudio();
-  if(s2 === "falar")   alternarFala();
   if(s2 === "scanner") escanear();
   if(s2 === "local")   inserirLocal();
-  if(s2 === "web")     pesquisarWeb();
+});
+
+/* ═══ FOLHA "SELECIONAR MOTOR" — escolher, não configurar ═══ */
+
+function renderEscolhaMotor(){
+  const el = $("#listaEscolhaMotor");
+  if(!motores.length){
+    el.innerHTML = '<div class="linha"><span class="ltxt">Nenhum motor cadastrado' +
+      "<small>Vá em Ajustes para adicionar o primeiro</small></span></div>";
+    return;
+  }
+  el.innerHTML = motores.map(function(m){
+    return '<button class="lmotor' + (m.ativo ? " ativo" : "") + '" data-usarm="' + esc(m.id) + '">' +
+      '<span class="lm-nome">' + esc(m.nome || "sem nome") +
+      "<small>" + esc(m.modelo || "modelo não definido") + "</small></span>" +
+      (m.ativo ? '<span class="lm-check">✓</span>' : "") + "</button>";
+  }).join("");
+}
+
+function abrirEscolhaMotor(){
+  renderEscolhaMotor();
+  $("#folhaMotor").classList.add("aberta");
+  $("#veuMotor").classList.add("on");
+}
+function fecharEscolhaMotor(){
+  $("#folhaMotor").classList.remove("aberta");
+  $("#veuMotor").classList.remove("on");
+}
+
+$("#trocaMotor").addEventListener("click", abrirEscolhaMotor);
+$("#fecharMotor").addEventListener("click", fecharEscolhaMotor);
+$("#veuMotor").addEventListener("click", fecharEscolhaMotor);
+$("#listaEscolhaMotor").addEventListener("click", function(e){
+  const b = e.target.closest("[data-usarm]");
+  if(!b) return;
+  aplicarMotor(motores.filter(function(m){ return m.id === b.dataset.usarm; })[0]);
+  fecharEscolhaMotor();
+});
+
+/* ═══ VOZ — ditar por toque curto, gravar por toque longo ═══ */
+let pressionando = null;
+$("#btnVoz").addEventListener("touchstart", function(){
+  pressionando = setTimeout(function(){ pressionando = "longo"; gravarAudio(); }, 550);
+}, {passive:true});
+$("#btnVoz").addEventListener("touchend", function(){
+  if(pressionando && pressionando !== "longo"){ clearTimeout(pressionando); ditar(); }
+  pressionando = null;
+});
+$("#btnVoz").addEventListener("click", function(e){
+  /* No desktop não há toque: clique simples dita */
+  if(e.detail === 0 || !("ontouchstart" in window)) ditar();
 });
 
 /* Arquivos */
-$("#btnAnexo").addEventListener("click", function(){ $("#arqInput").click(); });
 $("#arqInput").addEventListener("change", function(e){
   if(e.target.files.length) lerArquivos(e.target.files);
   e.target.value = "";
