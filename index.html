@@ -284,6 +284,13 @@
   .bibMundo{display:block;margin-top:3px;color:var(--brass);font-size:11.5px;
     letter-spacing:.03em;font-style:normal}
 
+
+  .avisoAcervo{background:var(--card);border:1px solid var(--brass);border-radius:11px;
+    padding:11px 13px;margin-bottom:12px;font-size:13px;color:var(--txt);
+    display:flex;gap:10px;align-items:flex-start;line-height:1.45}
+  .avisoX{background:none;border:0;color:var(--muted);font-size:15px;
+    padding:0 2px;cursor:pointer;flex-shrink:0;font-family:inherit}
+
   .pane{flex:1;min-height:0;display:none;flex-direction:column}
   .pane.on{display:flex}
   /* O que rola precisa esticar dentro do pane. Sem isto a altura vira zero:
@@ -3316,6 +3323,8 @@ function recuperar(q){
    Sem ponte de idioma, "regulação IA" nunca acha "AI regulation". */
 const PONTE_IDIOMA = {
   regulacao:["regulation","regulatory","policy"], regulamentacao:["regulation","compliance"],
+  regulamento:["regulation","rule","rules"], regra:["rule","rules"], regras:["rules"],
+  norma:["standard","rule"], marco:["framework"], politica:["policy"],
   lei:["law","act","legislation"], juridico:["legal"], contrato:["contract"],
   inteligencia:["intelligence"], artificial:["artificial"], ia:["ai","artificial intelligence"],
   aprendizado:["learning"], maquina:["machine"], modelo:["model"], modelos:["models"],
@@ -3354,18 +3363,31 @@ function buscarBiblio(termo){
     return p.length >= 2 && VAZIAS.indexOf(p) < 0; });
   /* três camadas: o que você escreveu, o atalho offline PT→EN, e o que o
      motor traduziu para as línguas que a biblioteca realmente tem */
-  const t = expandirConsulta(base).concat(termosMundo.map(norm));
+  /* quatro camadas, da mais barata pra mais cara:
+     1) o que você escreveu  2) atalho PT→EN embutido
+     3) dicionário da Wikidata guardado no aparelho — offline, sem motor
+     4) tradução pelo motor, só se ainda faltar alcance */
+  const t = expandirConsulta(base)
+    .concat(traduzirPeloDicionario(base))
+    .concat(termosMundo.map(norm));
   return biblio.filter(d => filtroDom === "todos" || d.dominio === filtroDom)
     .map(d => {
       const tit = norm(d.titulo || ""), corpo = norm(d.corpo || ""), fonte = norm(d.fonte || "");
       let s = 0, casou = 0;
       t.forEach(function(p){
-        const raiz = p.replace(/(s|es|ing|ed)$/, "");
-        if(tit.includes(p))        { s += 5; casou++; }
-        else if(tit.includes(raiz)){ s += 3.5; casou++; }
-        else if(corpo.includes(p)) { s += 2; casou++; }
+        const raiz = p.replace(/(s|es|ing|ed|mento|cao|dade|ismo)$/, "");
+        /* Dicionário sempre terá buraco: regulação, regulamento, regulatório,
+           regulation. Todas partilham a raiz. Casar pelo começo da palavra
+           cobre o que lista nenhuma cobriria — e as línguas latinas e o inglês
+           dividem quase toda raiz técnica. */
+        const tronco = p.length >= 6 ? p.slice(0, 5) : null;
+        if(tit.includes(p))          { s += 5;   casou++; }
+        else if(tit.includes(raiz))  { s += 3.5; casou++; }
+        else if(corpo.includes(p))   { s += 2;   casou++; }
         else if(corpo.includes(raiz)){ s += 1.2; casou++; }
-        else if(fonte.includes(p)) { s += 1; casou++; }
+        else if(tronco && tit.includes(tronco))   { s += 1.6; casou++; }
+        else if(tronco && corpo.includes(tronco)) { s += 0.7; casou++; }
+        else if(fonte.includes(p))   { s += 1;   casou++; }
       });
       /* a expansão de idioma não pode inflar a pontuação: conta acerto único */
       if(casou > 1) s *= 1 + Math.min(casou - 1, base.length) * .35;
@@ -4957,11 +4979,19 @@ function renderAcervo(){
     return;
   }
   const itens = buscarBiblio(termo);
-  if(!itens.length){ l.innerHTML = '<div class="empty"><p>Nada encontrado.</p></div>'; return; }
+  const cabecalho = avisoAcervo
+    ? '<div class="avisoAcervo">' + esc(avisoAcervo) +
+      '<button class="avisoX" data-limpar-aviso="1">✕</button></div>' : "";
+  if(!itens.length){
+    l.innerHTML = cabecalho + '<div class="empty"><p>Nada encontrado.</p>' +
+      (termo ? '<p class="note">A biblioteca tem ' + biblio.length + ' itens. ' +
+        'Tente uma palavra mais geral, ou toque em “Pedir à IA”.</p>' : '') + '</div>';
+    return;
+  }
 
   /* Buscando: lista por relevância. Sem busca: pastas por domínio. */
   if(termo && termo.trim()){
-    l.innerHTML = '<div class="bibNota">' + itens.length + ' resultado(s) por relevância' +
+    l.innerHTML = cabecalho + '<div class="bibNota">' + itens.length + ' resultado(s) por relevância' +
       '<span id="bibNotaMundo" class="bibMundo">' + esc(notaMundo) + '</span></div>' +
       itens.slice(0,120).map(cartaoDoc).join("");
     return;
@@ -4972,7 +5002,7 @@ function renderAcervo(){
     (pastas[k] = pastas[k] || []).push(d);
   });
   const nomes = Object.keys(pastas).sort(function(a,b){ return pastas[b].length - pastas[a].length; });
-  l.innerHTML = nomes.map(function(n){
+  l.innerHTML = cabecalho + nomes.map(function(n){
     const ab = pastasAbertas[n] ? " aberta" : "";
     const its = pastas[n];
     const idiomas = {};
@@ -5261,7 +5291,14 @@ async function perguntarAcervo(){
       '<p class="a">' + esc(r).replace(/\n/g,"<br>") + '</p>' +
       '<div class="used">leu ' + achados.length + " itens · " +
       achados.filter(function(d){ return (d.tier||3) === 1; }).length + ' de fonte primária</div></div>';
-  }catch(e){ l.innerHTML = '<p class="err">O motor não respondeu (' + esc(e.message) + ').</p>'; }
+  }catch(e){
+    /* Antes o erro apagava a lista e você ficava sem nada. Agora ele é um
+       aviso em cima: a resposta da IA falhou, mas a busca local continua
+       valendo e os itens seguem na tela. */
+    avisoAcervo = "A IA não respondeu (" + e.message + "). Os resultados da " +
+      "busca continuam abaixo.";
+    renderAcervo();
+  }
 }
 
 /* ═══ MÓDULOS — a IA escreve, o Piloto aprova ═══ */
@@ -5772,6 +5809,52 @@ aplicarModoCor();
 
 
 
+
+/* ═══ DICIONÁRIO DO MUNDO — tradução guardada no aparelho ═══
+   Colhido da Wikidata pelo coletor: o mesmo conceito rotulado em ~20 línguas,
+   com apelidos ("IA", "AI"). Fica no aparelho, então a busca multilíngue
+   passa a funcionar SEM motor e SEM internet. O motor vira reforço, não base. */
+let dicMundo = {};
+function carregarDicionario(){
+  try{ dicMundo = JSON.parse(localStorage.getItem("sa:dic") || "{}"); }
+  catch(e){ dicMundo = {}; }
+}
+function guardarDicionario(d){
+  dicMundo = d || {};
+  try{ localStorage.setItem("sa:dic", JSON.stringify(dicMundo)); }catch(e){}
+}
+function tamanhoDicionario(){
+  let n = 0;
+  Object.keys(dicMundo).forEach(function(k){ n += (dicMundo[k] || []).length; });
+  return {conceitos: Object.keys(dicMundo).length, termos: n};
+}
+
+/* Casa a consulta com os conceitos do dicionário e devolve todas as línguas.
+   "regulamento de IA" encosta em "regulamentação" e em "inteligência
+   artificial" — os dois entram, cada um com seus rótulos. */
+function traduzirPeloDicionario(palavras){
+  const fora = [];
+  const chaves = Object.keys(dicMundo);
+  palavras.forEach(function(p){
+    const raiz = p.length >= 6 ? p.slice(0, 5) : p;
+    chaves.forEach(function(k){
+      const nk = norm(k);
+      if(nk.indexOf(p) >= 0 || (raiz.length >= 4 && nk.indexOf(raiz) >= 0)){
+        (dicMundo[k] || []).forEach(function(t){ fora.push(norm(t)); });
+      }
+    });
+    /* o termo pode estar do outro lado: você digita 人工智能 e quer o resto */
+    chaves.forEach(function(k){
+      const lista = dicMundo[k] || [];
+      if(lista.some(function(t){ return norm(t).indexOf(p) >= 0; })){
+        lista.forEach(function(t){ fora.push(norm(t)); });
+      }
+    });
+  });
+  return Array.from(new Set(fora));
+}
+carregarDicionario();
+
 /* ═══ BUSCA NO MUNDO — a consulta vai para as línguas que existem na base ═══
    Dicionário fixo PT→EN não serve: o GDELT traz ~100 línguas e a Wikipédia
    ~300. Em vez de tentar prever, o app olha o que a biblioteca REALMENTE tem
@@ -5824,12 +5907,26 @@ async function expandirPeloMotor(termo){
 }
 
 /* Termos vindos do motor entram junto com os originais e refazem a busca */
-let termosMundo = [], notaMundo = "";
+let termosMundo = [], notaMundo = "", avisoAcervo = "";
 async function buscarNoMundo(termo){
   const nota = $("#bibNotaMundo");
   if(!termo || !termo.trim()){ termosMundo = []; notaMundo = ""; return; }
   const idiomas = idiomasNaBiblioteca().filter(function(l){ return l !== "pt"; });
   if(!idiomas.length) return;
+
+  /* O dicionário local já cobriu? Então não gasta chamada no motor.
+     Chamada de motor custa tempo, cota e às vezes falha — e aqui seria à toa. */
+  const doDic = traduzirPeloDicionario(
+    norm(termo).split(/\s+/).filter(function(p){ return p.length >= 2; }));
+  if(doDic.length >= 4){
+    const d = tamanhoDicionario();
+    termosMundo = [];
+    notaMundo = "traduzido pelo dicionário do aparelho · " + d.conceitos +
+      " conceitos · sem internet";
+    renderAcervo();
+    return;
+  }
+
   notaMundo = "procurando também em " +
     idiomas.map(function(l){ return NOME_IDIOMA[l] || l; }).join(", ") + "…";
   if(nota) nota.textContent = notaMundo;
@@ -5843,8 +5940,11 @@ async function buscarNoMundo(termo){
   }catch(err){
     /* Sem motor ligado a busca não morre: continua com o que dá offline. */
     termosMundo = [];
-    notaMundo = "só em português e inglês — ligue um motor para buscar nas outras " +
-      idiomas.length + " língua(s)";
+    const d = tamanhoDicionario();
+    notaMundo = d.conceitos
+      ? "o dicionário do aparelho não cobre este termo e o motor não respondeu"
+      : "busca só em português e inglês. Monte o dicionário em Ajustes → Termux " +
+        "→ dicionario para buscar em todas as línguas sem depender de motor.";
     renderAcervo();
   }
 }
@@ -5957,6 +6057,20 @@ document.addEventListener("click", async function(e){
         Math.round(Date.now()/1000 - t.inicio) + "s"; continue; }
       saida.textContent = (t.saida || "") + (t.erro || "");
       /* coleta terminou: já traz a biblioteca nova pra dentro do app */
+      if(b.dataset.pcmd === "dicionario"){
+        try{
+          const dd = await ponteChamar("/dicionario");
+          if(dd.dicionario){
+            guardarDicionario(dd.dicionario);
+            const n = tamanhoDicionario();
+            saida.textContent += "\n\n" + n.conceitos + " conceitos e " + n.termos +
+              " termos guardados no aparelho. A busca multilíngue agora funciona " +
+              "sem motor e sem internet.";
+            const r = $("#ls-termux");
+            if(r) r.textContent = "conectada · dicionário com " + n.conceitos + " conceitos";
+          }
+        }catch(x){ saida.textContent += "\n\nnão consegui baixar o dicionário: " + x.message; }
+      }
       if(b.dataset.pcmd === "coletar" || b.dataset.pcmd === "exportar"){
         try{
           const bb = await ponteChamar("/biblioteca");
@@ -5976,6 +6090,7 @@ document.addEventListener("click", async function(e){
 liga("#lista", "click", function(e){
   const p = e.target.closest ? e.target.closest("[data-pasta]") : null;
   if(p){ const n = p.dataset.pasta; pastasAbertas[n] = !pastasAbertas[n]; renderAcervo(); return; }
+  if(e.target.closest("[data-limpar-aviso]")){ avisoAcervo = ""; renderAcervo(); return; }
   const tr = e.target.closest ? e.target.closest("[data-trad]") : null;
   if(tr){ alternarTraducao(tr.dataset.trad); return; }
   if(e.target.closest("a")) return;          /* deixa o link fazer o que ele faz */

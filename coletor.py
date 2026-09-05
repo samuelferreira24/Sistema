@@ -13,6 +13,7 @@ Uso:
     python coletor.py --memoria    # gera bloco de memória pro app
 """
 
+import hashlib
 import json, os, sys, re, time, hashlib
 import urllib.request
 import urllib.parse, urllib.error
@@ -29,7 +30,7 @@ FONTES = {
     "mundo": [
         # ── GDELT: notícia de ~100 países, traduzida automaticamente. A porta principal.
         {"nome": "GDELT — mundo, últimas 24h", "tier": 2, "tipo": "gdelt",
-         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:eng&mode=artlist&maxrecords=25&format=json&timespan=24h",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=(world%20OR%20government%20OR%20policy)%20sourcelang:english&mode=artlist&maxrecords=25&format=json&timespan=24h",
          "ativo": True},
         {"nome": "GDELT — economia global", "tier": 2, "tipo": "gdelt",
          "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=(economy%20OR%20inflation%20OR%20trade)&mode=artlist&maxrecords=25&format=json&timespan=24h",
@@ -39,16 +40,16 @@ FONTES = {
          "ativo": True},
         # Idiomas específicos — ligar conforme a necessidade
         {"nome": "GDELT — em chinês", "tier": 2, "tipo": "gdelt",
-         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:chi&mode=artlist&maxrecords=20&format=json&timespan=24h",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=(%E6%94%BF%E5%BA%9C)%20sourcelang:chinese&mode=artlist&maxrecords=20&format=json&timespan=24h",
          "ativo": False},
         {"nome": "GDELT — em russo", "tier": 2, "tipo": "gdelt",
-         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:rus&mode=artlist&maxrecords=20&format=json&timespan=24h",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=(%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE)%20sourcelang:russian&mode=artlist&maxrecords=20&format=json&timespan=24h",
          "ativo": False},
         {"nome": "GDELT — em árabe", "tier": 2, "tipo": "gdelt",
-         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:ara&mode=artlist&maxrecords=20&format=json&timespan=24h",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=(%D8%AD%D9%83%D9%88%D9%85%D8%A9)%20sourcelang:arabic&mode=artlist&maxrecords=20&format=json&timespan=24h",
          "ativo": False},
         {"nome": "GDELT — em espanhol", "tier": 2, "tipo": "gdelt",
-         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:spa&mode=artlist&maxrecords=20&format=json&timespan=24h",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=(gobierno)%20sourcelang:spanish&mode=artlist&maxrecords=20&format=json&timespan=24h",
          "ativo": False},
     ],
     "ciencia": [
@@ -162,13 +163,32 @@ UA = "SistemaAbsoluto-Coletor/1.0 (uso pessoal, respeita robots)"
 # BASE
 # ──────────────────────────────────────────────────────────────
 
-def buscar(url, timeout=25):
-    req = urllib.request.Request(url, headers={
-        "User-Agent": UA,
-        "Accept": "application/json, application/xml, text/xml, */*",
-    })
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", errors="replace")
+def buscar(url, timeout=25, tentativas=3):
+    """Erro de rede sem o código vira adivinhação. Aqui o código aparece,
+    e 429/503 (limite do servidor) espera e tenta de novo em vez de desistir."""
+    ultimo = None
+    for n in range(tentativas):
+        req = urllib.request.Request(url, headers={
+            "User-Agent": UA,
+            "Accept": "application/json, application/xml, text/xml, */*",
+        })
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read().decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as e:
+            ultimo = "HTTP %s" % e.code
+            # 429 = pediu demais; 5xx = servidor tropeçou. Vale esperar.
+            if e.code in (429, 500, 502, 503, 504) and n < tentativas - 1:
+                time.sleep(3 * (n + 1))
+                continue
+            raise RuntimeError("%s em %s" % (ultimo, url.split("?")[0]))
+        except Exception as e:
+            ultimo = type(e).__name__
+            if n < tentativas - 1:
+                time.sleep(2)
+                continue
+            raise RuntimeError("%s em %s" % (ultimo, url.split("?")[0]))
+    raise RuntimeError(ultimo or "falhou")
 
 
 def limpar(txt, limite=400):
@@ -607,6 +627,12 @@ def exportar_biblioteca():
                 with open(os.path.join(pasta, arq), encoding="utf-8") as f:
                     for it in json.load(f):
                         it.setdefault("dominio", dominio)
+                        # Sem id o app não consegue apontar pro item (traduzir,
+                        # abrir, marcar). Hash da url+título é estável: o mesmo
+                        # item recoletado amanhã continua com o mesmo id.
+                        if not it.get("id"):
+                            semente = (it.get("url") or "") + "|" + (it.get("titulo") or "")
+                            it["id"] = "b" + hashlib.sha1(semente.encode("utf-8")).hexdigest()[:12]
                         itens.append(it)
             except Exception:
                 continue
@@ -631,6 +657,120 @@ def exportar_biblioteca():
     print("\nNo app: Ajustes → Importar biblioteca.\n")
 
 
+# ═══════════════════════════════════════════════════════════════
+# DICIONÁRIO DO MUNDO — tradução embutida, sem motor e sem chave
+#
+# A Wikidata guarda o MESMO conceito rotulado em ~200 línguas. Buscar
+# "inteligência artificial" devolve o Q-id, e o Q-id devolve 人工智能,
+# искусственный интеллект, الذكاء الاصطناعي de uma vez só.
+#
+# Colhido uma vez, vira arquivo local. Depois disso a busca multilíngue
+# do app funciona offline, sem depender de motor nenhum.
+# ═══════════════════════════════════════════════════════════════
+
+# Línguas que valem guardar. Mais que isso incha o arquivo sem uso real.
+LINGUAS_DIC = ["pt", "en", "es", "zh", "ru", "ar", "fr", "de", "ja", "ko",
+               "it", "hi", "tr", "nl", "fa", "id", "vi", "pl", "uk", "he"]
+
+# Sementes: os conceitos que a busca de Samuel encosta o tempo todo.
+# A lista cresce sozinha com os termos que aparecem na própria biblioteca.
+SEMENTES = [
+    "inteligência artificial", "aprendizado de máquina", "rede neural",
+    "modelo de linguagem", "algoritmo", "dados", "banco de dados",
+    "regulamentação", "lei", "contrato", "privacidade", "segurança da informação",
+    "criptografia", "código-fonte", "programação", "software", "servidor",
+    "computação em nuvem", "telefone celular", "processador", "memória",
+    "economia", "inflação", "taxa de juros", "mercado financeiro", "imposto",
+    "empresa", "empreendedorismo", "investimento", "produtividade",
+    "saúde", "medicina", "clínica médica", "odontologia",
+    "energia", "mudança climática", "guerra", "eleição", "governo",
+    "pesquisa científica", "universidade", "patente", "propriedade intelectual",
+    "automação", "robótica", "agente inteligente", "tradução automática",
+]
+
+
+def _wd(url):
+    return json.loads(buscar(url, timeout=20))
+
+
+def termos_da_biblioteca(limite=40):
+    """Puxa os termos mais repetidos nos títulos já coletados. Assim o
+    dicionário acompanha o que Samuel realmente guarda, não uma lista fixa."""
+    conta = {}
+    vazias = set("""de da do que com para por uma um os as the and of in to a o e
+        sobre como com new for with from this that are which um dos das no na""".split())
+    for dominio in os.listdir(RAIZ) if os.path.isdir(RAIZ) else []:
+        pasta = os.path.join(RAIZ, dominio)
+        if not os.path.isdir(pasta):
+            continue
+        for arq in os.listdir(pasta):
+            if not arq.endswith(".json"):
+                continue
+            try:
+                with open(os.path.join(pasta, arq), encoding="utf-8") as f:
+                    for it in json.load(f):
+                        for w in re.findall(r"[A-Za-zÀ-ÿ]{5,}", it.get("titulo", "")):
+                            w = w.lower()
+                            if w not in vazias:
+                                conta[w] = conta.get(w, 0) + 1
+            except Exception:
+                continue
+    ordenado = sorted(conta, key=lambda k: -conta[k])
+    return ordenado[:limite]
+
+
+def montar_dicionario():
+    """Um termo → um Q-id → rótulos em todas as línguas guardadas."""
+    alvos = list(dict.fromkeys(SEMENTES + termos_da_biblioteca()))
+    dic = {}
+    achados = 0
+    print("\n  DICIONÁRIO DO MUNDO — %d termos a resolver" % len(alvos))
+
+    for i, termo in enumerate(alvos, 1):
+        try:
+            q = _wd("https://www.wikidata.org/w/api.php?action=wbsearchentities"
+                    "&format=json&language=pt&uselang=pt&limit=1&search="
+                    + urllib.parse.quote(termo))
+            achado = (q.get("search") or [])
+            if not achado:
+                continue
+            qid = achado[0]["id"]
+
+            ent = _wd("https://www.wikidata.org/w/api.php?action=wbgetentities"
+                      "&format=json&props=labels|aliases&ids=" + qid)
+            e = (ent.get("entities") or {}).get(qid) or {}
+            rotulos = []
+            for lg in LINGUAS_DIC:
+                lab = (e.get("labels") or {}).get(lg)
+                if lab and lab.get("value"):
+                    rotulos.append(lab["value"])
+                # apelidos ajudam: "IA" é apelido de "inteligência artificial"
+                for al in ((e.get("aliases") or {}).get(lg) or [])[:2]:
+                    if al.get("value"):
+                        rotulos.append(al["value"])
+            rotulos = [r for r in dict.fromkeys(rotulos) if 1 < len(r) < 60]
+            if len(rotulos) > 1:
+                dic[termo] = rotulos
+                achados += 1
+        except Exception as e:
+            print("    ! %s: %s" % (termo[:28], str(e)[:40]))
+            continue
+        if i % 10 == 0:
+            print("    %d/%d — %d resolvidos" % (i, len(alvos), achados))
+        time.sleep(0.4)   # a Wikidata é gratuita; não convém martelar
+
+    saida = os.path.join(RAIZ, "dicionario.json")
+    with open(saida, "w", encoding="utf-8") as f:
+        json.dump({"dicionario": dic, "linguas": LINGUAS_DIC, "versao": 1,
+                   "gerado": datetime.now(timezone.utc).isoformat()}, f,
+                  ensure_ascii=False, indent=1)
+    total = sum(len(v) for v in dic.values())
+    print("\n  %d conceitos · %d termos em %d línguas" % (len(dic), total, len(LINGUAS_DIC)))
+    print("  salvo em %s" % saida)
+    print("  No app: Ajustes → Termux → dicionario\n")
+    return dic
+
+
 if __name__ == "__main__":
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     if arg == "--status":
@@ -639,6 +779,8 @@ if __name__ == "__main__":
         gerar_memoria()
     elif arg == "--exportar":
         exportar_biblioteca()
+    elif arg == "--dicionario":
+        montar_dicionario()
     else:
         print("\nCOLETOR — Sistema Absoluto")
         print(f"{datetime.now().strftime('%d/%m/%Y %H:%M')}\n")

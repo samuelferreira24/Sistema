@@ -57,6 +57,7 @@ PERMITIDOS = {
     "status":      [sys.executable, os.path.join(SA, "coletor.py"), "--status"],
     "orquestrar":  [sys.executable, os.path.join(SA, "orquestrador.py")],
     "exportar":    [sys.executable, os.path.join(SA, "coletor.py"), "--exportar"],
+    "dicionario":  [sys.executable, os.path.join(SA, "coletor.py"), "--dicionario"],
     "espaco":      ["df", "-h", CASA],
     "motor_vivo":  ["curl", "-s", "-m", "3", "http://127.0.0.1:8080/health"],
     # O motor é pesado: sobe só quando pedido e desce quando não serve mais.
@@ -102,6 +103,11 @@ class Ponte(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Token")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        # O Chrome bloqueia página https chamando 127.0.0.1 (Private Network
+        # Access) a menos que o próprio servidor local autorize. Sem esta
+        # linha, o app hospedado no GitHub Pages nunca acha a Ponte.
+        self.send_header("Access-Control-Allow-Private-Network", "true")
+        self.send_header("Access-Control-Max-Age", "86400")
         self.end_headers()
         self.wfile.write(corpo)
 
@@ -130,6 +136,13 @@ class Ponte(BaseHTTPRequestHandler):
                 return self.responder(404, {"erro": "ainda não existe; rode coletar/exportar"})
             with open(alvo, encoding="utf-8") as f:
                 return self.responder(200, {"biblioteca": json.load(f)})
+
+        if rota == "/dicionario":
+            alvo = os.path.join(BIBLIOTECA, "dicionario.json")
+            if not os.path.exists(alvo):
+                return self.responder(404, {"erro": "ainda não montado; rode o comando dicionario"})
+            with open(alvo, encoding="utf-8") as f:
+                return self.responder(200, json.load(f))
 
         if rota == "/comandos":
             return self.responder(200, {"comandos": sorted(PERMITIDOS)})
