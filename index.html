@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sistema Absoluto</title>
-<meta name="theme-color" content="#131A24">
+<meta name="theme-color" content="#0B0B0D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Sistema Absoluto">
@@ -179,6 +179,57 @@
   .esp{flex:1;background:none;border:1px solid var(--line);color:var(--muted);
        padding:6px 0;border-radius:6px;font-size:11.5px;font-weight:500}
   .esp.on{border-color:var(--acento);color:var(--acento);background:rgba(255,255,255,.03)}
+
+
+  /* ═══ AJUSTES — índice em grupos, estilo lista de configurações ═══ */
+  .ajIndice{display:block}
+  .ajIndice.oculto{display:none}
+  .ajGrupoCab{font-size:11px;letter-spacing:.16em;color:var(--muted);
+    text-transform:uppercase;margin:22px 4px 8px}
+  .ajGrupo{background:var(--card);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;margin-bottom:4px}
+  .ajLinha{width:100%;background:none;border:0;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:14px;padding:15px 14px;text-align:left;
+    color:var(--txt);font-size:15.5px;font-family:inherit;cursor:pointer}
+  .ajLinha:last-child{border-bottom:0}
+  .ajLinha:active{background:var(--line)}
+  .ajIc{width:24px;text-align:center;font-size:16px;color:var(--brass);flex-shrink:0}
+  .ajTxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .ajT{line-height:1.25}
+  .ajS{font-size:12.5px;color:var(--muted);line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ajSeta{color:var(--muted);font-size:19px;flex-shrink:0}
+  .subpg{display:none}
+  .subpg.on{display:block}
+
+  /* ═══ MOTOR — pílula com ponto de estado, sem cara de botão solto ═══ */
+  .cmotor{width:auto;height:38px;border-radius:19px;padding:0 14px 0 11px;gap:8px;
+    font-size:13px;max-width:190px;overflow:hidden;white-space:nowrap;
+    text-overflow:ellipsis;background:var(--card);border:1px solid var(--line);
+    color:var(--txt);font-weight:500;letter-spacing:.01em}
+  .cmotor:active{background:var(--line)}
+  .cmotor .pt{width:7px;height:7px;border-radius:50%;background:var(--brass);
+    flex-shrink:0;box-shadow:0 0 0 3px rgba(201,162,74,.15)}
+  .cmotor.off .pt{background:var(--muted);box-shadow:none}
+
+
+  /* ═══ TELA INICIAL — logo, marca e barra, como nas referências ═══ */
+  #splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:26px;background:#0B0B0D;
+    transition:opacity .45s ease}
+  body.claro #splash{background:#F4F1EA}
+  #splash.sai{opacity:0;pointer-events:none}
+  .spLogo{width:112px;height:auto;filter:drop-shadow(0 0 22px rgba(201,162,74,.28))}
+  .spNome{text-align:center;font-weight:800;font-size:29px;letter-spacing:.19em;
+    color:#fff;line-height:1.15}
+  body.claro .spNome{color:#2B2B2B}
+  .spNome span{display:block;font-size:16.5px;letter-spacing:.34em;
+    color:#C9A24A;font-weight:700;margin-top:3px}
+  .spBarra{width:190px;height:3px;border-radius:2px;background:rgba(201,162,74,.20);
+    overflow:hidden;margin-top:8px}
+  .spBarra i{display:block;height:100%;width:38%;border-radius:2px;
+    background:linear-gradient(90deg,#8C6B2A,#F0DCA8);animation:spmov 1.1s ease-in-out infinite}
+  @keyframes spmov{0%{transform:translateX(-100%)}100%{transform:translateX(360%)}}
 
   .pane{flex:1;min-height:0;display:none;flex-direction:column}
   .pane.on{display:flex}
@@ -435,6 +486,22 @@
 </style>
 </head>
 <body>
+<div id="splash">
+  <svg viewBox="0 0 100 108" fill="none" xmlns="http://www.w3.org/2000/svg" class="spLogo">
+    <defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F0DCA8"/><stop offset=".45" stop-color="#C9A24A"/>
+      <stop offset="1" stop-color="#8C6B2A"/></linearGradient></defs>
+    <g stroke="url(#spg)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M50 4 L94 29 L94 79 L50 104 L6 79 L6 29 Z"/>
+      <path d="M50 26 L72 39 L50 52 L28 39 Z"/>
+      <path d="M6 29 L28 39 L28 66"/><path d="M94 29 L72 39 L72 66"/>
+      <path d="M50 52 L50 82 L38 70 M50 82 L62 70"/>
+    </g>
+  </svg>
+  <div class="spNome">SISTEMA<span>ABSOLUTO</span></div>
+  <div class="spBarra"><i></i></div>
+</div>
+
 <div id="app">
 
   <!-- ═══ BARRA FINA — hambúrguer abre o menu, igual o Claude ═══ -->
@@ -444,8 +511,6 @@
     <span class="topo-titulo" id="topoTitulo">Conversa</span>
     <button class="hamb" id="btnNovaTopo" aria-label="Nova conversa" style="display:none">✎</button>
     <button class="hamb" id="btnAcoes" aria-label="Ações" style="display:none">⋮</button>
-    <button class="hamb" id="btnTema" aria-label="Tema" title="Claro ou escuro">◐</button>
-    <span class="tag t-acento" id="selo">Núcleo</span>
   </div>
 
   <!-- ═══ MENU LATERAL ═══ -->
@@ -480,6 +545,7 @@
     <div id="menuFixados" class="menu-fixados"></div>
 
     <div class="menu-fundo">
+      <div class="menu-fix-cab">Espaços</div>
       <div class="espacos">
         <button class="esp on" data-esp="nucleo">Núcleo · CPF</button>
         <button class="esp" data-esp="operacao">Operação · CNPJ</button>
@@ -562,8 +628,53 @@
 
   <div class="pane" id="pane-ajustes">
     <div class="scroll body">
+<div class="ajIndice" id="ajIndice">
+  <div class="ajGrupo">
+    <button class="ajLinha" data-sub="espacos"><span class="ajIc">▦</span><span class="ajTxt"><span class="ajT">Espaços</span><span class="ajS" id="ls-espacos">Núcleo · CPF</span></span><span class="ajSeta">›</span></button>
+  </div>
+  <div class="ajGrupoCab">MOTOR</div>
+  <div class="ajGrupo">
+    <button class="ajLinha" data-sub="motor"><span class="ajIc">◇</span><span class="ajTxt"><span class="ajT">Motor</span><span class="ajS" id="ls-motor">o cérebro que responde</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="motores"><span class="ajIc">≡</span><span class="ajTxt"><span class="ajT">Motores cadastrados</span><span class="ajS" id="ls-motores">trocar sem vir aqui</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="local"><span class="ajIc">▣</span><span class="ajTxt"><span class="ajT">Motor local</span><span class="ajS" id="ls-local">funciona sem internet</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="custo"><span class="ajIc">$</span><span class="ajTxt"><span class="ajT">Gasto e limite</span><span class="ajS" id="ls-custo">quanto já foi usado</span></span><span class="ajSeta">›</span></button>
+  </div>
+  <div class="ajGrupoCab">APARÊNCIA</div>
+  <div class="ajGrupo">
+    <button class="ajLinha" data-sub="aparencia"><span class="ajIc">◐</span><span class="ajTxt"><span class="ajT">Modo de cor</span><span class="ajS" id="ls-aparencia">claro, escuro e paleta</span></span><span class="ajSeta">›</span></button>
+  </div>
+  <div class="ajGrupoCab">DADOS</div>
+  <div class="ajGrupo">
+    <button class="ajLinha" data-sub="nuvem"><span class="ajIc">☁</span><span class="ajTxt"><span class="ajT">Nuvem</span><span class="ajS" id="ls-nuvem">sincroniza seus aparelhos</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="biblioteca"><span class="ajIc">▤</span><span class="ajTxt"><span class="ajT">Biblioteca</span><span class="ajS" id="ls-biblioteca">o que o coletor trouxe</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="espaco"><span class="ajIc">▥</span><span class="ajTxt"><span class="ajT">Armazenamento</span><span class="ajS" id="ls-espaco">espaço usado no aparelho</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="copia"><span class="ajIc">⇅</span><span class="ajTxt"><span class="ajT">Exportar e importar</span><span class="ajS" id="ls-copia">cópia de segurança</span></span><span class="ajSeta">›</span></button>
+  </div>
+  <div class="ajGrupoCab">AVANÇADO</div>
+  <div class="ajGrupo">
+    <button class="ajLinha" data-sub="evolucao"><span class="ajIc">✦</span><span class="ajTxt"><span class="ajT">Evolução</span><span class="ajS" id="ls-evolucao">módulos novos, você aprova</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="plantao"><span class="ajIc">◷</span><span class="ajTxt"><span class="ajT">Plantão</span><span class="ajS" id="ls-plantao">o que rodou sem você</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="autoteste"><span class="ajIc">✓</span><span class="ajTxt"><span class="ajT">Auto-teste</span><span class="ajS" id="ls-autoteste">o app se verifica</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="python"><span class="ajIc">⌨</span><span class="ajTxt"><span class="ajT">Laboratório Python</span><span class="ajS" id="ls-python">roda código de verdade</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="atualizar"><span class="ajIc">↑</span><span class="ajTxt"><span class="ajT">Atualizar o app</span><span class="ajS" id="ls-atualizar">publicar versão nova</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="ondas"><span class="ajIc">≈</span><span class="ajTxt"><span class="ajT">Ondas</span><span class="ajS" id="ls-ondas">dados por som, sem rede</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="sinais"><span class="ajIc">⌁</span><span class="ajTxt"><span class="ajT">Outros sinais</span><span class="ajS" id="ls-sinais">Bluetooth e NFC</span></span><span class="ajSeta">›</span></button>
+  </div>
+</div>
+<div class="subpg" id="sub-espacos" data-tit="Espaços">
+  <div class="card">
+    <div class="lbl">Espaços</div>
+    <p class="note" style="margin:0 0 12px">Cada espaço tem memória, conversas e nuvem
+    separadas — nada se mistura. Novos clientes entram como espaços próprios.</p>
+    <div class="espacos" id="espacosAjustes">
+      <button class="esp on" data-esp="nucleo">Núcleo · CPF</button>
+      <button class="esp" data-esp="operacao">Operação · CNPJ</button>
+    </div>
+  </div>
+</div>
 
-      <div class="card">
+
+      <div class="subpg" id="sub-motor" data-tit="Motor"><div class="card">
         <div class="lbl">Motor</div>
         <select class="field" id="prov">
           <option value="gemini">Google Gemini — grátis, sem cartão</option>
@@ -584,9 +695,9 @@
         <p class="note" style="margin:12px 0 0;font-size:12.5px">
           Gemini: aistudio.google.com · Groq: console.groq.com · OpenRouter: openrouter.ai<br>
           A chave fica só neste aparelho.</p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-motores" data-tit="Motores cadastrados"><div class="card">
         <div class="lbl">Motores</div>
         <p class="note" style="margin:0 0 12px">Cadastre quantos quiser. Para trocar durante a
         conversa, toque no nome do motor no rodapé — não precisa voltar aqui.</p>
@@ -617,9 +728,9 @@
           <button class="ghost" id="testarMotor">Testar antes</button>
         </div>
         <p id="mStatus" class="status" style="display:none"></p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-aparencia" data-tit="Modo de cor"><div class="card">
         <div class="lbl">Aparência</div>
         <p class="note" style="margin:0 0 12px">Muda na hora, sem recarregar. Fica salvo neste
         aparelho e vai junto na exportação.</p>
@@ -675,9 +786,9 @@
           <button class="ghost" id="resetVisual">Voltar ao padrão</button>
         </div>
         <p id="visualStatus" class="status" style="display:none"></p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-custo" data-tit="Gasto e limite"><div class="card">
         <div class="lbl">Gasto do motor pago</div>
         <div id="custoResumo" class="note" style="margin:0 0 10px">nenhum gasto ainda.</div>
         <div class="barra" style="margin-bottom:12px"><div id="custoBarra" style="width:0%"></div></div>
@@ -698,9 +809,9 @@
         do site do fornecedor. Ao bater o limite, o motor pago para de responder e o app avisa —
         você decide se aumenta. O contador é estimativa baseada no que a API reporta, não a fatura
         oficial: confira no painel do fornecedor de vez em quando.</p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-local" data-tit="Motor local"><div class="card">
         <div class="lbl">Motor local (offline)</div>
         <p class="note" style="margin:0 0 10px">llama.cpp ou Ollama no Termux. Configurado, o app
         cai pra ele sozinho se a internet sumir.</p>
@@ -711,9 +822,9 @@
           <button class="ghost" id="testarLocal">Testar</button>
         </div>
         <p id="localStatus" class="status" style="display:none"></p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-nuvem" data-tit="Nuvem"><div class="card">
         <div class="lbl">Nuvem — sincroniza seus aparelhos</div>
         <p class="note" style="margin:0 0 10px">Sobe cifrado: o GitHub guarda texto embaralhado, sem
         a senha nem ele lê. Núcleo e Operação têm arquivos separados — não se misturam nem na nuvem.</p>
@@ -725,9 +836,9 @@
           <button class="ghost" id="baixar">Baixar</button>
         </div>
         <p id="nuvemStatus" class="status" style="display:none"></p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-biblioteca" data-tit="Biblioteca"><div class="card">
         <div class="lbl">Biblioteca</div>
         <p class="note" style="margin:0 0 10px">Importe o <code>biblioteca-para-o-app.json</code>
         gerado pelo coletor no Termux.</p>
@@ -736,9 +847,9 @@
           <button class="ghost" id="limparBib">Limpar</button>
           <input type="file" id="impBib" accept="application/json" style="display:none">
         </div>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-evolucao" data-tit="Evolução"><div class="card">
         <div class="lbl">Evolução — a IA escreve, você aprova</div>
         <p class="note" style="margin:0 0 10px">Peça um módulo novo. A IA escreve o código, você lê e
         decide. O núcleo do app nunca é tocado: módulo quebrado se desliga, o sistema continua de pé.</p>
@@ -748,9 +859,9 @@
         <button class="primary" id="gerarModulo">Pedir à IA</button>
         <p id="moduloStatus" class="status" style="display:none"></p>
         <div id="modulos" style="margin-top:14px"></div>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-plantao" data-tit="Plantão"><div class="card">
         <div class="lbl">Plantão — o que rodou sem você</div>
         <p class="note" style="margin:0 0 10px">O orquestrador roda no Termux com a tela apagada:
         coleta, lê o que mudou e aplica o Filtro. Aqui você busca o que ele deixou.</p>
@@ -762,18 +873,18 @@
         </div>
         <p id="orqStatus" class="status" style="display:none"></p>
         <div id="saidaPlantao" style="margin-top:12px"></div>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-autoteste" data-tit="Auto-teste"><div class="card">
         <div class="lbl">Auto-teste — o app se verifica</div>
         <p class="note" style="margin:0 0 10px">Exercita cada peça crítica de verdade: grava e lê,
         monta prompt, cifra e decifra, roda ferramenta, testa a caixa isolada. Rode depois de
         qualquer mudança, antes de confiar.</p>
         <button class="primary" id="rodarTeste">Rodar auto-teste</button>
         <div id="saidaTeste" style="margin-top:12px"></div>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-ondas" data-tit="Ondas"><div class="card">
         <div class="lbl">Ondas — receptor e transmissor</div>
         <p class="note" style="margin:0 0 10px">O aparelho já tem um transmissor (alto-falante) e um
         receptor (microfone) de ondas acústicas. Dois celulares trocam dados por som, sem internet,
@@ -794,9 +905,9 @@
         </div>
         <div class="saida" id="rxOndas" style="display:none"></div>
         <p id="ondasStatus" class="status" style="display:none"></p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-sinais" data-tit="Outros sinais"><div class="card">
         <div class="lbl">Outros sinais</div>
         <p class="note" style="margin:0 0 10px">O que o aparelho alcança sem hardware extra.
         Bluetooth e NFC falam direto com o outro dispositivo — não passa por servidor de ninguém.</p>
@@ -806,9 +917,9 @@
           <button class="ghost" id="btnRede">Rede</button>
         </div>
         <div class="saida" id="sinaisStatus" style="display:none"></div>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-espaco" data-tit="Armazenamento"><div class="card">
         <div class="lbl">Armazenamento</div>
         <div id="espacoInfo" class="note" style="margin:0 0 12px">medindo…</div>
         <div class="barra" style="margin-bottom:12px"><div id="espacoBarra" style="width:0%"></div></div>
@@ -818,9 +929,9 @@
           <button class="ghost" id="limparHist">Limpar conversas antigas</button>
         </div>
         <p id="espacoStatus" class="status" style="display:none"></p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-python" data-tit="Laboratório Python"><div class="card">
         <div class="lbl">Laboratório Python</div>
         <p class="note" style="margin:0 0 10px">Python de verdade rodando no navegador. Os arquivos
         que você anexou ficam disponíveis na variável <code>arquivos</code> — dicionário com o nome
@@ -839,9 +950,9 @@ for nome, conteudo in arquivos.items():
           <button class="ghost" id="pedirPy">Pedir código à IA</button>
         </div>
         <div class="saida" id="pySaida" style="display:none"></div>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-atualizar" data-tit="Atualizar o app"><div class="card">
         <div class="lbl">Atualizar o app</div>
         <p class="note" style="margin:0 0 10px">Escolha o arquivo novo que você baixou — o app publica
         direto no seu repositório do GitHub, sem precisar abrir o site.</p>
@@ -858,16 +969,16 @@ for nome, conteudo in arquivos.items():
         propósito: esse precisa de permissão pra escrever no repositório, que é mais poderosa que
         só gist. Crie um token fino (Fine-grained), preso só a este repositório, com permissão
         "Contents: Read and write". O app leva ~1 minuto pra publicar depois de enviar.</p>
-      </div>
+      </div></div>
 
-      <div class="card">
+      <div class="subpg" id="sub-copia" data-tit="Exportar e importar"><div class="card">
         <div class="lbl">Cópia local</div>
         <div class="row">
           <button class="ghost" id="exp">Exportar espaço</button>
           <button class="ghost" id="impBtn">Importar</button>
           <input type="file" id="imp" accept="application/json" style="display:none">
         </div>
-      </div>
+      </div></div>
 
     </div>
   </div>
@@ -4775,7 +4886,8 @@ function renderSub(){
     (biblio.length ? " · " + biblio.length + " na biblioteca" : "") +
     " · motor: " + nome + (navigator.onLine ? "" : " · offline") +
     (fila.length ? " · " + fila.length + " na fila" : "");
-  $("#selo").textContent = (espaco === "nucleo" ? "Núcleo · CPF" : "Operação · CNPJ") +
+  const _selo = $("#selo");
+  if(_selo) _selo.textContent = (espaco === "nucleo" ? "Núcleo · CPF" : "Operação · CNPJ") +
     (ehNativo() ? " · nativo" : "");
   document.body.classList.toggle("operacao", espaco === "operacao");
 }
@@ -5198,6 +5310,7 @@ function irPara(secao){
     const p = $("#pane-" + secao);
     if(p) p.classList.add("on");
   }
+  if(secao === "ajustes"){ fecharSub(); }
   if(secao === "ajustes"){ medirEspaco(); preencherCusto(); preencherVisual(); renderMotores(); }
   if(secao === "decisoes") renderDecisoes();
   if(secao === "malha") renderMalhaPane();
@@ -5302,6 +5415,58 @@ function aplicarTema(claro){
 liga("#btnTema", "click", function(){
   aplicarTema(!document.body.classList.contains("claro"));
 });
+
+
+/* Espaço trocado em Ajustes reflete no menu lateral e no resumo da linha */
+document.addEventListener("click", function(e){
+  const b = e.target.closest ? e.target.closest("#espacosAjustes [data-esp]") : null;
+  if(!b) return;
+  const espelho = document.querySelector('.menu-fundo [data-esp="'+b.dataset.esp+'"]');
+  if(espelho && !espelho.classList.contains("on")) espelho.click();
+  document.querySelectorAll("#espacosAjustes .esp").forEach(function(x){x.classList.remove("on");});
+  b.classList.add("on");
+  atualizarResumosAjustes();
+});
+
+/* ═══ AJUSTES — navegação índice ⇄ subpágina ═══ */
+function abrirSub(sid){
+  const pg=$("#sub-"+sid); if(!pg) return;
+  $("#ajIndice").classList.add("oculto");
+  document.querySelectorAll(".subpg").forEach(function(x){x.classList.remove("on");});
+  pg.classList.add("on");
+  $("#topoTitulo").textContent = pg.dataset.tit || "Ajustes";
+  const v=$("#btnVoltar"); if(v){ v.style.display="flex"; v.dataset.volta="ajustes"; }
+  if(sid==="custo" && typeof renderCusto==="function") renderCusto();
+  if(sid==="espaco" && typeof medirEspaco==="function") medirEspaco();
+  if(sid==="motores" && typeof renderMotores==="function") renderMotores();
+  if(sid==="aparencia" && typeof preencherVisual==="function") preencherVisual();
+}
+function fecharSub(){
+  document.querySelectorAll(".subpg").forEach(function(x){x.classList.remove("on");});
+  $("#ajIndice").classList.remove("oculto");
+  $("#topoTitulo").textContent="Ajustes";
+  const v=$("#btnVoltar"); if(v){ v.style.display="none"; v.dataset.volta=""; }
+  atualizarResumosAjustes();
+}
+/* o subtítulo de cada linha mostra o valor atual, como numa tela de configurações */
+function atualizarResumosAjustes(){
+  const put=function(id,txt){ const e=$("#ls-"+id); if(e&&txt) e.textContent=txt; };
+  try{
+    put("espacos", (typeof espaco!=="undefined" && espaco==="operacao") ? "Operação · CNPJ" : "Núcleo · CPF");
+    const mn=$("#motorNome"); if(mn) put("motor", mn.textContent.trim()||"nenhum configurado");
+    if(typeof motoresSalvos==="function"){
+      const n=motoresSalvos().length;
+      put("motores", n? (n+" cadastrado"+(n>1?"s":"")) : "nenhum cadastrado");
+    }
+    const t=document.querySelector('[data-tema].on');
+    put("aparencia", t? t.textContent.trim() : "Latão");
+  }catch(e){}
+}
+document.addEventListener("click", function(e){
+  const alvo=e.target.closest ? e.target.closest("[data-sub]") : null;
+  if(alvo){ abrirSub(alvo.dataset.sub); }
+});
+
 liga("#btnConfig", "click", function(){ irPara("ajustes"); });
 liga("#novaDoMenu", "click", function(){
   novaConversa(); irParaChat();
@@ -5832,6 +5997,8 @@ liga("#projetos", "input", function(e){
 
 /* ── Topo contextual ── */
 liga("#btnVoltar", "click", function(){
+  /* Dentro de Ajustes, volta pro índice em vez de sair da seção */
+  if(this.dataset.volta === "ajustes"){ fecharSub(); return; }
   /* Do chat volta pra lista de conversas; do projeto, pra lista de projetos */
   if($("#pane-projeto").classList.contains("on")) irPara("projetos");
   else irPara("conselho");
@@ -6548,6 +6715,19 @@ window.addEventListener("offline", renderSub);
 
 if("serviceWorker" in navigator)
   window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+
+/* A tela inicial sai sozinha assim que o app termina de montar */
+(function(){
+  function sair(){
+    const sp=document.getElementById("splash"); if(!sp) return;
+    sp.classList.add("sai");
+    setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); }, 500);
+  }
+  if(document.readyState==="complete") setTimeout(sair,650);
+  else window.addEventListener("load", function(){ setTimeout(sair,650); });
+  setTimeout(sair, 4000);   /* trava de segurança: nunca deixa a tela presa */
+})();
+
 </script>
 </body>
 </html>
