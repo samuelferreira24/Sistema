@@ -271,6 +271,19 @@
     padding:6px 13px;border-radius:15px;font-size:12.5px;font-family:inherit;cursor:pointer}
   .dtrad:active{background:var(--line)}
 
+
+  /* ═══ LEITURA ═══ */
+  .leiTitulo{font-size:20px;line-height:1.3;margin:0 0 8px;color:var(--txt);font-weight:600}
+  .leiFonte{font-size:12.5px;color:var(--muted);margin-bottom:14px;font-family:ui-monospace,monospace}
+  .leiTexto{font-size:15.5px;line-height:1.65;color:var(--txt);margin:16px 0 20px;
+    white-space:pre-wrap;word-break:break-word}
+  .doc[data-abrir]{cursor:pointer}
+  .doc[data-abrir]:active{background:var(--line)}
+
+
+  .bibMundo{display:block;margin-top:3px;color:var(--brass);font-size:11.5px;
+    letter-spacing:.03em;font-style:normal}
+
   .pane{flex:1;min-height:0;display:none;flex-direction:column}
   .pane.on{display:flex}
   /* O que rola precisa esticar dentro do pane. Sem isto a altura vira zero:
@@ -673,6 +686,9 @@
     <div class="scroll body" id="lista"></div>
   </div>
 
+  <div class="pane" id="pane-leitura">
+    <div class="scroll body" id="leituraCorpo"></div>
+  </div>
   <div class="pane" id="pane-ajustes">
     <div class="scroll body">
 <div class="ajIndice" id="ajIndice">
@@ -3296,12 +3312,49 @@ function recuperar(q){
     top.indexOf(b) < 0);
   return fix.concat(top).slice(0,9);
 }
+/* Você pergunta em português; quase tudo que o coletor traz está em inglês.
+   Sem ponte de idioma, "regulação IA" nunca acha "AI regulation". */
+const PONTE_IDIOMA = {
+  regulacao:["regulation","regulatory","policy"], regulamentacao:["regulation","compliance"],
+  lei:["law","act","legislation"], juridico:["legal"], contrato:["contract"],
+  inteligencia:["intelligence"], artificial:["artificial"], ia:["ai","artificial intelligence"],
+  aprendizado:["learning"], maquina:["machine"], modelo:["model"], modelos:["models"],
+  rede:["network"], redes:["networks"], neural:["neural"], treino:["training"],
+  treinamento:["training"], dados:["data"], dado:["data"], banco:["database"],
+  agente:["agent"], agentes:["agents"], ferramenta:["tool"], ferramentas:["tools"],
+  seguranca:["security","safety"], ataque:["attack"], defesa:["defense"],
+  privacidade:["privacy"], risco:["risk"], falha:["failure","flaw"],
+  saude:["health"], medicina:["medical","medicine"], clinica:["clinic","clinical"],
+  economia:["economy","economic"], inflacao:["inflation"], juros:["interest rate"],
+  mercado:["market"], preco:["price","pricing"], custo:["cost"], imposto:["tax"],
+  empresa:["company","business"], negocio:["business"], cliente:["customer","client"],
+  energia:["energy"], clima:["climate"], guerra:["war","conflict"], eleicao:["election"],
+  celular:["mobile","phone","android"], programacao:["programming","code"],
+  codigo:["code"], servidor:["server"], nuvem:["cloud"], memoria:["memory"],
+  busca:["search"], pesquisa:["research","search"], estudo:["study"],
+  artigo:["paper","article"], noticia:["news"], mundo:["world","global"],
+  brasil:["brazil","brazilian"], china:["china","chinese"], europa:["europe","european"]
+};
+function expandirConsulta(palavras){
+  const fora = [];
+  palavras.forEach(function(p){
+    fora.push(p);
+    if(PONTE_IDIOMA[p]) PONTE_IDIOMA[p].forEach(function(e){ fora.push(norm(e)); });
+  });
+  return fora;
+}
+
 function buscarBiblio(termo){
   /* Palavras curtas e vazias não ajudam a achar nada — saem do cálculo */
   const VAZIAS = ["de","da","do","que","com","para","por","uma","um","os","as","the","and",
                   "of","in","to","a","o","e","sobre","como"];
-  const t = norm(termo).split(/\s+/).filter(function(p){
-    return p.length > 2 && VAZIAS.indexOf(p) < 0; });
+  /* Sigla de duas letras carrega muito significado em português — IA, UE,
+     EUA, ML, PIB. Descartar por tamanho jogava fora justo o termo central. */
+  const base = norm(termo).split(/\s+/).filter(function(p){
+    return p.length >= 2 && VAZIAS.indexOf(p) < 0; });
+  /* três camadas: o que você escreveu, o atalho offline PT→EN, e o que o
+     motor traduziu para as línguas que a biblioteca realmente tem */
+  const t = expandirConsulta(base).concat(termosMundo.map(norm));
   return biblio.filter(d => filtroDom === "todos" || d.dominio === filtroDom)
     .map(d => {
       const tit = norm(d.titulo || ""), corpo = norm(d.corpo || ""), fonte = norm(d.fonte || "");
@@ -3314,9 +3367,10 @@ function buscarBiblio(termo){
         else if(corpo.includes(raiz)){ s += 1.2; casou++; }
         else if(fonte.includes(p)) { s += 1; casou++; }
       });
-      if(casou > 1) s *= 1 + (casou - 1) * .35;   /* achar várias palavras vale mais */
+      /* a expansão de idioma não pode inflar a pontuação: conta acerto único */
+      if(casou > 1) s *= 1 + Math.min(casou - 1, base.length) * .35;
       s += (4 - (d.tier || 3)) * .6;              /* fonte primária sobe */
-      return {d, s, casou: !t.length || casou > 0};
+      return {d, s, casou: !base.length || casou > 0};
     }).filter(x => x.casou).sort((a,b) => b.s - a.s).map(x => x.d);
 }
 
@@ -4907,7 +4961,8 @@ function renderAcervo(){
 
   /* Buscando: lista por relevância. Sem busca: pastas por domínio. */
   if(termo && termo.trim()){
-    l.innerHTML = '<div class="bibNota">' + itens.length + ' resultado(s) por relevância</div>' +
+    l.innerHTML = '<div class="bibNota">' + itens.length + ' resultado(s) por relevância' +
+      '<span id="bibNotaMundo" class="bibMundo">' + esc(notaMundo) + '</span></div>' +
       itens.slice(0,120).map(cartaoDoc).join("");
     return;
   }
@@ -4949,20 +5004,32 @@ function idiomaDe(d){
   return "—";
 }
 
+/* Biblioteca antiga não tem id. Sem isso, traduzir e abrir não funcionam —
+   gera um a partir do conteúdo, igual ao que o coletor faz agora. */
+function idDoc(d){
+  if(d.id) return d.id;
+  const semente = (d.url || "") + "|" + (d.titulo || "");
+  let h = 0;
+  for(let i = 0; i < semente.length; i++){ h = ((h << 5) - h + semente.charCodeAt(i)) | 0; }
+  d.id = "b" + Math.abs(h).toString(16);
+  return d.id;
+}
+
 function cartaoDoc(d){
   const t = TIERS[d.tier || 3];
   const link = d.url ? ' · <a class="dlink" href="' + esc(d.url) +
     '" target="_blank" rel="noopener">abrir fonte</a>' : "";
   const al = d.suspeito ? '<span class="tag t-amber">neutralizado</span>' : "";
+  const did = idDoc(d);
   const lg = idiomaDe(d);
   const estrangeiro = lg !== "pt" && lg !== "—";
-  const vendo = traduzidos[d.id] || null;
+  const vendo = traduzidos[did] || null;
   const corpo = vendo ? vendo : (d.corpo || "");
   const botao = estrangeiro
-    ? '<button class="dtrad" data-trad="' + esc(d.id) + '">' +
+    ? '<button class="dtrad" data-trad="' + esc(did) + '">' +
       (vendo ? "ver original" : "traduzir") + '</button>'
     : "";
-  return '<div class="doc"><div class="dhead"><span class="tier ' + t.cls + '">' + t.rotulo +
+  return '<div class="doc" data-abrir="' + esc(did) + '"><div class="dhead"><span class="tier ' + t.cls + '">' + t.rotulo +
     '</span><span class="tag t-muted">' + esc(d.dominio||"—") + '</span>' +
     '<span class="tag t-muted">' + lg + '</span>' + al +
     (vendo ? '<span class="tag t-acento">traduzido</span>' : "") + '</div>' +
@@ -5703,6 +5770,129 @@ document.addEventListener("click", function(e){
 });
 aplicarModoCor();
 
+
+
+/* ═══ BUSCA NO MUNDO — a consulta vai para as línguas que existem na base ═══
+   Dicionário fixo PT→EN não serve: o GDELT traz ~100 línguas e a Wikipédia
+   ~300. Em vez de tentar prever, o app olha o que a biblioteca REALMENTE tem
+   e manda o motor traduzir a consulta só para essas línguas. Base muda,
+   busca acompanha, sem ninguém editar lista. */
+
+function idiomasNaBiblioteca(){
+  const c = {};
+  biblio.forEach(function(d){
+    const l = idiomaDe(d);
+    if(l && l !== "—") c[l] = (c[l] || 0) + 1;
+  });
+  return Object.keys(c).sort(function(a,b){ return c[b] - c[a]; });
+}
+
+const NOME_IDIOMA = {en:"inglês", es:"espanhol", zh:"chinês", ru:"russo", ar:"árabe",
+  fr:"francês", de:"alemão", ja:"japonês", ko:"coreano", it:"italiano", hi:"híndi",
+  tr:"turco", nl:"holandês", fa:"persa", id:"indonésio", vi:"vietnamita", th:"tailandês",
+  he:"hebraico", pl:"polonês", uk:"ucraniano", sv:"sueco", el:"grego", bn:"bengali",
+  ur:"urdu", pt:"português"};
+
+/* Tradução de consulta custa uma chamada ao motor. Guardada, custa zero
+   na segunda vez — e a mesma pergunta se repete muito. */
+function cacheConsulta(chave){
+  try{ return JSON.parse(localStorage.getItem("sa:qx:" + chave) || "null"); }
+  catch(e){ return null; }
+}
+function guardarConsulta(chave, termos){
+  try{ localStorage.setItem("sa:qx:" + chave, JSON.stringify(termos)); }catch(e){}
+}
+
+async function expandirPeloMotor(termo){
+  const idiomas = idiomasNaBiblioteca().filter(function(l){ return l !== "pt"; });
+  if(!idiomas.length) return [];
+  const chave = norm(termo) + "|" + idiomas.join(",");
+  const guardado = cacheConsulta(chave);
+  if(guardado) return guardado;
+
+  const nomes = idiomas.map(function(l){ return (NOME_IDIOMA[l] || l); }).join(", ");
+  const r = await chamarMotor([{papel:"user", texto:
+    "Traduza os termos de busca abaixo para estas línguas: " + nomes + ".\n" +
+    "Devolva SÓ os termos traduzidos, separados por vírgula, sem explicação, " +
+    "sem numeração e sem repetir a língua.\n\nTermos: " + termo}]);
+  const termos = (r || "").split(/[,\n;]+/)
+    .map(function(x){ return x.trim(); })
+    .filter(function(x){ return x && x.length > 1 && x.length < 60; })
+    .slice(0, 40);
+  guardarConsulta(chave, termos);
+  return termos;
+}
+
+/* Termos vindos do motor entram junto com os originais e refazem a busca */
+let termosMundo = [], notaMundo = "";
+async function buscarNoMundo(termo){
+  const nota = $("#bibNotaMundo");
+  if(!termo || !termo.trim()){ termosMundo = []; notaMundo = ""; return; }
+  const idiomas = idiomasNaBiblioteca().filter(function(l){ return l !== "pt"; });
+  if(!idiomas.length) return;
+  notaMundo = "procurando também em " +
+    idiomas.map(function(l){ return NOME_IDIOMA[l] || l; }).join(", ") + "…";
+  if(nota) nota.textContent = notaMundo;
+  try{
+    termosMundo = await expandirPeloMotor(termo);
+    notaMundo = termosMundo.length
+      ? "busca ampliada para " + idiomas.length + " língua(s): " +
+        idiomas.map(function(l){ return NOME_IDIOMA[l] || l; }).join(", ")
+      : "";
+    renderAcervo();
+  }catch(err){
+    /* Sem motor ligado a busca não morre: continua com o que dá offline. */
+    termosMundo = [];
+    notaMundo = "só em português e inglês — ligue um motor para buscar nas outras " +
+      idiomas.length + " língua(s)";
+    renderAcervo();
+  }
+}
+
+/* ═══ LEITURA — o item abre dentro do app, inteiro ═══
+   O cartão mostra resumo cortado. Tocar nele abre o texto completo aqui,
+   com o botão de traduzir do lado, sem jogar você pro navegador. */
+let docAberto = null;
+
+function abrirDoc(id){
+  const d = biblio.filter(function(x){ return idDoc(x) === id; })[0];
+  if(!d) return;
+  docAberto = id;
+  const lg = idiomaDe(d);
+  const estrangeiro = lg !== "pt" && lg !== "—";
+  const vendo = traduzidos[id] || null;
+  const t = TIERS[d.tier || 3];
+  const corpo = vendo ? vendo : (d.corpo || "");
+  const el = $("#leituraCorpo");
+  el.innerHTML =
+    '<div class="dhead" style="margin-bottom:14px">' +
+      '<span class="tier ' + t.cls + '">' + t.rotulo + '</span>' +
+      '<span class="tag t-muted">' + esc(d.dominio || "—") + '</span>' +
+      '<span class="tag t-muted">' + lg + '</span>' +
+      (vendo ? '<span class="tag t-acento">traduzido</span>' : "") +
+    '</div>' +
+    '<h2 class="leiTitulo">' + esc(d.titulo || "sem título") + '</h2>' +
+    '<div class="leiFonte">' + esc(d.fonte || "") +
+      (d.coletado ? " · " + esc(d.coletado) : "") + '</div>' +
+    (estrangeiro ? '<button class="dtrad" data-trad="' + esc(id) + '">' +
+       (vendo ? "ver original" : "traduzir") + '</button>' : "") +
+    '<div class="leiTexto">' + (corpo ? esc(corpo).replace(/\n/g, "<br>")
+       : '<span class="note">Este item veio só com o resumo. Use “abrir fonte” para o texto completo.</span>') + '</div>' +
+    (d.url ? '<a class="dlink" href="' + esc(d.url) + '" target="_blank" rel="noopener">abrir fonte original ↗</a>' : "");
+  $("#pane-leitura").classList.add("on");
+  document.querySelectorAll(".pane").forEach(function(p){
+    if(p.id !== "pane-leitura") p.classList.remove("on"); });
+  $("#topoTitulo").textContent = "Leitura";
+  const v = $("#btnVoltar");
+  if(v){ v.style.display = "flex"; v.dataset.volta = "leitura"; }
+}
+function fecharDoc(){
+  docAberto = null;
+  $("#pane-leitura").classList.remove("on");
+  const v = $("#btnVoltar"); if(v){ v.style.display = "none"; v.dataset.volta = ""; }
+  irPara("acervo");
+}
+
 /* ═══ PONTE — o Termux como serviço, sem abrir o Termux ═══ */
 const PONTE = "http://127.0.0.1:8099";
 function ponteToken(){ return localStorage.getItem("sa:ponte") || ""; }
@@ -5719,14 +5909,29 @@ async function ponteTestar(){
   try{
     await ponteChamar("/saude");
     const c = await ponteChamar("/comandos");
-    if(c.erro) throw new Error(c.erro);
+    if(c.erro) throw new Error("401 " + c.erro);
     if(e) e.textContent = "conectada · " + c.comandos.length + " comandos disponíveis";
     const r = $("#ls-termux"); if(r) r.textContent = "conectada";
     const cx = $("#ponteComandos");
     if(cx) cx.innerHTML = c.comandos.map(function(n){
       return '<button class="ghost" data-pcmd="' + n + '">' + n + '</button>'; }).join("");
   }catch(err){
-    if(e) e.textContent = "não achei a Ponte. Ligue no Termux: python ~/sa/ponte.py &";
+    /* Mensagem genérica escondia a causa. As três causas reais são
+       diferentes e o conserto de cada uma é outro — então diga qual é. */
+    const httpsBloqueando = location.protocol === "https:";
+    let msg;
+    if(err && err.message && /Failed to fetch|NetworkError|Load failed/i.test(err.message)){
+      msg = httpsBloqueando
+        ? "O navegador bloqueou a chamada porque o app está em https e a Ponte "
+          + "é http local. Duas saídas: usar o APK (não bloqueia), ou abrir o app "
+          + "em http://localhost. A Ponte pode estar ligada normalmente."
+        : "Não achei a Ponte. Ligue no Termux: python ~/sa/ponte.py &";
+    } else if(err && /401|token/i.test(err.message || "")){
+      msg = "A Ponte respondeu, mas recusou o token. Rode: python ~/sa/ponte.py --token";
+    } else {
+      msg = "Falhou: " + (err && err.message ? err.message : err);
+    }
+    if(e) e.textContent = msg;
     const r = $("#ls-termux"); if(r) r.textContent = "ponte desligada";
   }
 }
@@ -5773,13 +5978,21 @@ liga("#lista", "click", function(e){
   if(p){ const n = p.dataset.pasta; pastasAbertas[n] = !pastasAbertas[n]; renderAcervo(); return; }
   const tr = e.target.closest ? e.target.closest("[data-trad]") : null;
   if(tr){ alternarTraducao(tr.dataset.trad); return; }
+  if(e.target.closest("a")) return;          /* deixa o link fazer o que ele faz */
+  const ab = e.target.closest ? e.target.closest("[data-abrir]") : null;
+  if(ab){ abrirDoc(ab.dataset.abrir); }
+});
+/* o traduzir da página de leitura também precisa responder */
+liga("#pane-leitura", "click", function(e){
+  const tr = e.target.closest ? e.target.closest("[data-trad]") : null;
+  if(tr) alternarTraducao(tr.dataset.trad);
 });
 
 /* Traduz pelo motor já configurado. Guarda a versão traduzida ao lado da
    original — o toque no botão alterna entre as duas, nada é sobrescrito. */
 async function alternarTraducao(id){
-  if(traduzidos[id]){ delete traduzidos[id]; renderAcervo(); return; }
-  const d = biblio.filter(function(x){ return x.id === id; })[0];
+  if(traduzidos[id]){ delete traduzidos[id]; renderAcervo(); if(docAberto===id) abrirDoc(id); return; }
+  const d = biblio.filter(function(x){ return idDoc(x) === id; })[0];
   if(!d || !d.corpo) return;
   traduzidos[id] = "traduzindo…"; renderAcervo();
   try{
@@ -5789,6 +6002,7 @@ async function alternarTraducao(id){
     traduzidos[id] = (r || "").trim() || "não foi possível traduzir";
   }catch(err){ traduzidos[id] = "falha ao traduzir: " + (err.message || err); }
   renderAcervo();
+  if(docAberto === id) abrirDoc(id);
 }
 
 /* "Pedir à IA" agora explica o que quer, não o nome do arquivo:
@@ -6286,7 +6500,17 @@ liga("#imperio", "change", function(e){
 });
 
 let deb;
-liga("#q", "input", function(){ clearTimeout(deb); deb = setTimeout(renderAcervo, 150); });
+let debMundo;
+liga("#q", "input", function(){
+  clearTimeout(deb);
+  deb = setTimeout(renderAcervo, 150);
+  /* A busca local responde na hora. A tradução da consulta chama o motor,
+     então espera você parar de digitar — senão gasta chamada a cada tecla. */
+  termosMundo = [];
+  clearTimeout(debMundo);
+  const termo = this.value;
+  debMundo = setTimeout(function(){ buscarNoMundo(termo); }, 900);
+});
 liga("#perguntarIA", "click", function(){
   if(modoAcervo === "biblioteca") perguntarAcervo();
   else {
@@ -6379,6 +6603,7 @@ liga("#projetos", "input", function(e){
 /* ── Topo contextual ── */
 liga("#btnVoltar", "click", function(){
   /* Dentro de Ajustes, volta pro índice em vez de sair da seção */
+  if(this.dataset.volta === "leitura"){ fecharDoc(); return; }
   if(this.dataset.volta === "ajustes"){ fecharSub(); return; }
   /* Do chat volta pra lista de conversas; do projeto, pra lista de projetos */
   if($("#pane-projeto").classList.contains("on")) irPara("projetos");
@@ -7132,7 +7357,9 @@ if("serviceWorker" in navigator)
     /* 2. menu lateral */
     const menu = document.querySelector("#menuLateral.aberto");
     if(menu){ if(typeof fecharMenu==="function") fecharMenu(); return true; }
-    /* 3. subpágina de ajustes */
+    /* 3. página de leitura */
+    if($("#pane-leitura") && $("#pane-leitura").classList.contains("on")){ fecharDoc(); return true; }
+    /* 3b. subpágina de ajustes */
     if(document.querySelector(".subpg.on")){ fecharSub(); return true; }
     /* 4. dentro de um chat ou projeto → volta pra lista */
     if($("#pane-projeto") && $("#pane-projeto").classList.contains("on")){ irPara("projetos"); return true; }
