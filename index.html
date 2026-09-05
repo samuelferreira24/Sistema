@@ -517,6 +517,7 @@
         <button class="cbtn cenviar" id="send" title="Enviar" disabled>↑</button>
       </div>
     </div>
+  </div>
 
   <div class="pane" id="pane-projeto">
     <div class="scroll body" id="telaProjeto"></div>
@@ -1152,6 +1153,15 @@ const arquivos = () => { const p = proj(); return p ? p.arquivos : []; };
 const base = () => espaco === "nucleo" ? METODO : OPERACAO_BASE;
 const mem = () => base().concat(extras);
 const $ = s => document.querySelector(s);
+
+/* ═══ LIGA — ligação de evento à prova de elemento removido ═══ */
+const FALTANDO = [];
+function liga(sel){
+  const el = $(sel);
+  if(!el){ FALTANDO.push(sel); return false; }
+  el.addEventListener.apply(el, [].slice.call(arguments, 1));
+  return true;
+}
 const k = n => "sa:" + espaco + ":" + n;
 
 const IMPERIO_PADRAO = () => ({
@@ -5277,8 +5287,8 @@ function renderMenuFixados(){
 Array.prototype.forEach.call(document.querySelectorAll(".mitem"), function(t){
   t.addEventListener("click", function(){ if(t.dataset.ir) irPara(t.dataset.ir); });
 });
-$("#abrirMenu").addEventListener("click", abrirMenuLateral);
-$("#veuMenu").addEventListener("click", fecharMenu);
+liga("#abrirMenu", "click", abrirMenuLateral);
+liga("#veuMenu", "click", fecharMenu);
 /* ═══ TEMA CLARO / ESCURO ═══ */
 function aplicarTema(claro){
   document.body.classList.toggle("claro", claro);
@@ -5289,20 +5299,20 @@ function aplicarTema(claro){
   if(meta) meta.setAttribute("content", claro ? "#FAF8F4" : "#0B0B0D");
   guardar("sa:tema", claro ? "claro" : "escuro");
 }
-$("#btnTema").addEventListener("click", function(){
+liga("#btnTema", "click", function(){
   aplicarTema(!document.body.classList.contains("claro"));
 });
-$("#btnConfig").addEventListener("click", function(){ irPara("ajustes"); });
-$("#novaDoMenu").addEventListener("click", function(){
+liga("#btnConfig", "click", function(){ irPara("ajustes"); });
+liga("#novaDoMenu", "click", function(){
   novaConversa(); irParaChat();
 });
-$("#buscaGlobal").addEventListener("input", function(){
+liga("#buscaGlobal", "input", function(){
   const cursor = this.selectionStart;
   renderListaConversas();
   const campo = $("#buscaGlobal");
   campo.focus(); campo.setSelectionRange(cursor, cursor);
 });
-$("#listaConversas").addEventListener("click", function(e){
+liga("#listaConversas", "click", function(e){
   const ag = e.target.dataset.abrirglobal, fg = e.target.dataset.fixarglobal;
   if(fg){
     const [pid, cid] = fg.split("|");
@@ -5315,7 +5325,7 @@ $("#listaConversas").addEventListener("click", function(e){
     e.target.closest(".convglobal").dataset.abrirglobal);
   if(alvo){ const [pid, cid] = alvo.split("|"); abrirConversa(pid, cid); }
 });
-$("#menuFixados").addEventListener("click", function(e){
+liga("#menuFixados", "click", function(e){
   const t = e.target.closest("[data-abrirglobal],[data-abrirprojfix]");
   if(!t) return;
   if(t.dataset.abrirglobal){
@@ -5336,16 +5346,16 @@ Array.prototype.forEach.call(document.querySelectorAll(".esp"), function(b){
   });
 });
 
-$("#input").addEventListener("input", function(e){
+liga("#input", "input", function(e){
   $("#send").disabled = modo !== "diagnostico" && !e.target.value.trim();
   e.target.style.height = "auto";
   e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
 });
-$("#input").addEventListener("keydown", function(e){
+liga("#input", "keydown", function(e){
   if(e.key === "Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); perguntar(); }
 });
 /* ── Motores ── */
-$("#mPreset").addEventListener("change", function(){
+liga("#mPreset", "change", function(){
   const p = PRESETS[$("#mPreset").value];
   if(!p) return;
   $("#mNome").value = p.nome;
@@ -5359,7 +5369,7 @@ $("#mPreset").addEventListener("change", function(){
   }else d.style.display = "none";
 });
 
-$("#addMotor").addEventListener("click", function(){
+liga("#addMotor", "click", function(){
   const nome = $("#mNome").value.trim();
   const url = $("#mUrl").value.trim();
   const modelo = $("#mModelo").value.trim();
@@ -5382,7 +5392,7 @@ $("#addMotor").addEventListener("click", function(){
   st.textContent = nome + " adicionado. Toque em 'usar' para ativar.";
 });
 
-$("#testarMotor").addEventListener("click", async function(){
+liga("#testarMotor", "click", async function(){
   const st = $("#mStatus"); st.style.display = "block"; st.textContent = "testando…";
   const antes = JSON.parse(JSON.stringify(cfg));
   const tipo = (PRESETS[$("#mPreset").value] || {}).tipo || "openai";
@@ -5400,7 +5410,7 @@ $("#testarMotor").addEventListener("click", async function(){
   }
 });
 
-$("#listaMotores").addEventListener("click", function(e){
+liga("#listaMotores", "click", function(e){
   const u = e.target.dataset.usar, r = e.target.dataset.rmmotor;
   if(u){
     aplicarMotor(motores.filter(function(m){ return m.id === u; })[0]);
@@ -5414,7 +5424,7 @@ $("#listaMotores").addEventListener("click", function(e){
 });
 
 /* Ícones leves em cada resposta: copiar, regenerar, votar */
-$("#feed").addEventListener("click", function(e){
+liga("#feed", "click", function(e){
   const t = e.target;
   const ct = t.dataset.copiartxt, rg = t.dataset.regenerar, vt = t.dataset.voto;
 
@@ -5446,7 +5456,7 @@ $("#feed").addEventListener("click", function(e){
   }
 });
 
-$("#send").addEventListener("click", function(){
+liga("#send", "click", function(){
   if($("#send").classList.contains("parando")){ pararResposta(); return; }
   perguntar();
 });
@@ -5454,26 +5464,6 @@ $("#send").addEventListener("click", function(){
 
 
 /* Trocar de motor sem sair da conversa */
-$("#trocaMotor").addEventListener("click", function(){
-  const lista = motoresSalvos();
-  if(!lista.length){
-    if(confirm("Nenhum motor cadastrado ainda. Ir para Ajustes?"))
-      irPara("ajustes");
-    return;
-  }
-  const nomes = lista.map(function(m, i){ return (i+1) + ") " + m.nome; }).join("\n");
-  const esc2 = prompt("Qual motor usar?\n\n" + nomes + "\n\nDigite o número:");
-  if(!esc2) return;
-  const m = lista[parseInt(esc2, 10) - 1];
-  if(!m) return;
-  aplicarMotor(m);
-});
-
-$("#novaConversaRapida").addEventListener("click", function(){
-  novaConversa("");
-  renderFeed(); renderSub();
-});
-
 /* Copiar bloco de código */
 document.addEventListener("click", function(e){
   if(!e.target.classList || !e.target.classList.contains("copiar")) return;
@@ -5486,7 +5476,7 @@ document.addEventListener("click", function(e){
 });
 
 /* Aba Decisões */
-$("#decisoes").addEventListener("click", function(e){
+liga("#decisoes", "click", function(e){
   const esc2 = e.target.dataset.escolher, ad = e.target.dataset.adiar,
         ap = e.target.dataset.apagardec;
   if(esc2){
@@ -5517,9 +5507,9 @@ $("#decisoes").addEventListener("click", function(e){
 });
 
 /* Aba Malha: mesma lógica do Império, chamada direto */
-$("#malhaPane").addEventListener("click", function(e){ acoesDaMalha(e, renderMalhaPane); });
+liga("#malhaPane", "click", function(e){ acoesDaMalha(e, renderMalhaPane); });
 
-$("#feed").addEventListener("click", function(e){
+liga("#feed", "click", function(e){
   const cp = e.target.dataset.copiar, bx = e.target.dataset.baixar;
   if(cp !== undefined){
     const h = hist.filter(function(x){ return x.id === cp; })[0];
@@ -5544,7 +5534,7 @@ $("#feed").addEventListener("click", function(e){
   if(adj !== undefined) decidir(+adj, "ajustar");
 });
 
-$("#vistaImperio").addEventListener("click", function(e){
+liga("#vistaImperio", "click", function(e){
   const v = e.target.dataset.vista; if(!v) return;
   vistaImperio = v;
   Array.prototype.forEach.call(document.querySelectorAll("#vistaImperio .chip"), function(c){
@@ -5624,7 +5614,7 @@ function acoesDaMalha(e, redesenhar){
   return false;
 }
 
-$("#imperio").addEventListener("click", function(e){
+liga("#imperio", "click", function(e){
   if(acoesDaMalha(e, renderImperio)) return;
   const t = e.target;
 
@@ -5732,7 +5722,7 @@ $("#imperio").addEventListener("click", function(e){
   }
 });
 
-$("#imperio").addEventListener("change", function(e){
+liga("#imperio", "change", function(e){
   const ok = e.target.dataset.tabok, pz = e.target.dataset.prazook;
   if(ok !== undefined){
     const f = tabuleiro.fazer.filter(function(x){ return x.id === ok; })[0];
@@ -5750,8 +5740,8 @@ $("#imperio").addEventListener("change", function(e){
 });
 
 let deb;
-$("#q").addEventListener("input", function(){ clearTimeout(deb); deb = setTimeout(renderAcervo, 150); });
-$("#perguntarIA").addEventListener("click", function(){
+liga("#q", "input", function(){ clearTimeout(deb); deb = setTimeout(renderAcervo, 150); });
+liga("#perguntarIA", "click", function(){
   if(modoAcervo === "biblioteca") perguntarAcervo();
   else {
     modoAcervo = "biblioteca";
@@ -5761,7 +5751,7 @@ $("#perguntarIA").addEventListener("click", function(){
     renderAcervo(); perguntarAcervo();
   }
 });
-$("#acervoModo").addEventListener("click", function(e){
+liga("#acervoModo", "click", function(e){
   const m = e.target.dataset.modo; if(!m) return;
   modoAcervo = m;
   Array.prototype.forEach.call(document.querySelectorAll("#acervoModo .chip"), function(c){
@@ -5772,11 +5762,11 @@ $("#acervoModo").addEventListener("click", function(e){
     : m === "oficina" ? "Buscar ferramenta…" : "Buscar na biblioteca…";
   renderAcervo();
 });
-$("#filtros").addEventListener("click", function(e){
+liga("#filtros", "click", function(e){
   const d = e.target.dataset.dom; if(!d) return;
   filtroDom = d; renderAcervo();
 });
-$("#lista").addEventListener("click", function(e){
+liga("#lista", "click", function(e){
   if(e.target.id === "copiarCtx"){ copiarContexto(); return; }
 
   /* Oficina */
@@ -5828,9 +5818,9 @@ $("#lista").addEventListener("click", function(e){
   if(id){ extras = extras.filter(function(b){ return b.id !== id; }); sExtras(); renderAcervo(); renderSub(); }
 });
 
-$("#gerarModulo").addEventListener("click", gerarModulo);
+liga("#gerarModulo", "click", gerarModulo);
 /* Projetos */
-$("#projetos").addEventListener("input", function(e){
+liga("#projetos", "input", function(e){
   if(e.target.id !== "buscaConv") return;
   /* Troca só a lista, preservando o campo e o cursor — refazer tudo perderia o foco */
   const cursor = e.target.selectionStart;
@@ -5841,17 +5831,17 @@ $("#projetos").addEventListener("input", function(e){
 });
 
 /* ── Topo contextual ── */
-$("#btnVoltar").addEventListener("click", function(){
+liga("#btnVoltar", "click", function(){
   /* Do chat volta pra lista de conversas; do projeto, pra lista de projetos */
   if($("#pane-projeto").classList.contains("on")) irPara("projetos");
   else irPara("conselho");
 });
-$("#btnNovaTopo").addEventListener("click", function(){ novaConversa(); irParaChat(); });
-$("#btnAcoes").addEventListener("click", abrirAcoes);
-$("#veuAcoes").addEventListener("click", fecharAcoes);
+liga("#btnNovaTopo", "click", function(){ novaConversa(); irParaChat(); });
+liga("#btnAcoes", "click", abrirAcoes);
+liga("#veuAcoes", "click", fecharAcoes);
 
 /* ── Folha de ações da conversa ── */
-$("#folhaAcoes").addEventListener("click", function(e){
+liga("#folhaAcoes", "click", function(e){
   const b = e.target.closest("[data-facao]");
   if(!b) return;
   const c = conv(), p = proj();
@@ -5896,7 +5886,7 @@ $("#folhaAcoes").addEventListener("click", function(e){
 });
 
 /* ── Tela do projeto ── */
-$("#telaProjeto").addEventListener("click", function(e){
+liga("#telaProjeto", "click", function(e){
   const t = e.target;
   if(t.dataset.editarvisao){
     const p = projetos.filter(function(x){ return x.id === t.dataset.editarvisao; })[0];
@@ -5940,7 +5930,7 @@ $("#telaProjeto").addEventListener("click", function(e){
   }
 });
 
-$("#projetos").addEventListener("click", function(e){
+liga("#projetos", "click", function(e){
   const t = e.target;
   if(t.id === "novoProj"){ novoProjeto(); return; }
   const card = t.closest("[data-abrirproj]");
@@ -6011,11 +6001,11 @@ async function enviarEstado(){
   }
 }
 
-$("#buscarPlantao").addEventListener("click", function(){ buscarPlantao("/plantao"); });
-$("#forcarRodada").addEventListener("click", function(){ buscarPlantao("/rodar"); });
-$("#enviarEstado").addEventListener("click", enviarEstado);
+liga("#buscarPlantao", "click", function(){ buscarPlantao("/plantao"); });
+liga("#forcarRodada", "click", function(){ buscarPlantao("/rodar"); });
+liga("#enviarEstado", "click", enviarEstado);
 
-$("#rodarTeste").addEventListener("click", async function(){
+liga("#rodarTeste", "click", async function(){
   const alvo = $("#saidaTeste");
   alvo.innerHTML = '<p class="status">iniciando…</p>';
   const R = await autoTeste(function(passo){
@@ -6048,7 +6038,7 @@ $("#rodarTeste").addEventListener("click", async function(){
 });
 
 /* Aparência — tudo aplica na hora, sem esperar salvar */
-$("#temas").addEventListener("click", function(e){
+liga("#temas", "click", function(e){
   const t = e.target.dataset.tema;
   if(!t) return;
   visual.tema = t;
@@ -6065,17 +6055,17 @@ $("#temas").addEventListener("click", function(e){
   $("#" + id).addEventListener("change", sVisual);
 });
 
-$("#tamFonte").addEventListener("input", function(){
+liga("#tamFonte", "input", function(){
   visual.fonte = parseInt($("#tamFonte").value, 10);
   $("#vFonte").textContent = visual.fonte;
   aplicarVisual();
 });
-$("#tamCantos").addEventListener("input", function(){
+liga("#tamCantos", "input", function(){
   visual.cantos = parseInt($("#tamCantos").value, 10);
   $("#vCantos").textContent = visual.cantos;
   aplicarVisual();
 });
-$("#tamDens").addEventListener("input", function(){
+liga("#tamDens", "input", function(){
   visual.densidade = parseInt($("#tamDens").value, 10);
   $("#vDens").textContent = visual.densidade < 90 ? "compacto"
     : visual.densidade > 110 ? "espaçoso" : "normal";
@@ -6085,12 +6075,12 @@ $("#tamDens").addEventListener("input", function(){
   $("#" + id).addEventListener("change", sVisual);
 });
 
-$("#famFonte").addEventListener("change", function(){
+liga("#famFonte", "change", function(){
   visual.familia = $("#famFonte").value;
   aplicarVisual(); sVisual();
 });
 
-$("#escolherSentidos").addEventListener("click", function(e){
+liga("#escolherSentidos", "click", function(e){
   const s = e.target.dataset.vsent;
   if(!s) return;
   const i = visual.sentidos.indexOf(s);
@@ -6099,7 +6089,7 @@ $("#escolherSentidos").addEventListener("click", function(e){
   aplicarVisual(); renderEscolhas(); sVisual();
 });
 
-$("#escolherModos").addEventListener("click", function(e){
+liga("#escolherModos", "click", function(e){
   const m = e.target.dataset.vmodo;
   if(!m) return;
   const i = visual.modos.indexOf(m);
@@ -6120,13 +6110,13 @@ $("#escolherModos").addEventListener("click", function(e){
   aplicarVisual(); renderEscolhas(); sVisual();
 });
 
-$("#salvarVisual").addEventListener("click", function(){
+liga("#salvarVisual", "click", function(){
   sVisual();
   const s = $("#visualStatus"); s.style.display = "block";
   s.textContent = "salvo. vai junto quando você exportar ou subir pra nuvem.";
 });
 
-$("#resetVisual").addEventListener("click", function(){
+liga("#resetVisual", "click", function(){
   if(!confirm("Voltar toda a aparência ao padrão?")) return;
   visual = VISUAL_PADRAO();
   aplicarVisual(); preencherVisual(); sVisual();
@@ -6143,7 +6133,7 @@ function preencherCusto(){
   renderCusto();
 }
 
-$("#salvarCusto").addEventListener("click", function(){
+liga("#salvarCusto", "click", function(){
   const pe = parseFloat($("#precoEnt").value), ps = parseFloat($("#precoSai").value),
         li = parseFloat($("#limiteGasto").value);
   if(!isNaN(pe) && pe >= 0) custo.precoEnt = pe;
@@ -6156,7 +6146,7 @@ $("#salvarCusto").addEventListener("click", function(){
       ? " — já ultrapassado, o motor pago está travado." : ".");
 });
 
-$("#zerarCusto").addEventListener("click", function(){
+liga("#zerarCusto", "click", function(){
   if(!confirm("Zerar o contador?\n\nIsso não apaga o que já foi cobrado pelo fornecedor — " +
               "só reinicia a contagem daqui.")) return;
   custo.ent = 0; custo.sai = 0; custo.chamadas = 0; custo.desde = Date.now();
@@ -6164,21 +6154,21 @@ $("#zerarCusto").addEventListener("click", function(){
   const s = $("#custoStatus"); s.style.display = "block"; s.textContent = "contador zerado.";
 });
 
-$("#prov").addEventListener("change", function(){
+liga("#prov", "change", function(){
   $("#urlPago").style.display = $("#prov").value === "pago" ? "" : "none";
 });
 
 /* Ondas e sinais */
-$("#ouvirOndas").addEventListener("click", ligarReceptor);
-$("#transmitir").addEventListener("click", transmitir);
-$("#pararOndas").addEventListener("click", function(){
+liga("#ouvirOndas", "click", ligarReceptor);
+liga("#transmitir", "click", transmitir);
+liga("#pararOndas", "click", function(){
   pararOndas();
   if(window.speechSynthesis) window.speechSynthesis.cancel();
   const st = $("#ondasStatus"); st.style.display = "block"; st.textContent = "parado.";
 });
-$("#btnBLE").addEventListener("click", varrerBLE);
-$("#btnNFC").addEventListener("click", lerNFC);
-$("#btnRede").addEventListener("click", infoRede);
+liga("#btnBLE", "click", varrerBLE);
+liga("#btnNFC", "click", lerNFC);
+liga("#btnRede", "click", infoRede);
 
 /* ═══ FOLHA "ADICIONAR AO CHAT" ═══ */
 
@@ -6193,12 +6183,12 @@ function fecharMais(){
   $("#veuMais").classList.remove("on");
 }
 
-$("#btnMais").addEventListener("click", abrirMais);
-$("#fecharMais").addEventListener("click", fecharMais);
-$("#veuMais").addEventListener("click", fecharMais);
-$("#card3Arq").addEventListener("click", function(){ fecharMais(); $("#arqInput").click(); });
+liga("#btnMais", "click", abrirMais);
+liga("#fecharMais", "click", fecharMais);
+liga("#veuMais", "click", fecharMais);
+liga("#card3Arq", "click", function(){ fecharMais(); $("#arqInput").click(); });
 
-$("#folhaMais").addEventListener("click", function(e){
+liga("#folhaMais", "click", function(e){
   /* As chaves ficam ligadas/desligadas; o resto executa e fecha */
   if(e.target.id === "chaveWeb" || e.target.closest(".linha") &&
      e.target.closest(".linha").querySelector("#chaveWeb")){
@@ -6250,10 +6240,10 @@ function fecharEscolhaMotor(){
   $("#veuMotor").classList.remove("on");
 }
 
-$("#trocaMotor").addEventListener("click", abrirEscolhaMotor);
-$("#fecharMotor").addEventListener("click", fecharEscolhaMotor);
-$("#veuMotor").addEventListener("click", fecharEscolhaMotor);
-$("#listaEscolhaMotor").addEventListener("click", function(e){
+liga("#trocaMotor", "click", abrirEscolhaMotor);
+liga("#fecharMotor", "click", fecharEscolhaMotor);
+liga("#veuMotor", "click", fecharEscolhaMotor);
+liga("#listaEscolhaMotor", "click", function(e){
   const b = e.target.closest("[data-usarm]");
   if(!b) return;
   aplicarMotor(motores.filter(function(m){ return m.id === b.dataset.usarm; })[0]);
@@ -6262,24 +6252,24 @@ $("#listaEscolhaMotor").addEventListener("click", function(e){
 
 /* ═══ VOZ — ditar por toque curto, gravar por toque longo ═══ */
 let pressionando = null;
-$("#btnVoz").addEventListener("touchstart", function(){
+liga("#btnVoz", "touchstart", function(){
   pressionando = setTimeout(function(){ pressionando = "longo"; gravarAudio(); }, 550);
 }, {passive:true});
-$("#btnVoz").addEventListener("touchend", function(){
+liga("#btnVoz", "touchend", function(){
   if(pressionando && pressionando !== "longo"){ clearTimeout(pressionando); ditar(); }
   pressionando = null;
 });
-$("#btnVoz").addEventListener("click", function(e){
+liga("#btnVoz", "click", function(e){
   /* No desktop não há toque: clique simples dita */
   if(e.detail === 0 || !("ontouchstart" in window)) ditar();
 });
 
 /* Arquivos */
-$("#arqInput").addEventListener("change", function(e){
+liga("#arqInput", "change", function(e){
   if(e.target.files.length) lerArquivos(e.target.files);
   e.target.value = "";
 });
-$("#anexos").addEventListener("click", function(e){
+liga("#anexos", "click", function(e){
   const id = e.target.dataset.toggarq;
   if(id) alternarAnexo(id);
 });
@@ -6301,9 +6291,9 @@ async function medirEspaco(){
       : "web instalado — o navegador pode descartar dados se o aparelho ficar sem espaço");
 }
 
-$("#medirEspaco").addEventListener("click", medirEspaco);
+liga("#medirEspaco", "click", medirEspaco);
 
-$("#otimizar").addEventListener("click", async function(){
+liga("#otimizar", "click", async function(){
   const s2 = $("#espacoStatus"); s2.style.display = "block"; s2.textContent = "otimizando…";
   let cortados = 0;
   projetos.forEach(function(p){
@@ -6326,7 +6316,7 @@ $("#otimizar").addEventListener("click", async function(){
   renderTudo();
 });
 
-$("#limparHist").addEventListener("click", async function(){
+liga("#limparHist", "click", async function(){
   if(!confirm("Apagar conversas com mais de 30 dias? Decisões e calibragens ficam na memória.")) return;
   const corte = Date.now() - 30 * 86400000;
   let n = 0;
@@ -6348,10 +6338,10 @@ $("#limparHist").addEventListener("click", async function(){
 });
 
 /* Laboratório Python */
-$("#rodarPy").addEventListener("click", rodarPython);
-$("#pedirPy").addEventListener("click", pedirCodigoPy);
+liga("#rodarPy", "click", rodarPython);
+liga("#pedirPy", "click", pedirCodigoPy);
 
-$("#modulos").addEventListener("click", function(e){
+liga("#modulos", "click", function(e){
   const tog = e.target.dataset.togmod, run = e.target.dataset.runmod,
         rm = e.target.dataset.rmmod, tst = e.target.dataset.testmod;
   if(tst){ testarModulo(tst); return; }
@@ -6381,8 +6371,8 @@ Array.prototype.forEach.call(document.querySelectorAll(".modo"), function(b){
   });
 });
 
-$("#impBibBtn").addEventListener("click", function(){ $("#impBib").click(); });
-$("#impBib").addEventListener("change", function(e){
+liga("#impBibBtn", "click", function(){ $("#impBib").click(); });
+liga("#impBib", "change", function(e){
   const file = e.target.files[0]; if(!file) return;
   const r = new FileReader();
   r.onload = function(){
@@ -6400,7 +6390,7 @@ $("#impBib").addEventListener("change", function(e){
   };
   r.readAsText(file);
 });
-$("#limparBib").addEventListener("click", function(){
+liga("#limparBib", "click", function(){
   if(!confirm("Apagar a biblioteca deste espaço? Memória e decisões não são afetadas.")) return;
   biblio = []; sBiblio(); renderAcervo(); renderSub();
 });
@@ -6410,12 +6400,12 @@ function lerNuvem(){
 }
 function stNuvem(t){ const s = $("#nuvemStatus"); s.style.display = "block"; s.textContent = t; }
 
-$("#attEnviar").addEventListener("click", enviarAtualizacao);
-$("#attStatus").addEventListener("click", function(e){
+liga("#attEnviar", "click", enviarAtualizacao);
+liga("#attStatus", "click", function(e){
   if(e.target.id === "attRecarregar") recarregarForcado();
 });
 
-$("#subir").addEventListener("click", async function(){
+liga("#subir", "click", async function(){
   lerNuvem();
   if(!nuvem.token || !nuvem.senha){ stNuvem("faltou token ou senha."); return; }
   stNuvem("cifrando e subindo…");
@@ -6424,7 +6414,7 @@ $("#subir").addEventListener("click", async function(){
     stNuvem("no ar. gist " + id + " — anote pro outro celular."); }
   catch(e){ stNuvem("falhou (" + e.message + ")."); }
 });
-$("#baixar").addEventListener("click", async function(){
+liga("#baixar", "click", async function(){
   lerNuvem();
   if(!nuvem.token || !nuvem.gist || !nuvem.senha){ stNuvem("precisa de token, gist e senha."); return; }
   if(!confirm("Baixar substitui os dados deste espaço pelos da nuvem. Continuar?")) return;
@@ -6435,8 +6425,8 @@ $("#baixar").addEventListener("click", async function(){
 
 });
 
-$("#prov").addEventListener("change", function(e){ $("#modelo").value = MODELOS[e.target.value]; });
-$("#salvarMotor").addEventListener("click", function(){
+liga("#prov", "change", function(e){ $("#modelo").value = MODELOS[e.target.value]; });
+liga("#salvarMotor", "click", function(){
   cfg.prov = $("#prov").value; cfg.modelo = $("#modelo").value.trim(); cfg.chave = $("#chave").value.trim();
   cfg.urlPago = $("#urlPago").value.trim();
   sCfg(); renderSub(); preencherCusto();
@@ -6445,7 +6435,7 @@ $("#salvarMotor").addEventListener("click", function(){
     ? "salvo, mas falta o endereço da API do motor pago."
     : "salvo.";
 });
-$("#testar").addEventListener("click", async function(){
+liga("#testar", "click", async function(){
   const s = $("#testStatus"); s.style.display = "block"; s.textContent = "testando…";
   const antes = JSON.parse(JSON.stringify(cfg));
   cfg.prov = $("#prov").value; cfg.modelo = $("#modelo").value.trim(); cfg.chave = $("#chave").value.trim();
@@ -6453,12 +6443,12 @@ $("#testar").addEventListener("click", async function(){
   try{ await chamarMotor("Responda apenas: ok"); sCfg(); s.textContent = "funcionando."; renderSub(); preencherCusto(); }
   catch(e){ cfg = antes; s.textContent = "falhou (" + e.message + ")."; }
 });
-$("#salvarLocal").addEventListener("click", function(){
+liga("#salvarLocal", "click", function(){
   cfg.endpoint = $("#endpoint").value.trim(); cfg.modeloLocal = $("#modeloLocal").value.trim();
   sCfg(); renderSub();
   const s = $("#localStatus"); s.style.display = "block"; s.textContent = "salvo.";
 });
-$("#testarLocal").addEventListener("click", async function(){
+liga("#testarLocal", "click", async function(){
   const s = $("#localStatus"); s.style.display = "block"; s.textContent = "testando…";
   const antes = {e:cfg.endpoint, m:cfg.modeloLocal};
   cfg.endpoint = $("#endpoint").value.trim(); cfg.modeloLocal = $("#modeloLocal").value.trim();
@@ -6468,7 +6458,7 @@ $("#testarLocal").addEventListener("click", async function(){
     s.textContent = "não respondeu (" + e.message + ")."; }
 });
 
-$("#exp").addEventListener("click", async function(){
+liga("#exp", "click", async function(){
   sHist();
   const d = JSON.stringify({espaco, extras, projetos, biblio, modulos, imperio, tabuleiro, matriz, oficina, visual, malha,
     versao:9, data:new Date().toISOString()}, null, 2);
@@ -6492,8 +6482,8 @@ $("#exp").addEventListener("click", async function(){
   URL.revokeObjectURL(url);
   guardar("sa:ultimoBackup", String(Date.now()));
 });
-$("#impBtn").addEventListener("click", function(){ $("#imp").click(); });
-$("#imp").addEventListener("change", function(e){
+liga("#impBtn", "click", function(){ $("#imp").click(); });
+liga("#imp", "change", function(e){
   const f = e.target.files[0]; if(!f) return;
   const r = new FileReader();
   r.onload = function(){
