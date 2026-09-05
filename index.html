@@ -291,6 +291,11 @@
   .avisoX{background:none;border:0;color:var(--muted);font-size:15px;
     padding:0 2px;cursor:pointer;flex-shrink:0;font-family:inherit}
 
+
+  .leiAcoes{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 6px}
+  .dtrad.marcado{border-color:var(--brass);color:var(--brass)}
+  .leiSelo{font-size:11.5px;color:var(--muted);letter-spacing:.03em;margin-bottom:4px}
+
   .pane{flex:1;min-height:0;display:none;flex-direction:column}
   .pane.on{display:flex}
   /* O que rola precisa esticar dentro do pane. Sem isto a altura vira zero:
@@ -719,10 +724,13 @@
     <button class="ajLinha" data-sub="nuvem"><span class="ajIc">☁</span><span class="ajTxt"><span class="ajT">Nuvem</span><span class="ajS" id="ls-nuvem">sincroniza seus aparelhos</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="biblioteca"><span class="ajIc">▤</span><span class="ajTxt"><span class="ajT">Biblioteca</span><span class="ajS" id="ls-biblioteca">o que o coletor trouxe</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="espaco"><span class="ajIc">▥</span><span class="ajTxt"><span class="ajT">Armazenamento</span><span class="ajS" id="ls-espaco">espaço usado no aparelho</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="disco"><span class="ajIc">▤</span><span class="ajTxt"><span class="ajT">Memória no aparelho</span><span class="ajS" id="ls-disco">grava no disco do celular</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="copia"><span class="ajIc">⇅</span><span class="ajTxt"><span class="ajT">Exportar e importar</span><span class="ajS" id="ls-copia">cópia de segurança</span></span><span class="ajSeta">›</span></button>
   </div>
   <div class="ajGrupoCab">AVANÇADO</div>
   <div class="ajGrupo">
+    <button class="ajLinha" data-sub="varredura"><span class="ajIc">⌕</span><span class="ajTxt"><span class="ajT">Varredura</span><span class="ajS" id="ls-varredura">o app se examina inteiro</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="piloto"><span class="ajIc">◉</span><span class="ajTxt"><span class="ajT">Piloto automático</span><span class="ajS" id="ls-piloto">o sistema se vira sozinho</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="termux"><span class="ajIc">▸</span><span class="ajTxt"><span class="ajT">Termux</span><span class="ajS" id="ls-termux">ponte desligada</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="evolucao"><span class="ajIc">✦</span><span class="ajTxt"><span class="ajT">Evolução</span><span class="ajS" id="ls-evolucao">módulos novos, você aprova</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="plantao"><span class="ajIc">◷</span><span class="ajTxt"><span class="ajT">Plantão</span><span class="ajS" id="ls-plantao">o que rodou sem você</span></span><span class="ajSeta">›</span></button>
@@ -921,7 +929,39 @@
         </div>
       </div></div>
 
-      <div class="subpg" id="sub-termux" data-tit="Termux">
+      <div class="subpg" id="sub-varredura" data-tit="Varredura">
+  <div class="card">
+    <div class="lbl">Varredura completa</div>
+    <p class="note" style="margin:0 0 12px">Não conta o que existe — <b>executa</b>.
+    Abre cada seção e mede a altura, roda cada ferramenta e confere a resposta,
+    grava e lê de volta, pergunta ao motor, confere se a Ponte do celular está
+    na mesma versão do app.</p>
+    <div class="row">
+      <button class="primary" id="vdRodar">Varrer tudo</button>
+      <button class="ghost" id="vdCopiar">Copiar relatório</button>
+    </div>
+    <div id="vdEstado" class="note" style="margin-top:11px">nunca varreu</div>
+  </div>
+  <div id="vdResultado"></div>
+</div>
+<div class="subpg" id="sub-piloto" data-tit="Piloto automático">
+  <div class="card">
+    <div class="lbl">O que roda sozinho</div>
+    <p class="note" style="margin:0 0 12px">Você não precisa apertar nada. O piloto
+    olha o estado a cada 5 minutos e faz o que está atrasado. O motor sobe só quando
+    a análise precisa dele e desce sozinho depois — ele come bateria.</p>
+    <div class="ajGrupo" id="pilotoTabela"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="ghost" id="pilotoAgora">Rodar a checagem agora</button>
+      <button class="ghost" id="pilotoPausar">Pausar</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="lbl">Diário de bordo</div>
+    <pre id="pilotoDiario" class="cod" style="max-height:320px;overflow:auto">ainda não rodou</pre>
+  </div>
+</div>
+<div class="subpg" id="sub-termux" data-tit="Termux">
   <div class="card">
     <div class="lbl">Ponte com o Termux</div>
     <p class="note" style="margin:0 0 12px">Com a Ponte ligada, o coletor e o orquestrador
@@ -1062,7 +1102,36 @@ for nome, conteudo in arquivos.items():
         "Contents: Read and write". O app leva ~1 minuto pra publicar depois de enviar.</p>
       </div></div>
 
-      <div class="subpg" id="sub-copia" data-tit="Exportar e importar"><div class="card">
+      <div class="subpg" id="sub-disco" data-tit="Memória no aparelho">
+  <div class="card">
+    <div class="lbl">Disco do celular</div>
+    <p class="note" style="margin:0 0 12px">O navegador guarda a memória num lugar
+    que some se alguém limpar os dados do Chrome. Aqui ela vai pro disco de verdade
+    do aparelho, com histórico de versões e uma cópia em
+    <code>Downloads/sistema-absoluto-memoria</code> — essa você copia pro PC ou
+    sobe na nuvem.</p>
+    <div class="row">
+      <button class="primary" id="discoSalvar">Gravar agora</button>
+      <button class="ghost" id="discoRestaurar">Restaurar</button>
+      <button class="ghost" id="discoVersoes">Ver versões</button>
+    </div>
+    <div id="discoEstado" class="note" style="margin-top:11px">nunca gravado</div>
+  </div>
+  <div class="card">
+    <div class="lbl">Cópia de fuga</div>
+    <p class="note" style="margin:0 0 12px">Um arquivo comum em Downloads. Não
+    depende da Ponte, do Termux nem da internet. É o que sobra se você desinstalar
+    o app ou trocar de celular — mande também pro seu e-mail ou pra nuvem.</p>
+    <div class="row">
+      <button class="primary" id="discoBaixar">Baixar cópia</button>
+      <label class="ghost" style="cursor:pointer">Restaurar de arquivo
+        <input type="file" id="discoArquivo" accept="application/json,.json" hidden>
+      </label>
+    </div>
+    <pre id="discoLista" class="cod" style="margin-top:12px;display:none"></pre>
+  </div>
+</div>
+<div class="subpg" id="sub-copia" data-tit="Exportar e importar"><div class="card">
         <div class="lbl">Cópia local</div>
         <div class="row">
           <button class="ghost" id="exp">Exportar espaço</button>
@@ -3190,6 +3259,53 @@ async function nuvemBaixar(){
   sExtras(); sProjetos(); sBiblio(); sModulos(); sImperio(); sTab(); sMatriz(); sOficina(); sVisual(); sMalha();
 }
 
+
+let vdRodando = false;
+liga("#vdRodar", "click", async function(){
+  if(vdRodando) return;
+  vdRodando = true;
+  const est = $("#vdEstado"), res = $("#vdResultado");
+  res.innerHTML = "";
+  try{
+    await varreduraCompleta(function(t){ est.textContent = t; });
+    const r = resumoVarredura();
+    est.textContent = r.ok + " de " + r.total + " passaram" +
+      (r.ruins ? " · " + r.ruins + " problema(s)" : " · nenhum problema");
+    const areas = {};
+    VARREDURA.forEach(function(v){ (areas[v.area] = areas[v.area] || []).push(v); });
+    res.innerHTML = Object.keys(areas).map(function(a){
+      const itens = areas[a];
+      const ruins = itens.filter(function(x){ return !x.ok; }).length;
+      return '<div class="ajGrupoCab">' + a.toUpperCase() +
+        (ruins ? " · " + ruins + " com problema" : "") + '</div><div class="ajGrupo">' +
+        itens.map(function(v){
+          return '<div class="ajLinha" style="cursor:default;align-items:flex-start">' +
+            '<span class="ajIc" style="color:' + (v.ok ? "var(--brass)" : "#c0392b") + '">' +
+              (v.ok ? "✓" : "✕") + '</span>' +
+            '<span class="ajTxt"><span class="ajT">' + esc(v.item) + '</span>' +
+            '<span class="ajS" style="white-space:normal">' + esc(v.detalhe) + '</span>' +
+            (v.conserto ? '<span class="ajS" style="white-space:normal;color:#c0392b">' +
+               esc(v.conserto) + '</span>' : "") +
+            '</span></div>';
+        }).join("") + '</div>';
+    }).join("");
+    guardar("sa:varredura:ultima", JSON.stringify({quando:Date.now(), r:r}));
+    const l = $("#ls-varredura");
+    if(l) l.textContent = r.ruins ? r.ruins + " problema(s) encontrados" : "tudo passou";
+  }catch(e){ est.textContent = "a varredura parou: " + (e.message || e); }
+  vdRodando = false;
+});
+liga("#vdCopiar", "click", function(){
+  const txt = VARREDURA.map(function(v){
+    return (v.ok ? "OK  " : "FALHA ") + "[" + v.area + "] " + v.item +
+      " — " + v.detalhe + (v.conserto ? " >> " + v.conserto : "");
+  }).join("\n");
+  navigator.clipboard.writeText("VARREDURA " + new Date().toLocaleString("pt-BR") +
+    "\n\n" + txt).then(function(){
+    $("#vdEstado").textContent = "relatório copiado — cole onde precisar";
+  }).catch(function(){ $("#vdEstado").textContent = "não consegui copiar"; });
+});
+
 /* ═══ VARREDURA — o sistema se olha antes de perguntar à IA ═══ */
 function varrer(){
   const s = [];
@@ -4171,6 +4287,20 @@ const MANUAL = [
 ];
 
 /* A ideia original: levar o contexto inteiro pra qualquer outra IA, sem repetir nada. */
+let ultimaPergunta = "";
+/* A última fala de Samuel decide se a conversa é pesada. Ler da própria
+   conversa é mais confiável do que depender de quem chama montarContexto. */
+function lerUltimaPergunta(){
+  try{
+    const c = conversaAtual && conversaAtual();
+    const blocos = (c && c.blocos) || [];
+    for(let i = blocos.length - 1; i >= 0; i--){
+      if(blocos[i].quem === "eu" || blocos[i].papel === "user")
+        return String(blocos[i].texto || "").slice(0, 400);
+    }
+  }catch(e){}
+  return ($("#txt") ? $("#txt").value : "") || "";
+}
 function montarContexto(){
   const p = proj(), t = tabuleiro, i = imperio;
   const decisoes = extras.filter(b => b.tag === "DECISÃO").slice(-8);
@@ -4180,12 +4310,30 @@ function montarContexto(){
   L.push("# SISTEMA ABSOLUTO — CONTEXTO PARA IA EXTERNA");
   L.push("Gerado em " + new Date().toLocaleString("pt-BR") + " · espaço: " +
          (espaco === "nucleo" ? "Núcleo (CPF)" : "Operação (CNPJ)"));
-  L.push("\nVocê está recebendo o contexto do projeto de Samuel. Aplique o método abaixo. " +
-         "Traga solução pronta, aponte risco sem esperar ser perguntado, nunca entregue caminho " +
-         "único quando existem vários, e nunca decida no lugar dele.");
+  L.push("\nVocê é a IA de Samuel. Converse normalmente: responda o que foi " +
+    "perguntado, no tamanho que a pergunta pede. Pergunta simples recebe resposta " +
+    "simples — não transforme tudo em análise estratégica.");
+  L.push("\nO método abaixo é COMO VOCÊ PENSA, não um formulário a preencher. " +
+    "Ele deve aparecer no julgamento — na jogada que você escolhe, no risco que " +
+    "você nota, no que você recusa — e quase nunca no formato da resposta. " +
+    "Não anuncie as camadas, não cite os nomes, não devolva tabela de Motor/Piloto/" +
+    "Xadrez a menos que Samuel peça isso explicitamente. Se a resposta certa é uma " +
+    "frase, é uma frase.");
+  L.push("Traga solução pronta, aponte risco sem esperar ser perguntado, nunca " +
+    "entregue caminho único quando existem vários, e nunca decida no lugar dele.");
 
-  L.push("\n## MÉTODO");
-  base().filter(b => b.tag === "MÉTODO").forEach(b => L.push("**" + b.titulo + "** — " + b.corpo));
+  /* O método inteiro em toda pergunta engessava a resposta e gastava contexto
+     à toa. Aqui ele entra resumido; a íntegra só quando a conversa é decisão. */
+  ultimaPergunta = lerUltimaPergunta();
+  const pesada = /decis|estrat|plano|risco|contrato|cliente|invest|jogada|caminho|proposta|prioriz/i
+    .test((ultimaPergunta || "") + " " + (p && p.visao ? p.visao : ""));
+  const metodo = base().filter(b => b.tag === "MÉTODO");
+  L.push("\n## MÉTODO (como pensar)");
+  if(pesada){
+    metodo.forEach(b => L.push("**" + b.titulo + "** — " + b.corpo));
+  }else{
+    metodo.forEach(b => L.push("**" + b.titulo + "** — " + b.corpo.split(". ")[0] + "."));
+  }
 
   L.push("\n## ESTADO");
   base().filter(b => ["ESTADO","ESTRUTURA","PRINCÍPIO"].indexOf(b.tag) >= 0)
@@ -5758,16 +5906,11 @@ liga("#veuMenu", "click", fecharMenu);
 /* ═══ TEMA CLARO / ESCURO ═══ */
 function aplicarTema(claro){
   document.body.classList.toggle("claro", claro);
-  const btn = $("#btnTema");
-  if(btn) btn.textContent = claro ? "◑" : "◐";
   /* A barra do sistema acompanha, senão fica um bloco destoante no topo */
   const meta = document.querySelector('meta[name="theme-color"]');
   if(meta) meta.setAttribute("content", claro ? "#FAF8F4" : "#0B0B0D");
   guardar("sa:tema", claro ? "claro" : "escuro");
 }
-liga("#btnTema", "click", function(){
-  aplicarTema(!document.body.classList.contains("claro"));
-});
 
 
 /* Espaço trocado em Ajustes reflete no menu lateral e no resumo da linha */
@@ -5809,6 +5952,564 @@ aplicarModoCor();
 
 
 
+
+
+
+
+liga("#discoSalvar", "click", function(){ salvarNoAparelho(false); });
+liga("#discoRestaurar", "click", restaurarDoAparelho);
+liga("#discoVersoes", "click", async function(){
+  const el = $("#discoLista"); el.style.display = "block"; el.textContent = "lendo…";
+  try{
+    const r = await ponteChamar("/memorias");
+    el.textContent = "pasta: " + r.pasta + "\nespelho: " + r.espelho + "\n\n" +
+      (r.versoes || []).map(function(v){
+        return v.quando + "  " + Math.round(v.bytes/1024) + " KB  " + v.arquivo;
+      }).join("\n");
+  }catch(err){ el.textContent = "falhou: " + (err.message || err); }
+});
+
+
+/* ═══ CÓPIA DE FUGA — funciona mesmo sem Ponte, sem Termux, sem internet ═══
+   Desinstalar o app apaga o IndexedDB. Esta cópia é um arquivo comum na pasta
+   Downloads: sobrevive a desinstalar o app, desinstalar o Termux, trocar de
+   celular. É a última linha da Arca. */
+function baixarCopiaDaMemoria(){
+  try{
+    const pac = pacoteDaMemoria();
+    const blob = new Blob([pac], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const d = new Date();
+    const carimbo = d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") +
+      String(d.getDate()).padStart(2,"0") + "-" +
+      String(d.getHours()).padStart(2,"0") + String(d.getMinutes()).padStart(2,"0");
+    a.href = url;
+    a.download = "sistema-absoluto-memoria-" + carimbo + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    const el = $("#discoEstado");
+    if(el) el.textContent = "cópia baixada em Downloads · " +
+      Math.round(pac.length/1024) + " KB. Guarde fora do celular também.";
+    localStorage.setItem("sa:ultimaCopia", new Date().toISOString());
+  }catch(err){
+    const el = $("#discoEstado");
+    if(el) el.textContent = "não consegui gerar a cópia: " + (err.message || err);
+  }
+}
+
+async function restaurarDeArquivo(arquivo){
+  const el = $("#discoEstado");
+  try{
+    const txt = await arquivo.text();
+    const d = JSON.parse(txt);
+    if(Array.isArray(d.biblio)){
+      const vistos = {};
+      biblio.forEach(function(x){ vistos[idDoc(x)] = 1; });
+      d.biblio.forEach(function(x){ if(!vistos[idDoc(x)]) biblio.push(x); });
+      sBiblio();
+    }
+    Object.assign(textos,     d.textos    || {}); sTextos();
+    Object.assign(traduzidos, d.traducoes || {}); sTraducoes();
+    Object.assign(guardados,  d.guardados || {}); sGuardados();
+    Object.assign(memTrad,    d.memtrad   || {});
+    guardar("sa:memtrad", JSON.stringify(memTrad));
+    if(d.dicionario && Object.keys(d.dicionario).length) guardarDicionario(d.dicionario);
+    if(el) el.textContent = "restaurado do arquivo · " + biblio.length + " itens · " +
+      Object.keys(textos).length + " artigos · " + tamanhoMemTrad() + " frases";
+    renderAcervo();
+  }catch(err){
+    if(el) el.textContent = "arquivo inválido: " + (err.message || err);
+  }
+}
+liga("#discoBaixar", "click", baixarCopiaDaMemoria);
+liga("#discoArquivo", "change", function(){
+  if(this.files && this.files[0]) restaurarDeArquivo(this.files[0]);
+});
+
+
+
+function renderPiloto(){
+  const linhas = [
+    ["coleta",     "Coletar fontes",        PILOTO.coleta],
+    ["completar",  "Baixar artigos",        PILOTO.completar],
+    ["analise",    "Análise do orquestrador", PILOTO.analise],
+    ["dicionario", "Dicionário do mundo",   PILOTO.dicionario],
+    ["memoria",    "Gravar no aparelho",    PILOTO.memoria]
+  ];
+  const el = $("#pilotoTabela"); if(!el) return;
+  el.innerHTML = linhas.map(function(l){
+    const q = quandoFoi(l[0]);
+    const falta = q ? (q + l[2] - Date.now()) : 0;
+    const est = !q ? "nunca rodou"
+      : falta <= 0 ? "na próxima checagem"
+      : "em " + (falta > 3600000
+          ? Math.round(falta / 3600000) + "h"
+          : Math.round(falta / 60000) + "min");
+    return '<div class="ajLinha" style="cursor:default">' +
+      '<span class="ajIc">' + (q ? "✓" : "·") + '</span>' +
+      '<span class="ajTxt"><span class="ajT">' + l[1] + '</span>' +
+      '<span class="ajS">' + (q ? "último: " +
+        new Date(q).toLocaleString("pt-BR").slice(0,17) : "—") + '</span></span>' +
+      '<span class="ajS" style="flex-shrink:0">' + est + '</span></div>';
+  }).join("");
+  const d = $("#pilotoDiario");
+  if(d && pilotoDiario.length) d.textContent = pilotoDiario.map(function(x){
+    return new Date(x.quando).toLocaleTimeString("pt-BR").slice(0,5) + "  " + x.texto;
+  }).join("\n");
+  const p = $("#pilotoPausar"); if(p) p.textContent = pilotoLigado ? "Pausar" : "Retomar";
+  const r = $("#ls-piloto");
+  if(r) r.textContent = pilotoLigado ? "ligado · decide sozinho" : "pausado";
+}
+liga("#pilotoAgora", "click", function(){ anotarPiloto("checagem pedida por você"); rodadaDoPiloto(); });
+liga("#pilotoPausar", "click", function(){
+  pilotoLigado = !pilotoLigado;
+  guardar("sa:pilotoligado", pilotoLigado ? "1" : "0");
+  anotarPiloto(pilotoLigado ? "piloto retomado" : "piloto pausado por você");
+  renderPiloto();
+});
+
+
+/* ═══ VARREDURA — o app se examina inteiro e diz o que está quebrado ═══
+   O auto-teste antigo contava se as coisas EXISTEM. Isso não é diagnóstico:
+   um botão pode existir e não ter dono, um painel pode ter conteúdo e altura
+   zero, uma ferramenta pode estar registrada e falhar ao rodar. Aqui cada
+   verificação EXECUTA e compara com o resultado esperado. */
+
+const VARREDURA = [];
+function achado(area, item, ok, detalhe, conserto){
+  VARREDURA.push({area:area, item:item, ok:ok, detalhe:detalhe||"", conserto:conserto||""});
+}
+
+async function varreduraCompleta(aoAndar){
+  VARREDURA.length = 0;
+  const passo = function(t){ if(aoAndar) aoAndar(t); };
+
+  /* ── 1. ESTRUTURA: elemento que o código procura e não existe ── */
+  passo("conferindo a estrutura da tela…");
+  if(typeof FALTANDO !== "undefined"){
+    achado("estrutura", "elementos ausentes", FALTANDO.length === 0,
+      FALTANDO.length ? FALTANDO.join(", ") : "nenhum",
+      FALTANDO.length ? "esses ids sumiram do HTML mas o JS ainda os procura" : "");
+  }
+
+  /* ── 2. SEÇÕES: abre cada uma e mede altura de verdade ── */
+  const secoes = [["conselho","Conversas"],["projetos","Projetos"],["imperio","Império"],
+                  ["malha","Malha"],["decisoes","Decisões"],["acervo","Acervo"]];
+  const voltarPara = (document.querySelector(".pane.on") || {}).id || "";
+  for(const [sec, nome] of secoes){
+    passo("abrindo " + nome + "…");
+    try{
+      irPara(sec);
+      await new Promise(function(f){ setTimeout(f, 260); });
+      const p = document.querySelector(".pane.on");
+      const r = p ? p.getBoundingClientRect() : {height:0};
+      const txt = p ? p.innerText.replace(/\s+/g," ").trim().length : 0;
+      achado("seções", nome, !!p && r.height > 150 && txt > 15,
+        p ? (p.id + " · " + Math.round(r.height) + "px · " + txt + " caracteres")
+          : "nenhum painel ficou ativo",
+        r.height <= 150 ? "painel com altura zero: conteúdo existe mas não aparece" :
+        txt <= 15 ? "painel abre vazio: a função que desenha não rodou" : "");
+    }catch(e){ achado("seções", nome, false, e.message, "irPara() lançou erro"); }
+  }
+  try{ irPara(voltarPara.replace("pane-","") || "conselho"); }catch(e){}
+
+  /* ── 3. BOTÕES: existe e tem dono? ── */
+  passo("procurando botão órfão…");
+  const bs = Array.prototype.slice.call(document.querySelectorAll("button"));
+  const orfaos = bs.filter(function(b){
+    if(b.id || b.type === "submit") return false;
+    for(const a of b.attributes) if(a.name.indexOf("data-") === 0) return false;
+    return !b.onclick;
+  });
+  achado("botões", "todos com dono", orfaos.length === 0,
+    bs.length + " botões · " + orfaos.length + " sem id, sem data-* e sem onclick",
+    orfaos.length ? "botão sem nada disso nunca responde a clique" : "");
+
+  /* ── 4. FERRAMENTAS: roda cada uma e confere a resposta ── */
+  passo("executando as ferramentas…");
+  for(const nome of Object.keys(FERRAMENTAS)){
+    const f = FERRAMENTAS[nome];
+    if(nome === "falar_em_voz" || nome === "onde_estou"){
+      achado("ferramentas", nome, true, "pulada (pede permissão do aparelho)"); continue;
+    }
+    try{
+      const r = await Promise.race([
+        Promise.resolve(f.exec({termo:"teste", texto:"teste", chave:"teste",
+                                consulta:"teste", pergunta:"teste"})),
+        new Promise(function(_, rej){ setTimeout(function(){ rej(new Error("travou")); }, 6000); })
+      ]);
+      const vazio = r === undefined || r === null || r === "";
+      achado("ferramentas", nome, !vazio,
+        vazio ? "devolveu vazio" : String(r).slice(0, 70),
+        vazio ? "a IA vai chamar e não receber nada de volta" : "");
+    }catch(e){
+      achado("ferramentas", nome, false, e.message,
+        "a IA acha que essa ferramenta funciona e ela quebra ao ser usada");
+    }
+  }
+
+  /* ── 5. MEMÓRIA: grava e lê de volta ── */
+  passo("testando gravação e leitura…");
+  try{
+    const marca = "vd-" + Date.now();
+    guardar("sa:varredura", marca);
+    await new Promise(function(f){ setTimeout(f, 400); });
+    const v = await ler("sa:varredura");
+    achado("memória", "gravar e ler", v === marca,
+      v === marca ? "ida e volta certa" : "gravou " + marca + " e leu " + v,
+      v !== marca ? "o que você guardar pode não voltar" : "");
+  }catch(e){ achado("memória", "gravar e ler", false, e.message); }
+  achado("memória", "acervo carregado", true,
+    biblio.length + " itens · " + Object.keys(textos).length + " artigos inteiros · " +
+    tamanhoMemTrad() + " frases traduzidas · " + tamanhoDicionario().conceitos + " conceitos");
+
+  /* ── 6. PONTE: viva? e as versões batem? ── */
+  passo("falando com a Ponte…");
+  if(!ponteToken()){
+    achado("ponte", "conectada", false, "sem token",
+      "sem a Ponte o piloto não coleta, não analisa e não grava no disco");
+  }else{
+    try{
+      await ponteChamar("/saude");
+      const c = await ponteChamar("/comandos");
+      const esperados = ["coletar","completar","dicionario","exportar","orquestrar",
+                         "motor_ligar","motor_desligar","motor_vivo","status","espaco"];
+      const faltam = esperados.filter(function(x){ return (c.comandos||[]).indexOf(x) < 0; });
+      achado("ponte", "conectada", true, (c.comandos||[]).length + " comandos");
+      achado("ponte", "versões batem", faltam.length === 0,
+        faltam.length ? "faltando: " + faltam.join(", ") : "app e Ponte na mesma versão",
+        faltam.length ? "o ponte.py do celular está velho — copie o novo e reinicie" : "");
+      for(const rota of ["/plantao","/dicionario","/memorias"]){
+        try{
+          const r = await ponteChamar(rota);
+          achado("ponte", "rota " + rota, !r.erro, r.erro || "responde");
+        }catch(e){ achado("ponte", "rota " + rota, false, e.message); }
+      }
+    }catch(e){
+      achado("ponte", "conectada", false, e.message,
+        location.protocol === "https:"
+          ? "o Chrome bloqueia https chamando 127.0.0.1 — no APK isso some"
+          : "ligue no Termux: bash ~/sa/arranque.sh");
+    }
+  }
+
+  /* ── 7. MOTOR: responde de verdade? ── */
+  passo("perguntando ao motor…");
+  try{
+    const r = await Promise.race([
+      chamarMotor([{papel:"user", texto:"Responda apenas: ok"}]),
+      new Promise(function(_, rej){ setTimeout(function(){ rej(new Error("sem resposta em 25s")); }, 25000); })
+    ]);
+    achado("motor", "responde", !!(r && String(r).trim()),
+      String(r || "").slice(0, 50) || "vazio");
+  }catch(e){
+    achado("motor", "responde", false, e.message,
+      "sem motor: nada de análise, nada de tradução de texto novo");
+  }
+
+  /* ── 8. PILOTO: está em dia? ── */
+  passo("conferindo o piloto…");
+  [["coleta",PILOTO.coleta],["analise",PILOTO.analise],["memoria",PILOTO.memoria]]
+    .forEach(function(l){
+      const q = quandoFoi(l[0]);
+      const atrasado = q && (Date.now() - q > l[1] * 2);
+      achado("piloto", l[0], !!q && !atrasado,
+        q ? new Date(q).toLocaleString("pt-BR") : "nunca rodou",
+        !q ? "o piloto ainda não conseguiu rodar isto" :
+        atrasado ? "está atrasado mais que o dobro do intervalo" : "");
+    });
+
+  return VARREDURA;
+}
+
+function resumoVarredura(){
+  const ruins = VARREDURA.filter(function(x){ return !x.ok; });
+  return {total: VARREDURA.length, ok: VARREDURA.length - ruins.length,
+          ruins: ruins.length, falhas: ruins};
+}
+
+/* ═══ PILOTO AUTOMÁTICO — o sistema decide, Samuel não aperta ═══
+   Antes cada capacidade tinha um botão e dependia de alguém lembrar. Botão
+   que precisa ser lembrado é trabalho, não automação. Aqui existe um relógio
+   só: ele olha o estado, decide o que falta, e faz — inclusive ligar e
+   desligar o motor, que é caro e só deve subir quando serve pra alguma coisa. */
+
+const PILOTO = {
+  coleta:     3 * 60 * 60 * 1000,   /* a cada 3h  */
+  completar:  6 * 60 * 60 * 1000,   /* a cada 6h  */
+  analise:    4 * 60 * 60 * 1000,   /* a cada 4h  */
+  dicionario: 7 * 24 * 60 * 60 * 1000,
+  memoria:    30 * 60 * 1000,
+  motorOcioso:10 * 60 * 1000        /* desliga o motor após 10 min sem uso */
+};
+let pilotoLigado = true, pilotoOcupado = false, ultimoUsoMotor = 0, pilotoDiario = [];
+
+function quandoFoi(k){
+  const v = localStorage.getItem("sa:piloto:" + k);
+  return v ? new Date(v).getTime() : 0;
+}
+function marcarQuando(k){ localStorage.setItem("sa:piloto:" + k, new Date().toISOString()); }
+function passou(k, intervalo){ return Date.now() - quandoFoi(k) > intervalo; }
+function anotarPiloto(txt){
+  pilotoDiario.unshift({quando: Date.now(), texto: txt});
+  pilotoDiario = pilotoDiario.slice(0, 60);
+  guardar("sa:pilotodiario", JSON.stringify(pilotoDiario));
+  const el = $("#pilotoDiario");
+  if(el) el.textContent = pilotoDiario.map(function(x){
+    return new Date(x.quando).toLocaleTimeString("pt-BR").slice(0,5) + "  " + x.texto;
+  }).join("\n");
+}
+
+/* Espera a tarefa terminar em vez de disparar e torcer */
+async function tarefaAteOFim(comando, minutos){
+  const r = await ponteChamar("/rodar", "POST", {comando: comando});
+  if(r.erro) throw new Error(r.erro);
+  const limite = (minutos || 30) * 30;
+  for(let i = 0; i < limite; i++){
+    await new Promise(function(f){ setTimeout(f, 2000); });
+    const t = (await ponteChamar("/tarefas")).tarefas[r.tarefa];
+    if(t && t.estado !== "rodando") return t;
+  }
+  throw new Error("passou do tempo");
+}
+
+async function motorPrecisaEstarVivo(){
+  try{
+    const t = await tarefaAteOFim("motor_vivo", 1);
+    if((t.saida || "").indexOf("ok") >= 0 || (t.saida || "").indexOf("status") >= 0){
+      ultimoUsoMotor = Date.now(); return true;
+    }
+  }catch(e){}
+  anotarPiloto("motor estava desligado — subindo");
+  try{
+    await tarefaAteOFim("motor_ligar", 5);
+    ultimoUsoMotor = Date.now();
+    anotarPiloto("motor no ar");
+    return true;
+  }catch(e){ anotarPiloto("não consegui subir o motor: " + (e.message || e)); return false; }
+}
+
+async function rodadaDoPiloto(){
+  if(!pilotoLigado || pilotoOcupado || !ponteToken()) return;
+  pilotoOcupado = true;
+  try{
+    /* A Ponte responde? Sem ela não há o que automatizar. */
+    try{ await ponteChamar("/saude"); }
+    catch(e){ pilotoOcupado = false; return; }
+
+    /* 1. COLETAR — a base precisa de matéria-prima antes de qualquer análise */
+    if(passou("coleta", PILOTO.coleta)){
+      anotarPiloto("coletando fontes…");
+      const t = await tarefaAteOFim("coletar", 20);
+      marcarQuando("coleta");
+      try{
+        const bb = await ponteChamar("/biblioteca");
+        if(bb.biblioteca && Array.isArray(bb.biblioteca.itens)){
+          biblio = bb.biblioteca.itens; sBiblio(); renderAcervo();
+        }
+      }catch(e){}
+      anotarPiloto("coleta terminou · " + biblio.length + " itens na base");
+    }
+
+    /* 2. COMPLETAR — resumo de duas linhas não sustenta análise */
+    if(passou("completar", PILOTO.completar)){
+      anotarPiloto("baixando artigos inteiros…");
+      await tarefaAteOFim("completar", 30);
+      marcarQuando("completar");
+      anotarPiloto("artigos completados");
+    }
+
+    /* 3. ANALISAR — aqui o motor é obrigatório, então sobe antes */
+    if(passou("analise", PILOTO.analise)){
+      if(await motorPrecisaEstarVivo()){
+        anotarPiloto("o analista está lendo o que chegou…");
+        await tarefaAteOFim("orquestrar", 30);
+        marcarQuando("analise");
+        try{
+          const pl = await ponteChamar("/plantao");
+          const a = pl.atual || {};
+          const n = (a.achados || []).length;
+          const meus = a.precisa_samuel || 0;
+          anotarPiloto("análise pronta · " + n + " achado(s)" +
+            (meus ? " · " + meus + " precisa(m) de você" : " · nada exige você"));
+          if(meus) avisoAcervo = meus + " ponto(s) esperam sua decisão em Império → Plantão.";
+        }catch(e){}
+      }
+    }
+
+    /* 4. DICIONÁRIO — semanal, cresce junto com a biblioteca */
+    if(passou("dicionario", PILOTO.dicionario)){
+      anotarPiloto("atualizando o dicionário do mundo…");
+      await tarefaAteOFim("dicionario", 30);
+      marcarQuando("dicionario");
+      try{
+        const dd = await ponteChamar("/dicionario");
+        if(dd.dicionario){ guardarDicionario(dd.dicionario);
+          anotarPiloto("dicionário com " + tamanhoDicionario().conceitos + " conceitos"); }
+      }catch(e){}
+    }
+
+    /* 5. GRAVAR — memória que só é salva quando alguém lembra, um dia não é */
+    if(passou("memoria", PILOTO.memoria)){
+      if(await salvarNoAparelho(true)){ marcarQuando("memoria"); }
+    }
+
+    /* 6. DESLIGAR O MOTOR — ele come bateria; ocioso não serve pra nada */
+    if(ultimoUsoMotor && Date.now() - ultimoUsoMotor > PILOTO.motorOcioso){
+      try{ await tarefaAteOFim("motor_desligar", 2);
+           ultimoUsoMotor = 0; anotarPiloto("motor desligado (ocioso)"); }catch(e){}
+    }
+  }catch(err){
+    anotarPiloto("rodada parou: " + (err.message || err));
+  }
+  pilotoOcupado = false;
+}
+
+/* Um relógio só. Roda logo ao abrir e depois a cada 5 minutos. */
+setTimeout(rodadaDoPiloto, 12000);
+setInterval(rodadaDoPiloto, 5 * 60 * 1000);
+
+/* ═══ MEMÓRIA NO DISCO DO APARELHO ═══
+   O IndexedDB some se alguém limpar os dados do navegador. Aqui a memória
+   inteira vai pro disco real do celular pela Ponte, versionada, com espelho
+   em Downloads — de onde dá pra copiar pro PC ou subir na nuvem. */
+
+function pacoteDaMemoria(){
+  return JSON.stringify({
+    versao: 1,
+    quando: new Date().toISOString(),
+    biblio: biblio,
+    textos: textos,
+    traducoes: traduzidos,
+    guardados: guardados,
+    memtrad: memTrad,
+    dicionario: dicMundo,
+    conversas: (typeof conversas !== "undefined" ? conversas : []),
+    extras: (typeof extras !== "undefined" ? extras : []),
+    modulos: (typeof modulos !== "undefined" ? modulos : [])
+  });
+}
+
+async function salvarNoAparelho(silencioso){
+  const el = $("#discoEstado");
+  if(el && !silencioso) el.textContent = "gravando…";
+  try{
+    const pac = pacoteDaMemoria();
+    const r = await ponteChamar("/memoria", "POST", {nome: "acervo", dados: pac});
+    if(r.erro) throw new Error(r.erro);
+    const kb = Math.round(r.bytes / 1024);
+    localStorage.setItem("sa:ultimoDisco", new Date().toISOString());
+    if(el) el.textContent = "gravado no aparelho · " + kb + " KB · " +
+      r.versoes + " versão(ões) guardadas";
+    return true;
+  }catch(err){
+    if(el) el.textContent = "não gravou: " + (err.message || err) +
+      " — a Ponte precisa estar ligada";
+    return false;
+  }
+}
+
+async function restaurarDoAparelho(){
+  const el = $("#discoEstado");
+  if(el) el.textContent = "lendo do aparelho…";
+  try{
+    const r = await ponteChamar("/memoria?nome=acervo");
+    if(r.erro) throw new Error(r.erro);
+    const d = JSON.parse(r.dados);
+    /* Restaurar SOMA, não substitui: o que está no app agora não se perde
+       por causa de uma cópia mais antiga. */
+    if(Array.isArray(d.biblio)){
+      const vistos = {};
+      biblio.forEach(function(x){ vistos[idDoc(x)] = 1; });
+      d.biblio.forEach(function(x){ if(!vistos[idDoc(x)]) biblio.push(x); });
+      sBiblio();
+    }
+    Object.assign(textos,     d.textos    || {}); sTextos();
+    Object.assign(traduzidos, d.traducoes || {}); sTraducoes();
+    Object.assign(guardados,  d.guardados || {}); sGuardados();
+    Object.assign(memTrad,    d.memtrad   || {});
+    guardar("sa:memtrad", JSON.stringify(memTrad));
+    if(d.dicionario && Object.keys(d.dicionario).length) guardarDicionario(d.dicionario);
+    if(el) el.textContent = "restaurado · " + biblio.length + " itens · " +
+      Object.keys(textos).length + " artigos · " + tamanhoMemTrad() + " frases traduzidas";
+    renderAcervo();
+    return true;
+  }catch(err){
+    if(el) el.textContent = "não consegui ler: " + (err.message || err);
+    return false;
+  }
+}
+
+/* Grava sozinho de tempos em tempos quando a Ponte está por perto.
+   Memória que só é salva quando alguém lembra, um dia não é salva. */
+setInterval(function(){
+  if(!ponteToken()) return;
+  const ult = localStorage.getItem("sa:ultimoDisco");
+  if(ult && Date.now() - new Date(ult).getTime() < 30 * 60 * 1000) return;
+  salvarNoAparelho(true);
+}, 5 * 60 * 1000);
+
+/* ═══ ACERVO PERMANENTE — nada de bom se perde ═══
+   Texto completo e tradução moram no IndexedDB comprimido, não na sessão.
+   Fechou o app, trocou de aparelho, ficou uma semana sem abrir: continua lá. */
+
+let textos = {};        /* id -> texto completo do artigo   */
+let guardados = {};     /* id -> marcado como importante    */
+
+async function carregarAcervoPermanente(){
+  try{ textos    = JSON.parse(await ler("sa:textos")    || "{}"); }catch(e){ textos = {}; }
+  try{ traduzidos= JSON.parse(await ler("sa:traducoes") || "{}"); }catch(e){ traduzidos = {}; }
+  try{ guardados = JSON.parse(await ler("sa:guardados") || "{}"); }catch(e){ guardados = {}; }
+  try{ memTrad   = JSON.parse(await ler("sa:memtrad")   || "{}"); }catch(e){ memTrad = {}; }
+  try{ pilotoDiario = JSON.parse(await ler("sa:pilotodiario") || "[]"); }catch(e){ pilotoDiario = []; }
+  try{ pilotoLigado = (await ler("sa:pilotoligado")) !== "0"; }catch(e){ pilotoLigado = true; }
+}
+function sTextos(){    guardar("sa:textos",    JSON.stringify(textos)); }
+function sTraducoes(){ guardar("sa:traducoes", JSON.stringify(traduzidos)); }
+function sGuardados(){ guardar("sa:guardados", JSON.stringify(guardados)); }
+
+/* ═══ MEMÓRIA DE TRADUÇÃO — o tradutor que melhora sozinho ═══
+   Toda frase já traduzida fica guardada. Da próxima vez que a mesma frase
+   aparecer — e em texto técnico ela aparece muito — a tradução sai na hora,
+   offline e de graça. Não é lista fixa: cresce a cada uso, e o que o motor
+   produz uma vez fica seu para sempre. */
+let memTrad = {};
+
+function chaveFrase(f){
+  return norm(f).replace(/[^\p{L}\p{N} ]/gu, "").replace(/\s+/g, " ").trim().slice(0, 300);
+}
+function partirFrases(t){
+  return (t || "").split(/(?<=[.!?。！？])\s+|\n+/)
+    .map(function(x){ return x.trim(); })
+    .filter(Boolean);
+}
+function traduzirPelaMemoria(texto){
+  const frases = partirFrases(texto);
+  if(!frases.length) return {texto:"", cobertas:0, total:0, faltando:[]};
+  const fora = [], faltando = [];
+  let cobertas = 0;
+  frases.forEach(function(f){
+    const k = chaveFrase(f);
+    if(memTrad[k]){ fora.push(memTrad[k]); cobertas++; }
+    else { fora.push(f); faltando.push(f); }
+  });
+  return {texto: fora.join("\n\n"), cobertas: cobertas, total: frases.length, faltando: faltando};
+}
+function aprenderTraducao(original, traduzido){
+  const a = partirFrases(original), b = partirFrases(traduzido);
+  /* só aprende quando as duas versões têm o mesmo número de frases —
+     senão o alinhamento está errado e guardar seria envenenar a memória */
+  if(!a.length || a.length !== b.length) return 0;
+  let novas = 0;
+  for(let i = 0; i < a.length; i++){
+    const k = chaveFrase(a[i]);
+    if(k && !memTrad[k] && b[i] && b[i].length > 3){ memTrad[k] = b[i]; novas++; }
+  }
+  if(novas) guardar("sa:memtrad", JSON.stringify(memTrad));
+  return novas;
+}
+function tamanhoMemTrad(){ return Object.keys(memTrad).length; }
 
 /* ═══ DICIONÁRIO DO MUNDO — tradução guardada no aparelho ═══
    Colhido da Wikidata pelo coletor: o mesmo conceito rotulado em ~20 línguas,
@@ -5962,7 +6663,11 @@ function abrirDoc(id){
   const estrangeiro = lg !== "pt" && lg !== "—";
   const vendo = traduzidos[id] || null;
   const t = TIERS[d.tier || 3];
-  const corpo = vendo ? vendo : (d.corpo || "");
+  /* o coletor pode ter baixado o artigo inteiro (campo texto); vale tanto
+     quanto o que o app baixou sob demanda */
+  const completo = textos[id] || d.texto || "";
+  const corpo = vendo ? vendo : (completo || d.corpo || "");
+  const temCompleto = !!completo;
   const el = $("#leituraCorpo");
   el.innerHTML =
     '<div class="dhead" style="margin-bottom:14px">' +
@@ -5974,8 +6679,18 @@ function abrirDoc(id){
     '<h2 class="leiTitulo">' + esc(d.titulo || "sem título") + '</h2>' +
     '<div class="leiFonte">' + esc(d.fonte || "") +
       (d.coletado ? " · " + esc(d.coletado) : "") + '</div>' +
-    (estrangeiro ? '<button class="dtrad" data-trad="' + esc(id) + '">' +
-       (vendo ? "ver original" : "traduzir") + '</button>' : "") +
+    '<div class="leiAcoes">' +
+      (estrangeiro ? '<button class="dtrad" data-trad="' + esc(id) + '">' +
+         (vendo ? "ver original" : "traduzir") + '</button>' : "") +
+      (!temCompleto && d.url
+         ? '<button class="dtrad" data-texto="' + esc(id) + '">baixar artigo inteiro</button>'
+         : "") +
+      '<button class="dtrad' + (guardados[id] ? " marcado" : "") +
+        '" data-guardar="' + esc(id) + '">' +
+        (guardados[id] ? "★ guardado" : "☆ guardar") + '</button>' +
+    '</div>' +
+    (temCompleto ? '<div class="leiSelo">artigo inteiro guardado no aparelho · ' +
+       completo.length.toLocaleString("pt-BR") + ' caracteres</div>' : "") +
     '<div class="leiTexto">' + (corpo ? esc(corpo).replace(/\n/g, "<br>")
        : '<span class="note">Este item veio só com o resumo. Use “abrir fonte” para o texto completo.</span>') + '</div>' +
     (d.url ? '<a class="dlink" href="' + esc(d.url) + '" target="_blank" rel="noopener">abrir fonte original ↗</a>' : "");
@@ -6100,24 +6815,96 @@ liga("#lista", "click", function(e){
 /* o traduzir da página de leitura também precisa responder */
 liga("#pane-leitura", "click", function(e){
   const tr = e.target.closest ? e.target.closest("[data-trad]") : null;
-  if(tr) alternarTraducao(tr.dataset.trad);
+  if(tr){ alternarTraducao(tr.dataset.trad); return; }
+  const tx = e.target.closest ? e.target.closest("[data-texto]") : null;
+  if(tx){ buscarTextoCompleto(tx.dataset.texto); return; }
+  const gd = e.target.closest ? e.target.closest("[data-guardar]") : null;
+  if(gd){
+    const k = gd.dataset.guardar;
+    if(guardados[k]) delete guardados[k]; else guardados[k] = Date.now();
+    sGuardados(); abrirDoc(k);
+  }
 });
 
 /* Traduz pelo motor já configurado. Guarda a versão traduzida ao lado da
    original — o toque no botão alterna entre as duas, nada é sobrescrito. */
 async function alternarTraducao(id){
-  if(traduzidos[id]){ delete traduzidos[id]; renderAcervo(); if(docAberto===id) abrirDoc(id); return; }
+  if(traduzidos[id]){
+    delete traduzidos[id]; sTraducoes();
+    renderAcervo(); if(docAberto === id) abrirDoc(id); return;
+  }
   const d = biblio.filter(function(x){ return idDoc(x) === id; })[0];
-  if(!d || !d.corpo) return;
-  traduzidos[id] = "traduzindo…"; renderAcervo();
+  if(!d) return;
+  const fonte = (textos[id] || d.texto || d.corpo || "");
+  if(!fonte){ return; }
+
+  /* 1º a memória: frase já traduzida uma vez sai na hora, sem motor. */
+  const daMem = traduzirPelaMemoria(fonte);
+  if(daMem.cobertas === daMem.total && daMem.total > 0){
+    traduzidos[id] = daMem.texto;
+    sTraducoes(); renderAcervo(); if(docAberto === id) abrirDoc(id);
+    return;
+  }
+
+  /* Cobertura parcial já aparece enquanto o motor completa o resto. */
+  traduzidos[id] = daMem.cobertas
+    ? daMem.texto + "\n\n[" + daMem.cobertas + " de " + daMem.total +
+      " frases vieram da memória; completando o resto…]"
+    : "traduzindo…";
+  renderAcervo(); if(docAberto === id) abrirDoc(id);
+
   try{
     const r = await chamarMotor([{papel:"user", texto:
-      "Traduza para português do Brasil. Devolva só a tradução, sem comentário:\n\n" +
-      d.titulo + "\n" + d.corpo}]);
-    traduzidos[id] = (r || "").trim() || "não foi possível traduzir";
-  }catch(err){ traduzidos[id] = "falha ao traduzir: " + (err.message || err); }
+      "Traduza para português do Brasil. Devolva SÓ a tradução, mantendo a " +
+      "mesma quantidade de parágrafos, sem comentário nem numeração:\n\n" + fonte}]);
+    const texto = (r || "").trim();
+    if(!texto) throw new Error("resposta vazia");
+    traduzidos[id] = texto;
+    /* O que o motor produziu vira memória: da próxima vez é offline. */
+    const novas = aprenderTraducao(fonte, texto);
+    if(novas) console.log("memória de tradução aprendeu " + novas + " frase(s)");
+    sTraducoes();
+  }catch(err){
+    /* Motor caiu, mas o que a memória cobriu continua valendo. */
+    traduzidos[id] = daMem.cobertas
+      ? daMem.texto + "\n\n[" + (daMem.total - daMem.cobertas) +
+        " frase(s) sem tradução — o motor não respondeu (" + (err.message || err) + ")]"
+      : "";
+    if(!daMem.cobertas){
+      delete traduzidos[id];
+      avisoAcervo = "Não deu pra traduzir: " + (err.message || err) +
+        ". O dicionário do aparelho traduz termos para a busca, mas texto " +
+        "corrido precisa do motor. Confira Ajustes → Motor.";
+    }
+    sTraducoes();
+  }
   renderAcervo();
   if(docAberto === id) abrirDoc(id);
+}
+
+/* ═══ TEXTO COMPLETO — baixa uma vez, fica para sempre ═══ */
+async function buscarTextoCompleto(id){
+  const d = biblio.filter(function(x){ return idDoc(x) === id; })[0];
+  if(!d || !d.url) return;
+  textos[id] = "buscando o artigo…";
+  if(docAberto === id) abrirDoc(id);
+  try{
+    const r = await ponteChamar("/texto", "POST", {url: d.url});
+    if(r.texto && r.texto.length > 120){
+      textos[id] = r.texto;
+      sTextos();                       /* guardado de vez */
+    }else{
+      delete textos[id];
+      avisoAcervo = "A página não entregou texto legível" +
+        (r.aviso ? " (" + r.aviso + ")" : "") + ". Use “abrir fonte original”.";
+    }
+  }catch(err){
+    delete textos[id];
+    avisoAcervo = "Para baixar o artigo a Ponte precisa estar ligada (" +
+      (err.message || err) + ").";
+  }
+  if(docAberto === id) abrirDoc(id);
+  renderAcervo();
 }
 
 /* "Pedir à IA" agora explica o que quer, não o nome do arquivo:
@@ -6145,6 +6932,10 @@ function abrirSub(sid){
   if(sid==="custo" && typeof renderCusto==="function") renderCusto();
   if(sid==="espaco" && typeof medirEspaco==="function") medirEspaco();
   if(sid==="motores" && typeof renderMotores==="function") renderMotores();
+  if(sid==="varredura"){ const e=$("#vdEstado"); if(e) e.textContent="toque em Varrer tudo"; }
+  if(sid==="piloto"){ renderPiloto(); }
+  if(sid==="disco"){ const u=localStorage.getItem("sa:ultimoDisco");
+    const e=$("#discoEstado"); if(e&&u) e.textContent="última gravação: "+new Date(u).toLocaleString("pt-BR"); }
   if(sid==="termux"){ const t=$("#ponteToken"); if(t) t.value=ponteToken(); ponteTestar(); }
   if(sid==="aparencia" && typeof preencherVisual==="function") preencherVisual();
 }
@@ -6833,10 +7624,34 @@ const stOrq = t => { const s = $("#orqStatus"); s.style.display = "block"; s.tex
 async function buscarPlantao(rota){
   stOrq(rota === "/rodar" ? "pedindo uma rodada agora — pode levar um minuto…" : "buscando…");
   try{
-    const r = await fetch(orqBase() + (rota || "/plantao"),
-                          {signal: AbortSignal.timeout(rota === "/rodar" ? 180000 : 8000)});
-    if(!r.ok) throw new Error("HTTP " + r.status);
-    const d = await r.json();
+    /* A Ponte já está ligada e conhece o caminho do plantão. Tentar por ela
+       primeiro evita depender do orquestrador subir um servidor próprio. */
+    let d;
+    if(ponteToken() && rota !== "/rodar"){
+      try{
+        d = await ponteChamar("/plantao");
+        if(d.erro) throw new Error(d.erro);
+      }catch(e){ d = null; }
+    }
+    if(!d){
+      if(rota === "/rodar" && ponteToken()){
+        /* pedir rodada é tarefa longa: dispara e acompanha */
+        const t = await ponteChamar("/rodar", "POST", {comando: "orquestrar"});
+        if(t.erro) throw new Error(t.erro);
+        for(let i = 0; i < 120; i++){
+          await new Promise(function(f){ setTimeout(f, 2000); });
+          const st = (await ponteChamar("/tarefas")).tarefas[t.tarefa];
+          if(st && st.estado !== "rodando") break;
+          stOrq("o analista está trabalhando… " + (i * 2) + "s");
+        }
+        d = await ponteChamar("/plantao");
+      }else{
+        const r = await fetch(orqBase() + (rota || "/plantao"),
+                              {signal: AbortSignal.timeout(rota === "/rodar" ? 180000 : 8000)});
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        d = await r.json();
+      }
+    }
     const a = rota === "/rodar" ? d : d.atual;
     if(!a){ stOrq("o orquestrador está de pé, mas ainda não rodou nenhuma vez."); return; }
     mostrarPlantao(a, (d.historico || []).length);
@@ -7424,6 +8239,7 @@ window.addEventListener("offline", renderSub);
   try{ aplicarTema((await ler("sa:tema")) === "claro"); }catch(e){}
   aplicarVisual();
   renderTudo();
+  carregarAcervoPermanente().then(function(){ renderAcervo(); });
   try{ ligarModulosAtivos(); }catch(e){ console.warn("plugues:", e.message); }
   atualizarRodape();
   marcarSentidos();

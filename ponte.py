@@ -23,6 +23,7 @@ import os
 import re
 import secrets
 import subprocess
+import urllib.request
 import sys
 import threading
 import time
@@ -33,6 +34,12 @@ CASA = os.path.expanduser("~")
 SA = os.path.join(CASA, "sa")
 BIBLIOTECA = os.path.join(CASA, "biblioteca")
 ARQ_TOKEN = os.path.join(CASA, ".sa-ponte-token")
+# Disco de verdade do aparelho. O IndexedDB do navegador some se alguém
+# limpar os dados do Chrome; isto aqui não.
+MEMORIA = os.path.join(CASA, "sa-memoria")
+# Downloads é visível pelo gerenciador de arquivos: dá pra copiar pro PC,
+# mandar por e-mail, subir na nuvem. É a saída de emergência.
+ESPELHO = os.path.join(CASA, "storage", "downloads", "sistema-absoluto-memoria")
 
 
 def token():
@@ -58,6 +65,7 @@ PERMITIDOS = {
     "orquestrar":  [sys.executable, os.path.join(SA, "orquestrador.py")],
     "exportar":    [sys.executable, os.path.join(SA, "coletor.py"), "--exportar"],
     "dicionario":  [sys.executable, os.path.join(SA, "coletor.py"), "--dicionario"],
+    "completar":   [sys.executable, os.path.join(SA, "coletor.py"), "--completar"],
     "espaco":      ["df", "-h", CASA],
     "motor_vivo":  ["curl", "-s", "-m", "3", "http://127.0.0.1:8080/health"],
     # O motor é pesado: sobe só quando pedido e desce quando não serve mais.
@@ -87,6 +95,84 @@ def rodar_tarefa(nome, chave):
     except Exception as e:
         tarefas[chave].update({"estado": "erro", "erro": str(e)})
     tarefas[chave]["fim"] = time.time()
+
+
+
+def extrair_texto(html):
+    """Tira o texto legível de uma página. Sem biblioteca externa: o Termux
+    não deve depender de instalação extra pra uma coisa dessas."""
+    # fora o que nunca é conteúdo
+    html = re.sub(r"(?is)<(script|style|nav|header|footer|aside|form|svg)[^>]*>.*?</\1>", " ", html)
+    html = re.sub(r"(?is)<!--.*?-->", " ", html)
+    # parágrafo e quebra viram quebra de verdade, senão tudo cola
+    html = re.sub(r"(?i)</(p|div|li|h[1-6]|tr|section|article)>", "\n\n", html)
+    html = re.sub(r"(?i)<br\s*/?>", "\n", html)
+    txt = re.sub(r"(?s)<[^>]+>", " ", html)
+    # entidades mais comuns
+    for a, b in [("&nbsp;", " "), ("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">"),
+                 ("&quot;", '"'), ("&#39;", "'"), ("&mdash;", "—"), ("&ndash;", "–"),
+                 ("&rsquo;", "'"), ("&ldquo;", '"'), ("&rdquo;", '"'), ("&hellip;", "…")]:
+        txt = txt.replace(a, b)
+    txt = re.sub(r"&#(\d+);", lambda m: chr(int(m.group(1))), txt)
+    # linha curta demais quase sempre é menu, botão ou rodapé
+    linhas = []
+    for ln in txt.split("\n"):
+        ln = re.sub(r"[ \t]+", " ", ln).strip()
+        if len(ln) >= 40 or (ln and len(ln) < 40 and len(linhas) and len(linhas[-1]) >= 40):
+            linhas.append(ln)
+    fora = "\n".join(linhas)
+    fora = re.sub(r"\n{3,}", "\n\n", fora).strip()
+    return fora[:60000]
+
+
+
+def guardar_memoria(nome, dados):
+    """Cada gravação vira um arquivo com data. Nunca sobrescreve o anterior:
+    se um dia o app gravar lixo, as versões boas continuam lá."""
+    os.makedirs(MEMORIA, exist_ok=True)
+    carimbo = time.strftime("%Y%m%d-%H%M%S")
+    seguro = re.sub(r"[^A-Za-z0-9_.-]", "_", nome)[:60]
+    caminho = os.path.join(MEMORIA, "%s-%s.json" % (seguro, carimbo))
+    with open(caminho, "w", encoding="utf-8") as f:
+        f.write(dados)
+
+    # "mais recente" é um atalho fixo pro app achar sem procurar
+    atalho = os.path.join(MEMORIA, "%s-atual.json" % seguro)
+    with open(atalho, "w", encoding="utf-8") as f:
+        f.write(dados)
+
+    # espelho em Downloads, alcançável fora do Termux
+    try:
+        os.makedirs(ESPELHO, exist_ok=True)
+        with open(os.path.join(ESPELHO, "%s-atual.json" % seguro), "w",
+                  encoding="utf-8") as f:
+            f.write(dados)
+    except Exception:
+        pass   # sem permissão de storage não é motivo pra falhar a gravação
+
+    # guarda as 20 últimas de cada nome; o resto sai
+    versoes = sorted(g for g in os.listdir(MEMORIA)
+                     if g.startswith(seguro + "-") and not g.endswith("-atual.json"))
+    for velho in versoes[:-20]:
+        try:
+            os.remove(os.path.join(MEMORIA, velho))
+        except Exception:
+            pass
+    return caminho, len(versoes)
+
+
+def listar_memoria():
+    if not os.path.isdir(MEMORIA):
+        return []
+    fora = []
+    for g in sorted(os.listdir(MEMORIA), reverse=True):
+        if not g.endswith(".json"):
+            continue
+        c = os.path.join(MEMORIA, g)
+        fora.append({"arquivo": g, "bytes": os.path.getsize(c),
+                     "quando": time.strftime("%d/%m/%Y %H:%M",
+                                             time.localtime(os.path.getmtime(c)))})
+    return fora
 
 
 class Ponte(BaseHTTPRequestHandler):
@@ -144,6 +230,30 @@ class Ponte(BaseHTTPRequestHandler):
             with open(alvo, encoding="utf-8") as f:
                 return self.responder(200, json.load(f))
 
+        if rota == "/memoria":
+            import urllib.parse as _up
+            q = _up.parse_qs(self.path.split("?")[1] if "?" in self.path else "")
+            nome = (q.get("nome") or ["memoria"])[0]
+            seguro = re.sub(r"[^A-Za-z0-9_.-]", "_", nome)[:60]
+            alvo = os.path.join(MEMORIA, "%s-atual.json" % seguro)
+            if not os.path.exists(alvo):
+                return self.responder(404, {"erro": "nada guardado com esse nome ainda"})
+            with open(alvo, encoding="utf-8") as f:
+                return self.responder(200, {"nome": nome, "dados": f.read()})
+
+        if rota == "/plantao":
+            # O orquestrador grava o que descobriu enquanto ninguém olhava.
+            # Sem esta rota, o analista trabalha e ninguém lê o relatório.
+            alvo = os.path.join(SA, "plantao.json")
+            if not os.path.exists(alvo):
+                return self.responder(404, {"erro": "o orquestrador ainda não rodou"})
+            with open(alvo, encoding="utf-8") as f:
+                return self.responder(200, json.load(f))
+
+        if rota == "/memorias":
+            return self.responder(200, {"versoes": listar_memoria(), "pasta": MEMORIA,
+                                        "espelho": ESPELHO})
+
         if rota == "/comandos":
             return self.responder(200, {"comandos": sorted(PERMITIDOS)})
 
@@ -159,7 +269,44 @@ class Ponte(BaseHTTPRequestHandler):
         except Exception:
             corpo = {}
 
-        if self.path.split("?")[0] != "/rodar":
+        rota = self.path.split("?")[0]
+
+        if rota == "/memoria":
+            nome = str(corpo.get("nome", "memoria"))
+            dados = corpo.get("dados")
+            if not isinstance(dados, str) or not dados:
+                return self.responder(400, {"erro": "sem dados"})
+            try:
+                caminho, n = guardar_memoria(nome, dados)
+                return self.responder(200, {"ok": True, "arquivo": os.path.basename(caminho),
+                                            "bytes": len(dados.encode("utf-8")),
+                                            "versoes": n, "espelho": ESPELHO})
+            except Exception as e:
+                return self.responder(500, {"erro": type(e).__name__ + ": " + str(e)[:120]})
+
+        if rota == "/texto":
+            # O app abre um item e quer o artigo inteiro. Quem busca é a Ponte:
+            # ela não tem as travas de origem que o navegador impõe.
+            url = str(corpo.get("url", ""))
+            if not url.startswith("http"):
+                return self.responder(400, {"erro": "url inválida"})
+            try:
+                req = urllib.request.Request(url, headers={
+                    "User-Agent": "Mozilla/5.0 (Android) SistemaAbsoluto/1.0",
+                    "Accept": "text/html,application/xhtml+xml",
+                })
+                with urllib.request.urlopen(req, timeout=25) as r:
+                    bruto = r.read(3_000_000).decode("utf-8", errors="replace")
+                texto = extrair_texto(bruto)
+                if len(texto) < 120:
+                    return self.responder(200, {"texto": "", "aviso":
+                        "a página não entregou texto legível (pode exigir login ou ser PDF)"})
+                return self.responder(200, {"texto": texto, "tamanho": len(texto)})
+            except Exception as e:
+                return self.responder(200, {"texto": "", "aviso":
+                    type(e).__name__ + ": " + str(e)[:120]})
+
+        if rota != "/rodar":
             return self.responder(404, {"erro": "rota desconhecida"})
 
         nome = str(corpo.get("comando", ""))

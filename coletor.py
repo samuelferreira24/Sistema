@@ -771,6 +771,87 @@ def montar_dicionario():
     return dic
 
 
+def extrair_texto(html):
+    """Texto legível de uma página, sem biblioteca externa."""
+    html = re.sub(r"(?is)<(script|style|nav|header|footer|aside|form|svg)[^>]*>.*?</\1>", " ", html)
+    html = re.sub(r"(?is)<!--.*?-->", " ", html)
+    html = re.sub(r"(?i)</(p|div|li|h[1-6]|tr|section|article)>", "\n\n", html)
+    html = re.sub(r"(?i)<br\s*/?>", "\n", html)
+    txt = re.sub(r"(?s)<[^>]+>", " ", html)
+    for a, b in [("&nbsp;", " "), ("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">"),
+                 ("&quot;", '"'), ("&#39;", "'"), ("&mdash;", "—"), ("&ndash;", "–"),
+                 ("&rsquo;", "'"), ("&ldquo;", '"'), ("&rdquo;", '"'), ("&hellip;", "…")]:
+        txt = txt.replace(a, b)
+    txt = re.sub(r"&#(\d+);", lambda m: chr(int(m.group(1))), txt)
+    linhas = []
+    for ln in txt.split("\n"):
+        ln = re.sub(r"[ \t]+", " ", ln).strip()
+        if len(ln) >= 40 or (ln and len(linhas) and len(linhas[-1]) >= 40):
+            linhas.append(ln)
+    fora = re.sub(r"\n{3,}", "\n\n", "\n".join(linhas)).strip()
+    return fora[:60000]
+
+
+def completar_textos(limite=60):
+    """Resumo de RSS costuma ter duas linhas. O artigo inteiro está no link.
+    Aqui ele é baixado e guardado junto do item — depois disso, a leitura no
+    app funciona offline, sem depender do site continuar no ar."""
+    if not os.path.isdir(RAIZ):
+        print("Biblioteca vazia. Rode o coletor primeiro.")
+        return
+
+    feitos = falhos = pulados = 0
+    print("\n  COMPLETANDO ARTIGOS (até %d)" % limite)
+
+    for dominio in sorted(os.listdir(RAIZ)):
+        pasta = os.path.join(RAIZ, dominio)
+        if not os.path.isdir(pasta):
+            continue
+        for arq in sorted(os.listdir(pasta)):
+            if not arq.endswith(".json") or feitos + falhos >= limite:
+                continue
+            caminho = os.path.join(pasta, arq)
+            try:
+                with open(caminho, encoding="utf-8") as f:
+                    itens = json.load(f)
+            except Exception:
+                continue
+
+            mudou = False
+            for it in itens:
+                if feitos + falhos >= limite:
+                    break
+                # já tem texto longo? não gasta rede de novo
+                if len(it.get("texto") or "") > 400:
+                    pulados += 1
+                    continue
+                url = it.get("url") or ""
+                if not url.startswith("http") or url.endswith(".pdf"):
+                    continue
+                try:
+                    bruto = buscar(url, timeout=25, tentativas=2)
+                    texto = extrair_texto(bruto)
+                    if len(texto) > 300:
+                        # o mesmo filtro anti-injeção que já protege o resumo
+                        it["texto"] = neutralizar(texto) if "neutralizar" in globals() else texto
+                        mudou = True
+                        feitos += 1
+                        print("    + %s" % (it.get("titulo", "")[:52]))
+                    else:
+                        falhos += 1
+                except Exception as e:
+                    falhos += 1
+                    print("    ! %s: %s" % (it.get("titulo", "")[:34], str(e)[:34]))
+                time.sleep(1.0)   # não martelar os sites
+
+            if mudou:
+                with open(caminho, "w", encoding="utf-8") as f:
+                    json.dump(itens, f, ensure_ascii=False, indent=1)
+
+    print("\n  %d artigos baixados · %d falharam · %d já tinham" % (feitos, falhos, pulados))
+    exportar_biblioteca()
+
+
 if __name__ == "__main__":
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     if arg == "--status":
@@ -781,6 +862,8 @@ if __name__ == "__main__":
         exportar_biblioteca()
     elif arg == "--dicionario":
         montar_dicionario()
+    elif arg == "--completar":
+        completar_textos()
     else:
         print("\nCOLETOR — Sistema Absoluto")
         print(f"{datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
