@@ -231,6 +231,46 @@
     background:linear-gradient(90deg,#8C6B2A,#F0DCA8);animation:spmov 1.1s ease-in-out infinite}
   @keyframes spmov{0%{transform:translateX(-100%)}100%{transform:translateX(360%)}}
 
+
+  
+
+/* ═══ MODO DE COR — diálogo de três opções ═══ */
+  .dlgCor{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.94);
+    z-index:1200;width:min(330px,86vw);background:var(--card);border:1px solid var(--line);
+    border-radius:18px;padding:20px 8px 12px;opacity:0;pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease}
+  .dlgCor.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .dlgCor h4{margin:0 0 10px 14px;font-size:17px;color:var(--txt);font-weight:600}
+  .corOp{width:100%;background:none;border:0;display:flex;align-items:center;gap:15px;
+    padding:14px;color:var(--txt);font-size:16px;font-family:inherit;text-align:left;cursor:pointer}
+  .corOp:active{background:var(--line)}
+  .corIc{width:22px;text-align:center;color:var(--muted);font-size:17px}
+  .corCk{margin-left:auto;color:var(--brass);opacity:0;font-size:17px}
+  .corOp.on{color:var(--brass)} .corOp.on .corIc{color:var(--brass)} .corOp.on .corCk{opacity:1}
+
+
+  .torrada{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);z-index:2000;
+    background:var(--card);border:1px solid var(--line);color:var(--txt);
+    padding:11px 18px;border-radius:22px;font-size:13.5px;box-shadow:0 6px 22px rgba(0,0,0,.35)}
+
+
+  /* ═══ BIBLIOTECA — pastas por tema ═══ */
+  .bibNota{font-size:12px;color:var(--muted);margin:2px 2px 10px;letter-spacing:.04em}
+  .pasta{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+  .pastaCab{width:100%;background:var(--card);border:0;display:flex;align-items:center;
+    gap:11px;padding:13px 13px;color:var(--txt);font-size:15px;font-family:inherit;
+    text-align:left;cursor:pointer}
+  .pastaCab:active{background:var(--line)}
+  .pastaSeta{color:var(--brass);width:13px;flex-shrink:0}
+  .pastaNome{flex:1;text-transform:capitalize;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .pastaQtd{font-size:12px;color:var(--muted);background:var(--line);
+    padding:2px 9px;border-radius:11px;flex-shrink:0}
+  .pastaLg{font-size:10.5px;color:var(--muted);letter-spacing:.09em;flex-shrink:0}
+  .pastaCorpo{padding:4px 11px 11px;border-top:1px solid var(--line)}
+  .dtrad{margin-top:9px;background:none;border:1px solid var(--line);color:var(--brass);
+    padding:6px 13px;border-radius:15px;font-size:12.5px;font-family:inherit;cursor:pointer}
+  .dtrad:active{background:var(--line)}
+
   .pane{flex:1;min-height:0;display:none;flex-direction:column}
   .pane.on{display:flex}
   /* O que rola precisa esticar dentro do pane. Sem isto a altura vira zero:
@@ -502,6 +542,13 @@
   <div class="spBarra"><i></i></div>
 </div>
 
+<div class="veu" id="veuCor"></div>
+<div class="dlgCor" id="dlgCor">
+  <h4>Modo de cor</h4>
+  <button class="corOp" data-cor="sistema"><span class="corIc">◐</span>Sistema<span class="corCk">✓</span></button>
+  <button class="corOp" data-cor="claro"><span class="corIc">☀</span>Claro<span class="corCk">✓</span></button>
+  <button class="corOp" data-cor="escuro"><span class="corIc">☾</span>Escuro<span class="corCk">✓</span></button>
+</div>
 <div id="app">
 
   <!-- ═══ BARRA FINA — hambúrguer abre o menu, igual o Claude ═══ -->
@@ -641,7 +688,8 @@
   </div>
   <div class="ajGrupoCab">APARÊNCIA</div>
   <div class="ajGrupo">
-    <button class="ajLinha" data-sub="aparencia"><span class="ajIc">◐</span><span class="ajTxt"><span class="ajT">Modo de cor</span><span class="ajS" id="ls-aparencia">claro, escuro e paleta</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="aparencia"><span class="ajIc">◐</span><span class="ajTxt"><span class="ajT">Modo de cor</span><span class="ajS" id="ls-aparencia">Sistema</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="paleta"><span class="ajIc">◈</span><span class="ajTxt"><span class="ajT">Paleta</span><span class="ajS" id="ls-paleta">Latão</span></span><span class="ajSeta">›</span></button>
   </div>
   <div class="ajGrupoCab">DADOS</div>
   <div class="ajGrupo">
@@ -652,6 +700,7 @@
   </div>
   <div class="ajGrupoCab">AVANÇADO</div>
   <div class="ajGrupo">
+    <button class="ajLinha" data-sub="termux"><span class="ajIc">▸</span><span class="ajTxt"><span class="ajT">Termux</span><span class="ajS" id="ls-termux">ponte desligada</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="evolucao"><span class="ajIc">✦</span><span class="ajTxt"><span class="ajT">Evolução</span><span class="ajS" id="ls-evolucao">módulos novos, você aprova</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="plantao"><span class="ajIc">◷</span><span class="ajTxt"><span class="ajT">Plantão</span><span class="ajS" id="ls-plantao">o que rodou sem você</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="autoteste"><span class="ajIc">✓</span><span class="ajTxt"><span class="ajT">Auto-teste</span><span class="ajS" id="ls-autoteste">o app se verifica</span></span><span class="ajSeta">›</span></button>
@@ -730,7 +779,7 @@
         <p id="mStatus" class="status" style="display:none"></p>
       </div></div>
 
-      <div class="subpg" id="sub-aparencia" data-tit="Modo de cor"><div class="card">
+      <div class="subpg" id="sub-paleta" data-tit="Paleta"><div class="card">
         <div class="lbl">Aparência</div>
         <p class="note" style="margin:0 0 12px">Muda na hora, sem recarregar. Fica salvo neste
         aparelho e vai junto na exportação.</p>
@@ -849,7 +898,26 @@
         </div>
       </div></div>
 
-      <div class="subpg" id="sub-evolucao" data-tit="Evolução"><div class="card">
+      <div class="subpg" id="sub-termux" data-tit="Termux">
+  <div class="card">
+    <div class="lbl">Ponte com o Termux</div>
+    <p class="note" style="margin:0 0 12px">Com a Ponte ligada, o coletor e o orquestrador
+    rodam a partir daqui — você não precisa abrir o Termux. No Termux, uma vez:
+    <code>termux-wake-lock &amp;&amp; python ~/sa/ponte.py &amp;</code></p>
+    <input class="field" id="ponteToken" placeholder="Cole aqui o token que a Ponte mostrou">
+    <div class="row">
+      <button class="primary" id="ponteSalvar">Salvar e conectar</button>
+      <button class="ghost" id="ponteTestar">Testar</button>
+    </div>
+    <div id="ponteEstado" class="note" style="margin-top:11px">não conectada</div>
+  </div>
+  <div class="card">
+    <div class="lbl">Rodar sem abrir o Termux</div>
+    <div id="ponteComandos" class="row" style="flex-wrap:wrap;gap:8px"></div>
+    <pre id="ponteSaida" class="cod" style="margin-top:12px;display:none"></pre>
+  </div>
+</div>
+<div class="subpg" id="sub-evolucao" data-tit="Evolução"><div class="card">
         <div class="lbl">Evolução — a IA escreve, você aprova</div>
         <p class="note" style="margin:0 0 10px">Peça um módulo novo. A IA escreve o código, você lê e
         decide. O núcleo do app nunca é tocado: módulo quebrado se desliga, o sistema continua de pé.</p>
@@ -1178,6 +1246,7 @@ const MATRIZ_PADRAO = () => ({
   realocados: []
 });
 let filtroDom = "todos", modoAcervo = "biblioteca";
+let pastasAbertas = {}, traduzidos = {};
 let nuvem = {token:"", gist:"", senha:""};
 let cfg = {prov:"gemini", modelo:MODELOS.gemini, chave:"", endpoint:ENDPOINT_PADRAO,
            modeloLocal:"", urlPago:""};
@@ -3228,13 +3297,26 @@ function recuperar(q){
   return fix.concat(top).slice(0,9);
 }
 function buscarBiblio(termo){
-  const t = norm(termo).split(/\s+/).filter(Boolean);
+  /* Palavras curtas e vazias não ajudam a achar nada — saem do cálculo */
+  const VAZIAS = ["de","da","do","que","com","para","por","uma","um","os","as","the","and",
+                  "of","in","to","a","o","e","sobre","como"];
+  const t = norm(termo).split(/\s+/).filter(function(p){
+    return p.length > 2 && VAZIAS.indexOf(p) < 0; });
   return biblio.filter(d => filtroDom === "todos" || d.dominio === filtroDom)
     .map(d => {
-      const txt = norm((d.titulo||"") + " " + (d.corpo||"") + " " + (d.fonte||""));
-      let s = 0; t.forEach(p => { if(txt.includes(p)) s++; });
-      s += (4 - (d.tier || 3)) * .4;
-      return {d, s, casou: !t.length || t.some(p => txt.includes(p))};
+      const tit = norm(d.titulo || ""), corpo = norm(d.corpo || ""), fonte = norm(d.fonte || "");
+      let s = 0, casou = 0;
+      t.forEach(function(p){
+        const raiz = p.replace(/(s|es|ing|ed)$/, "");
+        if(tit.includes(p))        { s += 5; casou++; }
+        else if(tit.includes(raiz)){ s += 3.5; casou++; }
+        else if(corpo.includes(p)) { s += 2; casou++; }
+        else if(corpo.includes(raiz)){ s += 1.2; casou++; }
+        else if(fonte.includes(p)) { s += 1; casou++; }
+      });
+      if(casou > 1) s *= 1 + (casou - 1) * .35;   /* achar várias palavras vale mais */
+      s += (4 - (d.tier || 3)) * .6;              /* fonte primária sobe */
+      return {d, s, casou: !t.length || casou > 0};
     }).filter(x => x.casou).sort((a,b) => b.s - a.s).map(x => x.d);
 }
 
@@ -4822,18 +4904,72 @@ function renderAcervo(){
   }
   const itens = buscarBiblio(termo);
   if(!itens.length){ l.innerHTML = '<div class="empty"><p>Nada encontrado.</p></div>'; return; }
-  l.innerHTML = itens.slice(0,120).map(function(d){
-    const t = TIERS[d.tier || 3];
-    const link = d.url ? ' · <a class="dlink" href="' + esc(d.url) +
-      '" target="_blank" rel="noopener">abrir fonte</a>' : "";
-    const al = d.suspeito ? '<span class="tag t-amber">neutralizado</span>' : "";
-    return '<div class="doc"><div class="dhead"><span class="tier ' + t.cls + '">' + t.rotulo +
-      '</span><span class="tag t-muted">' + esc(d.dominio||"—") + '</span>' + al + '</div>' +
-      '<p class="dtitulo">' + esc(d.titulo) + '</p>' +
-      (d.corpo ? '<p class="dcorpo">' + esc(d.corpo) + '</p>' : "") +
-      '<div class="dfonte">' + esc(d.fonte||"") + (d.coletado ? " · " + esc(d.coletado) : "") +
-      link + '</div></div>';
+
+  /* Buscando: lista por relevância. Sem busca: pastas por domínio. */
+  if(termo && termo.trim()){
+    l.innerHTML = '<div class="bibNota">' + itens.length + ' resultado(s) por relevância</div>' +
+      itens.slice(0,120).map(cartaoDoc).join("");
+    return;
+  }
+  const pastas = {};
+  itens.forEach(function(d){
+    const k = d.dominio || "sem-tema";
+    (pastas[k] = pastas[k] || []).push(d);
+  });
+  const nomes = Object.keys(pastas).sort(function(a,b){ return pastas[b].length - pastas[a].length; });
+  l.innerHTML = nomes.map(function(n){
+    const ab = pastasAbertas[n] ? " aberta" : "";
+    const its = pastas[n];
+    const idiomas = {};
+    its.forEach(function(d){ idiomas[idiomaDe(d)] = 1; });
+    return '<div class="pasta' + ab + '">' +
+      '<button class="pastaCab" data-pasta="' + esc(n) + '">' +
+        '<span class="pastaSeta">' + (pastasAbertas[n] ? "▾" : "▸") + '</span>' +
+        '<span class="pastaNome">' + esc(n) + '</span>' +
+        '<span class="pastaQtd">' + its.length + '</span>' +
+        '<span class="pastaLg">' + Object.keys(idiomas).join(" ") + '</span>' +
+      '</button>' +
+      (pastasAbertas[n] ? '<div class="pastaCorpo">' +
+        its.slice(0,60).map(cartaoDoc).join("") + '</div>' : "") +
+    '</div>';
   }).join("");
+}
+
+/* Idioma detectado pelo texto — serve pra marcar o cartão e pra decidir a tradução */
+function idiomaDe(d){
+  if(d.idioma) return d.idioma;
+  const t = ((d.titulo||"") + " " + (d.corpo||"")).toLowerCase();
+  if(/[\u4e00-\u9fff]/.test(t)) return "zh";
+  if(/[\u3040-\u30ff]/.test(t)) return "ja";
+  if(/[\u0400-\u04ff]/.test(t)) return "ru";
+  if(/[\u0600-\u06ff]/.test(t)) return "ar";
+  if(/\b(the|and|with|from|this|that|for|are|which)\b/.test(t)) return "en";
+  if(/\b(de|que|para|com|uma|não|são|como)\b/.test(t)) return "pt";
+  if(/\b(el|los|para|con|una|como|pero)\b/.test(t)) return "es";
+  return "—";
+}
+
+function cartaoDoc(d){
+  const t = TIERS[d.tier || 3];
+  const link = d.url ? ' · <a class="dlink" href="' + esc(d.url) +
+    '" target="_blank" rel="noopener">abrir fonte</a>' : "";
+  const al = d.suspeito ? '<span class="tag t-amber">neutralizado</span>' : "";
+  const lg = idiomaDe(d);
+  const estrangeiro = lg !== "pt" && lg !== "—";
+  const vendo = traduzidos[d.id] || null;
+  const corpo = vendo ? vendo : (d.corpo || "");
+  const botao = estrangeiro
+    ? '<button class="dtrad" data-trad="' + esc(d.id) + '">' +
+      (vendo ? "ver original" : "traduzir") + '</button>'
+    : "";
+  return '<div class="doc"><div class="dhead"><span class="tier ' + t.cls + '">' + t.rotulo +
+    '</span><span class="tag t-muted">' + esc(d.dominio||"—") + '</span>' +
+    '<span class="tag t-muted">' + lg + '</span>' + al +
+    (vendo ? '<span class="tag t-acento">traduzido</span>' : "") + '</div>' +
+    '<p class="dtitulo">' + esc(d.titulo) + '</p>' +
+    (corpo ? '<p class="dcorpo">' + esc(corpo) + '</p>' : "") +
+    '<div class="dfonte">' + esc(d.fonte||"") + (d.coletado ? " · " + esc(d.coletado) : "") +
+    link + '</div>' + botao + '</div>';
 }
 
 function renderModulos(){
@@ -5161,24 +5297,127 @@ async function testarModulo(id){
   sModulos(); renderModulos();
 }
 
-function rodarModulo(id){
-  const m = modulos.filter(function(x){ return x.id === id; })[0];
-  if(!m || !m.ativo) return;
-  const api = {
+/* ═══ PLUGUE — o que faz módulo virar peça do sistema ═══
+   Antes o módulo era um script que só rodava quando você apertava. Agora ele
+   pluga: registra ferramenta que a IA chama sozinha, cria tela própria, engata
+   em gancho de evento e fala com o Termux. Nada disso exige mexer no app. */
+
+const GANCHOS = {inicio:[], mensagem:[], coleta:[], decisao:[], minuto:[], hora:[]};
+const TELAS_PLUGADAS = {};
+
+function dispararGancho(nome, dado){
+  (GANCHOS[nome] || []).forEach(function(g){
+    try{ g.fn(dado); }
+    catch(e){ console.warn("gancho " + nome + " do módulo " + g.mod + ":", e.message); }
+  });
+}
+
+function apiDoModulo(m){
+  const chaveDep = "sa:mod:" + m.id;
+  return {
+    /* ── leitura do sistema ── */
     memoria: mem(), biblioteca: biblio, imperio: imperio,
-    gravar: function(t,c){
+    projetos: (typeof projetos !== "undefined" ? projetos : []),
+    decisoes: (typeof decisoes !== "undefined" ? decisoes : []),
+    espaco: (typeof espaco !== "undefined" ? espaco : "nucleo"),
+
+    /* ── escrita ── */
+    gravar: function(t, c){
       extras.push({id:"mod-"+Date.now(), tag:"CONTEXTO", titulo:t, corpo:c});
       sExtras(); renderAcervo(); renderSub();
     },
     mostrar: function(html){
       const d = document.createElement("div");
       d.className = "card"; d.innerHTML = html;
-      $("#modulos").insertBefore(d, $("#modulos").firstChild);
-    }
+      const alvo = $("#modulos"); if(alvo) alvo.insertBefore(d, alvo.firstChild);
+    },
+    /* memória própria do módulo — não polui a do sistema */
+    guardar: function(k, v){ localStorage.setItem(chaveDep+":"+k, JSON.stringify(v)); },
+    ler: function(k, padrao){
+      try{ const v = localStorage.getItem(chaveDep+":"+k);
+           return v === null ? padrao : JSON.parse(v); }catch(e){ return padrao; }
+    },
+
+    /* ── a IA ── */
+    perguntar: function(texto){ return chamarMotor([{papel:"user", texto:texto}]); },
+    /* ferramenta registrada aqui a IA passa a chamar sozinha, como as de fábrica */
+    registrarFerramenta: function(nome, desc, exec){
+      FERRAMENTAS[nome] = {desc: desc, exec: exec, deModulo: m.id};
+    },
+
+    /* ── tela própria no menu lateral ── */
+    registrarTela: function(nome, icone, montar){
+      TELAS_PLUGADAS[m.id] = {nome:nome, icone:icone, montar:montar, mod:m.id};
+      montarTelasPlugadas();
+    },
+
+    /* ── ganchos: o módulo passa a agir sozinho ── */
+    ao: function(evento, fn){
+      if(!GANCHOS[evento]) GANCHOS[evento] = [];
+      GANCHOS[evento].push({mod:m.id, fn:fn});
+    },
+
+    /* ── Termux, pela Ponte ── */
+    termux: function(comando){ return ponteChamar("/rodar", "POST", {comando:comando}); },
+
+    /* ── rede ── */
+    buscarWeb: function(url, opcoes){ return fetch(url, opcoes).then(function(r){ return r.json(); }); },
+
+    /* ── identidade ── */
+    id: m.id, nome: m.nome, versao: 2
   };
-  try{ Function("api", m.codigo)(api); }
+}
+
+/* Telas de módulo entram no menu como qualquer seção nativa */
+function montarTelasPlugadas(){
+  const menu = $("#menuLateral"); if(!menu) return;
+  Object.keys(TELAS_PLUGADAS).forEach(function(mid){
+    const t = TELAS_PLUGADAS[mid];
+    if(document.querySelector('[data-ir="plug-'+mid+'"]')) return;
+    const b = document.createElement("button");
+    b.className = "mitem"; b.dataset.ir = "plug-"+mid;
+    b.innerHTML = '<span class="mic">'+(t.icone||"◆")+'</span> '+esc(t.nome);
+    const linha = menu.querySelector(".menu-linha");
+    if(linha) menu.insertBefore(b, linha); else menu.appendChild(b);
+    if(!document.querySelector("#pane-plug-"+mid)){
+      const p = document.createElement("div");
+      p.className = "pane"; p.id = "pane-plug-"+mid;
+      p.innerHTML = '<div class="scroll body" id="corpo-plug-'+mid+'"></div>';
+      const app = $("#app"); if(app) app.appendChild(p);
+    }
+  });
+}
+
+function rodarModulo(id){
+  const m = modulos.filter(function(x){ return x.id === id; })[0];
+  if(!m || !m.ativo) return;
+  try{ Function("api", m.codigo)(apiDoModulo(m)); }
   catch(e){ alert("O módulo deu erro: " + e.message + "\n\nO app continua funcionando."); }
 }
+
+/* Módulo desligado sai limpo: ferramenta, tela e gancho dele somem junto */
+function desplugarModulo(id){
+  Object.keys(FERRAMENTAS).forEach(function(n){
+    if(FERRAMENTAS[n].deModulo === id) delete FERRAMENTAS[n]; });
+  Object.keys(GANCHOS).forEach(function(g){
+    GANCHOS[g] = GANCHOS[g].filter(function(x){ return x.mod !== id; }); });
+  delete TELAS_PLUGADAS[id];
+  const b = document.querySelector('[data-ir="plug-'+id+'"]'); if(b) b.remove();
+  const p = document.querySelector("#pane-plug-"+id); if(p) p.remove();
+}
+
+/* Todo módulo ativo sobe junto com o app, sem você mandar */
+function ligarModulosAtivos(){
+  modulos.filter(function(m){ return m.ativo; }).forEach(function(m){
+    try{ Function("api", m.codigo)(apiDoModulo(m)); }
+    catch(e){ console.warn("módulo " + m.nome + " falhou ao subir:", e.message); }
+  });
+  dispararGancho("inicio", {quando: Date.now()});
+}
+
+/* Relógio do sistema: gancho de minuto e de hora para módulo que vigia sozinho */
+setInterval(function(){ dispararGancho("minuto", {quando: Date.now()}); }, 60000);
+setInterval(function(){ dispararGancho("hora",   {quando: Date.now()}); }, 3600000);
 
 /* ═══ EVENTOS ═══ */
 /* ═══ TELA DO PROJETO — lugar próprio, não um cartão na lista ═══ */
@@ -5301,7 +5540,8 @@ function irPara(secao){
   Array.prototype.forEach.call(document.querySelectorAll(".pane"), function(x){ x.classList.remove("on"); });
   const item = document.querySelector('[data-ir="' + secao + '"]');
   if(item) item.classList.add("on");
-  $("#topoTitulo").textContent = TITULOS_SECAO[secao] || secao;
+  const tp = TELAS_PLUGADAS[secao.indexOf("plug-")===0 ? secao.slice(5) : ""];
+  $("#topoTitulo").textContent = TITULOS_SECAO[secao] || (tp ? tp.nome : secao);
 
   if(secao === "conselho"){
     $("#pane-conselho-lista").classList.add("on");
@@ -5312,6 +5552,12 @@ function irPara(secao){
   }
   if(secao === "ajustes"){ fecharSub(); }
   if(secao === "ajustes"){ medirEspaco(); preencherCusto(); preencherVisual(); renderMotores(); }
+  if(secao.indexOf("plug-") === 0){
+    const mid = secao.slice(5), t = TELAS_PLUGADAS[mid];
+    if(t){ const c = $("#corpo-plug-"+mid);
+           if(c){ try{ t.montar(c); }catch(e){ c.innerHTML = '<div class="empty"><p>Módulo falhou: '+esc(e.message)+'</p></div>'; } } }
+  }
+  if(secao === "acervo") renderAcervo();
   if(secao === "decisoes") renderDecisoes();
   if(secao === "malha") renderMalhaPane();
   if(secao === "projetos") renderProjetos();
@@ -5397,8 +5643,11 @@ function renderMenuFixados(){
     }).join("");
 }
 
-Array.prototype.forEach.call(document.querySelectorAll(".mitem"), function(t){
-  t.addEventListener("click", function(){ if(t.dataset.ir) irPara(t.dataset.ir); });
+/* Delegação, não ligação um a um: item de menu criado depois — por um módulo
+   plugado, por exemplo — funciona sem precisar religar nada. */
+document.addEventListener("click", function(e){
+  const t = e.target.closest ? e.target.closest(".mitem[data-ir]") : null;
+  if(t) irPara(t.dataset.ir);
 });
 liga("#abrirMenu", "click", abrirMenuLateral);
 liga("#veuMenu", "click", fecharMenu);
@@ -5428,6 +5677,134 @@ document.addEventListener("click", function(e){
   atualizarResumosAjustes();
 });
 
+
+/* ═══ MODO DE COR — Sistema segue o aparelho; Claro/Escuro fixam ═══ */
+const midia = window.matchMedia ? window.matchMedia("(prefers-color-scheme: light)") : null;
+function modoCor(){ return localStorage.getItem("sa:modoCor") || "sistema"; }
+function aplicarModoCor(){
+  const m = modoCor();
+  const claro = m === "claro" || (m === "sistema" && midia && midia.matches);
+  document.body.classList.toggle("claro", claro);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", claro ? "#F4F1EA" : "#0B0B0D");
+  document.querySelectorAll(".corOp").forEach(function(b){
+    b.classList.toggle("on", b.dataset.cor === m); });
+  const r = $("#ls-aparencia");
+  if(r) r.textContent = m === "sistema" ? "Sistema" : (m === "claro" ? "Claro" : "Escuro");
+}
+if(midia && midia.addEventListener)
+  midia.addEventListener("change", function(){ if(modoCor()==="sistema") aplicarModoCor(); });
+function abrirCor(){ $("#dlgCor").classList.add("on"); $("#veuCor").classList.add("on"); }
+function fecharCor(){ $("#dlgCor").classList.remove("on"); $("#veuCor").classList.remove("on"); }
+document.addEventListener("click", function(e){
+  const op = e.target.closest ? e.target.closest(".corOp") : null;
+  if(op){ localStorage.setItem("sa:modoCor", op.dataset.cor); aplicarModoCor(); fecharCor(); return; }
+  if(e.target.id === "veuCor") fecharCor();
+});
+aplicarModoCor();
+
+/* ═══ PONTE — o Termux como serviço, sem abrir o Termux ═══ */
+const PONTE = "http://127.0.0.1:8099";
+function ponteToken(){ return localStorage.getItem("sa:ponte") || ""; }
+async function ponteChamar(rota, metodo, corpo){
+  const r = await fetch(PONTE + rota, {
+    method: metodo || "GET",
+    headers: {"Content-Type":"application/json", "X-Token": ponteToken()},
+    body: corpo ? JSON.stringify(corpo) : undefined
+  });
+  return await r.json();
+}
+async function ponteTestar(){
+  const e = $("#ponteEstado"); if(e) e.textContent = "procurando…";
+  try{
+    await ponteChamar("/saude");
+    const c = await ponteChamar("/comandos");
+    if(c.erro) throw new Error(c.erro);
+    if(e) e.textContent = "conectada · " + c.comandos.length + " comandos disponíveis";
+    const r = $("#ls-termux"); if(r) r.textContent = "conectada";
+    const cx = $("#ponteComandos");
+    if(cx) cx.innerHTML = c.comandos.map(function(n){
+      return '<button class="ghost" data-pcmd="' + n + '">' + n + '</button>'; }).join("");
+  }catch(err){
+    if(e) e.textContent = "não achei a Ponte. Ligue no Termux: python ~/sa/ponte.py &";
+    const r = $("#ls-termux"); if(r) r.textContent = "ponte desligada";
+  }
+}
+liga("#ponteSalvar", "click", function(){
+  localStorage.setItem("sa:ponte", ($("#ponteToken").value || "").trim());
+  ponteTestar();
+});
+liga("#ponteTestar", "click", ponteTestar);
+document.addEventListener("click", async function(e){
+  const b = e.target.closest ? e.target.closest("[data-pcmd]") : null;
+  if(!b) return;
+  const saida = $("#ponteSaida");
+  saida.style.display = "block"; saida.textContent = b.dataset.pcmd + ": disparado…";
+  try{
+    const r = await ponteChamar("/rodar", "POST", {comando: b.dataset.pcmd});
+    if(r.erro){ saida.textContent = "erro: " + r.erro; return; }
+    /* tarefa longa: pergunta de tempos em tempos em vez de travar a tela */
+    for(let i = 0; i < 240; i++){
+      await new Promise(function(f){ setTimeout(f, 1500); });
+      const t = (await ponteChamar("/tarefas")).tarefas[r.tarefa];
+      if(!t) break;
+      if(t.estado === "rodando"){ saida.textContent = b.dataset.pcmd + ": rodando… " +
+        Math.round(Date.now()/1000 - t.inicio) + "s"; continue; }
+      saida.textContent = (t.saida || "") + (t.erro || "");
+      /* coleta terminou: já traz a biblioteca nova pra dentro do app */
+      if(b.dataset.pcmd === "coletar" || b.dataset.pcmd === "exportar"){
+        try{
+          const bb = await ponteChamar("/biblioteca");
+          if(bb.biblioteca && Array.isArray(bb.biblioteca.itens)){
+            biblio = bb.biblioteca.itens; sBiblio(); renderAcervo();
+            saida.textContent += "\n\n" + biblio.length + " itens carregados na biblioteca.";
+          }
+        }catch(x){}
+      }
+      break;
+    }
+  }catch(err){ saida.textContent = "falhou: " + (err.message || err); }
+});
+
+
+/* ═══ BIBLIOTECA — pastas, tradução e busca por significado ═══ */
+liga("#lista", "click", function(e){
+  const p = e.target.closest ? e.target.closest("[data-pasta]") : null;
+  if(p){ const n = p.dataset.pasta; pastasAbertas[n] = !pastasAbertas[n]; renderAcervo(); return; }
+  const tr = e.target.closest ? e.target.closest("[data-trad]") : null;
+  if(tr){ alternarTraducao(tr.dataset.trad); return; }
+});
+
+/* Traduz pelo motor já configurado. Guarda a versão traduzida ao lado da
+   original — o toque no botão alterna entre as duas, nada é sobrescrito. */
+async function alternarTraducao(id){
+  if(traduzidos[id]){ delete traduzidos[id]; renderAcervo(); return; }
+  const d = biblio.filter(function(x){ return x.id === id; })[0];
+  if(!d || !d.corpo) return;
+  traduzidos[id] = "traduzindo…"; renderAcervo();
+  try{
+    const r = await chamarMotor([{papel:"user", texto:
+      "Traduza para português do Brasil. Devolva só a tradução, sem comentário:\n\n" +
+      d.titulo + "\n" + d.corpo}]);
+    traduzidos[id] = (r || "").trim() || "não foi possível traduzir";
+  }catch(err){ traduzidos[id] = "falha ao traduzir: " + (err.message || err); }
+  renderAcervo();
+}
+
+/* "Pedir à IA" agora explica o que quer, não o nome do arquivo:
+   o motor lê os candidatos e devolve os que realmente respondem o pedido. */
+async function perguntarBibliotecaPorSentido(pedido){
+  const cand = buscarBiblio(pedido).slice(0, 25);
+  if(!cand.length) return "Nada na biblioteca se aproxima disso ainda.";
+  const lista = cand.map(function(d, i){
+    return (i+1) + ") " + d.titulo + " — " + (d.corpo||"").slice(0,220); }).join("\n");
+  return await chamarMotor([{papel:"user", texto:
+    "Pedido do usuário: " + pedido + "\n\nCandidatos da biblioteca:\n" + lista +
+    "\n\nDiga quais números respondem o pedido e por quê, em português. " +
+    "Se nenhum servir, diga isso sem inventar."}]);
+}
+
+
 /* ═══ AJUSTES — navegação índice ⇄ subpágina ═══ */
 function abrirSub(sid){
   const pg=$("#sub-"+sid); if(!pg) return;
@@ -5439,6 +5816,7 @@ function abrirSub(sid){
   if(sid==="custo" && typeof renderCusto==="function") renderCusto();
   if(sid==="espaco" && typeof medirEspaco==="function") medirEspaco();
   if(sid==="motores" && typeof renderMotores==="function") renderMotores();
+  if(sid==="termux"){ const t=$("#ponteToken"); if(t) t.value=ponteToken(); ponteTestar(); }
   if(sid==="aparencia" && typeof preencherVisual==="function") preencherVisual();
 }
 function fecharSub(){
@@ -5464,7 +5842,10 @@ function atualizarResumosAjustes(){
 }
 document.addEventListener("click", function(e){
   const alvo=e.target.closest ? e.target.closest("[data-sub]") : null;
-  if(alvo){ abrirSub(alvo.dataset.sub); }
+  if(alvo){
+    if(alvo.dataset.sub === "aparencia"){ abrirCor(); return; }
+    abrirSub(alvo.dataset.sub);
+  }
 });
 
 liga("#btnConfig", "click", function(){ irPara("ajustes"); });
@@ -6514,6 +6895,7 @@ liga("#modulos", "click", function(e){
   if(tst){ testarModulo(tst); return; }
   if(tog){
     const m = modulos.filter(function(x){ return x.id === tog; })[0];
+    if(m && m.ativo) desplugarModulo(m.id);
     if(!m.ativo){
       if(!m.testado && !confirm("Este módulo nunca rodou na caixa de teste.\n\n" +
         "Testar primeiro mostra o que ele faz sem risco nenhum. Aprovar sem testar é decidir no escuro.\n\n" +
@@ -6702,6 +7084,7 @@ window.addEventListener("offline", renderSub);
   try{ aplicarTema((await ler("sa:tema")) === "claro"); }catch(e){}
   aplicarVisual();
   renderTudo();
+  try{ ligarModulosAtivos(); }catch(e){ console.warn("plugues:", e.message); }
   atualizarRodape();
   marcarSentidos();
   try{
@@ -6726,6 +7109,80 @@ if("serviceWorker" in navigator)
   if(document.readyState==="complete") setTimeout(sair,650);
   else window.addEventListener("load", function(){ setTimeout(sair,650); });
   setTimeout(sair, 4000);   /* trava de segurança: nunca deixa a tela presa */
+})();
+
+
+/* ═══ BOTÃO FÍSICO DE VOLTAR — comporta como app nativo ═══
+   Cada camada aberta empilha um estado. O botão do aparelho desempilha
+   na ordem: folha → subpágina de ajustes → chat → seção → confirmar saída. */
+(function(){
+  let saindo = 0;
+  history.replaceState({sa:"raiz"}, "");
+  history.pushState({sa:"tela"}, "");   /* colchão: o 1º toque nunca fecha o app */
+
+  function fecharCamadaAberta(){
+    /* 1. véus e folhas (motor, arquivos, ações, modo de cor) */
+    const veu = document.querySelector(".veu.on");
+    if(veu){
+      document.querySelectorAll(".veu.on").forEach(function(v){ v.classList.remove("on"); });
+      document.querySelectorAll(".folha.aberta,.aberta,.dlgCor.on").forEach(function(f){
+        f.classList.remove("aberta"); f.classList.remove("on"); });
+      return true;
+    }
+    /* 2. menu lateral */
+    const menu = document.querySelector("#menuLateral.aberto");
+    if(menu){ if(typeof fecharMenu==="function") fecharMenu(); return true; }
+    /* 3. subpágina de ajustes */
+    if(document.querySelector(".subpg.on")){ fecharSub(); return true; }
+    /* 4. dentro de um chat ou projeto → volta pra lista */
+    if($("#pane-projeto") && $("#pane-projeto").classList.contains("on")){ irPara("projetos"); return true; }
+    if($("#pane-conselho") && $("#pane-conselho").classList.contains("on")){ irPara("conselho"); return true; }
+    /* 5. em seção que não é a inicial → volta pra Conversas */
+    const atual = document.querySelector(".pane.on");
+    if(atual && atual.id !== "pane-conselho-lista"){ irPara("conselho"); return true; }
+    return false;   /* já está na raiz */
+  }
+
+  window.addEventListener("popstate", function(){
+    if(fecharCamadaAberta()){
+      history.pushState({sa:"tela"}, "");   /* repõe o colchão */
+      return;
+    }
+    /* raiz: exige segundo toque em 2s para sair, como todo app Android */
+    if(Date.now() - saindo < 2000){ history.back(); return; }
+    saindo = Date.now();
+    if(typeof aviso === "function") aviso("Toque em voltar de novo para sair");
+    else {
+      const t=document.createElement("div"); t.className="torrada";
+      t.textContent="Toque em voltar de novo para sair";
+      document.body.appendChild(t);
+      setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 1900);
+    }
+    history.pushState({sa:"tela"}, "");
+  });
+})();
+
+
+/* ═══ NATIVO — quando roda como APK, usa o botão real do aparelho ═══
+   No navegador nada disso existe e o app segue no esquema de histórico.
+   Dentro do Capacitor, o botão físico chega por evento próprio. */
+(function(){
+  const Cap = window.Capacitor;
+  if(!Cap || !Cap.Plugins || !Cap.Plugins.App) return;   /* rodando como web */
+  document.body.classList.add("nativo");
+  let ultimo = 0;
+  Cap.Plugins.App.addListener("backButton", function(){
+    /* reaproveita a mesma pilha do modo web — uma regra só, dois ambientes */
+    const evento = new PopStateEvent("popstate", {state:{sa:"tela"}});
+    const antes = document.querySelector(".pane.on");
+    window.dispatchEvent(evento);
+    setTimeout(function(){
+      const depois = document.querySelector(".pane.on");
+      const mudou = antes !== depois || document.querySelector(".veu.on") === null;
+      if(!mudou && Date.now() - ultimo < 2000){ Cap.Plugins.App.exitApp(); }
+      ultimo = Date.now();
+    }, 60);
+  });
 })();
 
 </script>

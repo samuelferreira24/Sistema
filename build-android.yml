@@ -12,6 +12,8 @@ on:
       - 'sw.js'
       - 'capacitor.config.json'
       - 'package.json'
+      - 'icon-192.png'
+      - 'icon-512.png'
 
 jobs:
   android:
@@ -44,6 +46,14 @@ jobs:
           if [ ! -d "android" ]; then
             npx cap add android
           fi
+
+      - name: Gerar os ícones nativos a partir do icon-512
+        run: |
+          mkdir -p assets
+          cp icon-512.png assets/icon.png
+          cp icon-512.png assets/splash.png
+          npx @capacitor/assets generate --android --iconBackgroundColor '#0B0B0D' \
+            --splashBackgroundColor '#0B0B0D' || echo "assets: seguindo com o padrão"
 
       - name: Sincronizar o app web com o nativo
         run: npx cap sync android

@@ -14,7 +14,8 @@ Uso:
 """
 
 import json, os, sys, re, time, hashlib
-import urllib.request, urllib.error
+import urllib.request
+import urllib.parse, urllib.error
 from datetime import datetime, timezone
 from xml.etree import ElementTree as ET
 
@@ -25,6 +26,66 @@ from xml.etree import ElementTree as ET
 # ──────────────────────────────────────────────────────────────
 
 FONTES = {
+    "mundo": [
+        # ── GDELT: notícia de ~100 países, traduzida automaticamente. A porta principal.
+        {"nome": "GDELT — mundo, últimas 24h", "tier": 2, "tipo": "gdelt",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:eng&mode=artlist&maxrecords=25&format=json&timespan=24h",
+         "ativo": True},
+        {"nome": "GDELT — economia global", "tier": 2, "tipo": "gdelt",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=(economy%20OR%20inflation%20OR%20trade)&mode=artlist&maxrecords=25&format=json&timespan=24h",
+         "ativo": True},
+        {"nome": "GDELT — inteligência artificial no mundo", "tier": 2, "tipo": "gdelt",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=(%22artificial%20intelligence%22)&mode=artlist&maxrecords=25&format=json&timespan=24h",
+         "ativo": True},
+        # Idiomas específicos — ligar conforme a necessidade
+        {"nome": "GDELT — em chinês", "tier": 2, "tipo": "gdelt",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:chi&mode=artlist&maxrecords=20&format=json&timespan=24h",
+         "ativo": False},
+        {"nome": "GDELT — em russo", "tier": 2, "tipo": "gdelt",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:rus&mode=artlist&maxrecords=20&format=json&timespan=24h",
+         "ativo": False},
+        {"nome": "GDELT — em árabe", "tier": 2, "tipo": "gdelt",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:ara&mode=artlist&maxrecords=20&format=json&timespan=24h",
+         "ativo": False},
+        {"nome": "GDELT — em espanhol", "tier": 2, "tipo": "gdelt",
+         "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:spa&mode=artlist&maxrecords=20&format=json&timespan=24h",
+         "ativo": False},
+    ],
+    "ciencia": [
+        # ── OpenAlex: ~250 milhões de trabalhos científicos, todo país, toda língua
+        {"nome": "OpenAlex — trabalhos recentes de IA", "tier": 1, "tipo": "openalex",
+         "url": "https://api.openalex.org/works?filter=concepts.id:C154945302&sort=publication_date:desc&per-page=20",
+         "ativo": True},
+        {"nome": "OpenAlex — mais citados do ano", "tier": 1, "tipo": "openalex",
+         "url": "https://api.openalex.org/works?filter=from_publication_date:2026-01-01&sort=cited_by_count:desc&per-page=20",
+         "ativo": False},
+        {"nome": "Europe PMC — biomédica mundial", "tier": 1, "tipo": "json",
+         "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=machine%20learning&format=json&pageSize=20",
+         "campos": {"lista": "resultList", "titulo": "title", "corpo": "abstractText"},
+         "ativo": False},
+        {"nome": "DOAJ — periódicos abertos, todas as línguas", "tier": 1, "tipo": "json",
+         "url": "https://doaj.org/api/search/articles/artificial%20intelligence?pageSize=20",
+         "campos": {"lista": "results", "titulo": "title", "corpo": "abstract"},
+         "ativo": False},
+    ],
+    "referencia": [
+        # ── Wikipédia: dicionário do mundo, uma entrada por língua
+        {"nome": "Wikipédia PT", "tier": 2, "tipo": "wikipedia", "idioma": "pt",
+         "url": "https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=intelig%C3%AAncia%20artificial&srlimit=15&format=json",
+         "ativo": True},
+        {"nome": "Wikipédia EN", "tier": 2, "tipo": "wikipedia", "idioma": "en",
+         "url": "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=artificial%20intelligence&srlimit=15&format=json",
+         "ativo": False},
+        {"nome": "Wikipédia ZH", "tier": 2, "tipo": "wikipedia", "idioma": "zh",
+         "url": "https://zh.wikipedia.org/w/api.php?action=query&list=search&srsearch=%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD&srlimit=15&format=json",
+         "ativo": False},
+    ],
+    "global_economia": [
+        {"nome": "Banco Mundial — indicadores globais", "tier": 1, "tipo": "json",
+         "url": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.MKTP.KD.ZG?format=json&per_page=20&mrnev=1",
+         "campos": {"lista": None, "titulo": "country", "corpo": "value"},
+         "ativo": False, "nota": "Resposta vem em lista dupla; confirmar formato no primeiro uso."},
+    ],
     "ia": [
         {"nome": "arXiv — IA e aprendizado de máquina", "tier": 1, "tipo": "arxiv",
          "url": "http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.LG&sortBy=submittedDate&sortOrder=descending&max_results=15",
@@ -272,6 +333,69 @@ def ler_bcb():
     return itens
 
 
+
+def ler_gdelt(fonte):
+    """GDELT monitora notícia de ~100 países e traduz o que não é inglês.
+    Cada item já vem com o idioma e o país de origem — é a porta do 'mundo inteiro'."""
+    # GDELT devolve o nome da língua por extenso; a memória guarda o código ISO
+    ISO = {"english":"en","portuguese":"pt","spanish":"es","chinese":"zh","russian":"ru",
+           "arabic":"ar","french":"fr","german":"de","japanese":"ja","korean":"ko",
+           "italian":"it","hindi":"hi","turkish":"tr","dutch":"nl","persian":"fa",
+           "indonesian":"id","vietnamese":"vi","thai":"th","hebrew":"he","polish":"pl",
+           "ukrainian":"uk","swedish":"sv","greek":"el","bengali":"bn","urdu":"ur"}
+    dados = json.loads(buscar(fonte["url"]))
+    itens = []
+    for o in dados.get("articles", [])[:20]:
+        bruto = (o.get("language") or "").strip().lower()
+        idioma = ISO.get(bruto, bruto[:2] if bruto else "—")
+        pais = o.get("sourcecountry") or ""
+        itens.append({
+            "titulo": limpar(o.get("title", ""), 200),
+            "corpo": limpar(f"{pais} · {o.get('domain','')}", 300),
+            "url": o.get("url", ""),
+            "idioma": idioma,
+        })
+    return itens
+
+
+def ler_openalex(fonte):
+    """OpenAlex indexa produção científica do mundo todo, sem chave e sem limite prático."""
+    dados = json.loads(buscar(fonte["url"]))
+    itens = []
+    for o in dados.get("results", [])[:20]:
+        # o resumo vem como índice invertido; remonta na ordem
+        inv = o.get("abstract_inverted_index") or {}
+        resumo = ""
+        if inv:
+            pos = {}
+            for palavra, ondes in inv.items():
+                for p in ondes:
+                    pos[p] = palavra
+            resumo = " ".join(pos[k] for k in sorted(pos))
+        itens.append({
+            "titulo": limpar(o.get("title") or o.get("display_name") or "", 200),
+            "corpo": limpar(resumo, 400),
+            "url": (o.get("primary_location") or {}).get("landing_page_url") or o.get("id", ""),
+            "idioma": (o.get("language") or "—")[:2],
+        })
+    return itens
+
+
+def ler_wikipedia(fonte):
+    """Wikipédia em qualquer uma das ~300 línguas. Serve de dicionário do mundo."""
+    dados = json.loads(buscar(fonte["url"]))
+    lg = fonte.get("idioma", "—")
+    itens = []
+    for o in (dados.get("query", {}).get("search", []) or [])[:15]:
+        itens.append({
+            "titulo": limpar(o.get("title", ""), 200),
+            "corpo": limpar(o.get("snippet", ""), 400),
+            "url": f"https://{lg}.wikipedia.org/wiki/" + urllib.parse.quote(o.get("title", "")),
+            "idioma": lg,
+        })
+    return itens
+
+
 def coletar_fonte(fonte):
     t = fonte["tipo"]
     if t == "rss":
@@ -284,6 +408,12 @@ def coletar_fonte(fonte):
         return ler_hn(fonte["url"])
     if t == "bcb":
         return ler_bcb()
+    if t == "gdelt":
+        return ler_gdelt(fonte)
+    if t == "openalex":
+        return ler_openalex(fonte)
+    if t == "wikipedia":
+        return ler_wikipedia(fonte)
     return []
 
 
