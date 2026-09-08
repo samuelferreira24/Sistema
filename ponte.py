@@ -37,6 +37,13 @@ ARQ_TOKEN = os.path.join(CASA, ".sa-ponte-token")
 # Disco de verdade do aparelho. O IndexedDB do navegador some se alguém
 # limpar os dados do Chrome; isto aqui não.
 MEMORIA = os.path.join(CASA, "sa-memoria")
+# De onde a Ponte se atualiza. Ela vive em ~/sa, não no GitHub Pages —
+# atualizar o site NÃO atualiza estes arquivos. Por isso ela busca sozinha.
+REPO = os.environ.get("SA_REPO",
+    "https://raw.githubusercontent.com/samuelferreira24/sistema-absoluto/main")
+ATUALIZAVEIS = ["ponte.py", "coletor.py", "orquestrador.py", "especialistas.py",
+                "governanca.py", "jetro.py", "executor.py", "base.py",
+                "arranque.sh", "rodar-coleta.sh"]
 # Downloads é visível pelo gerenciador de arquivos: dá pra copiar pro PC,
 # mandar por e-mail, subir na nuvem. É a saída de emergência.
 ESPELHO = os.path.join(CASA, "storage", "downloads", "sistema-absoluto-memoria")
@@ -66,6 +73,7 @@ PERMITIDOS = {
     "exportar":    [sys.executable, os.path.join(SA, "coletor.py"), "--exportar"],
     "dicionario":  [sys.executable, os.path.join(SA, "coletor.py"), "--dicionario"],
     "completar":   [sys.executable, os.path.join(SA, "coletor.py"), "--completar"],
+    "atualizar":   [sys.executable, os.path.join(SA, "ponte.py"), "--atualizar"],
     "espaco":      ["df", "-h", CASA],
     "motor_vivo":  ["curl", "-s", "-m", "3", "http://127.0.0.1:8080/health"],
     # O motor é pesado: sobe só quando pedido e desce quando não serve mais.
@@ -175,6 +183,61 @@ def listar_memoria():
     return fora
 
 
+
+def atualizar_se_mesma():
+    """Baixa a versão nova de cada arquivo do repositório de Samuel.
+    Guarda o antigo antes de trocar: se a versão nova vier quebrada, dá pra voltar."""
+    import urllib.request
+    velhos = os.path.join(SA, "versao-anterior")
+    os.makedirs(velhos, exist_ok=True)
+    trocados, iguais, falhos = [], 0, []
+
+    for nome in ATUALIZAVEIS:
+        alvo = os.path.join(SA, nome)
+        try:
+            req = urllib.request.Request(REPO + "/" + nome,
+                                         headers={"User-Agent": "SistemaAbsoluto/1.0"})
+            with urllib.request.urlopen(req, timeout=25) as r:
+                novo = r.read()
+            if not novo or len(novo) < 50:
+                falhos.append(nome + " (veio vazio)")
+                continue
+            atual = open(alvo, "rb").read() if os.path.exists(alvo) else b""
+            if atual == novo:
+                iguais += 1
+                continue
+            # Python quebrado derruba tudo. Confere antes de trocar.
+            if nome.endswith(".py"):
+                try:
+                    compile(novo.decode("utf-8"), nome, "exec")
+                except SyntaxError as e:
+                    falhos.append("%s (sintaxe: linha %s)" % (nome, e.lineno))
+                    continue
+            if atual:
+                with open(os.path.join(velhos, nome), "wb") as f:
+                    f.write(atual)
+            with open(alvo, "wb") as f:
+                f.write(novo)
+            if nome.endswith(".sh"):
+                os.chmod(alvo, 0o755)
+            trocados.append(nome)
+        except Exception as e:
+            falhos.append("%s (%s)" % (nome, type(e).__name__))
+
+    print("\n  ATUALIZAÇÃO DA PONTE")
+    print("  origem: %s" % REPO)
+    print("  trocados: %s" % (", ".join(trocados) if trocados else "nenhum"))
+    print("  já estavam iguais: %d" % iguais)
+    if falhos:
+        print("  falharam: %s" % ", ".join(falhos))
+    if "ponte.py" in trocados:
+        print("\n  A PRÓPRIA PONTE MUDOU — reinicie para valer:")
+        print("     pkill -f ponte.py && python ~/sa/ponte.py &")
+    print("  versão anterior guardada em %s\n" % velhos)
+    return {"trocados": trocados, "iguais": iguais, "falhos": falhos,
+            "precisa_reiniciar": "ponte.py" in trocados}
+
+
 class Ponte(BaseHTTPRequestHandler):
 
     def log_message(self, *a):
@@ -254,6 +317,15 @@ class Ponte(BaseHTTPRequestHandler):
             return self.responder(200, {"versoes": listar_memoria(), "pasta": MEMORIA,
                                         "espelho": ESPELHO})
 
+        if rota == "/versao":
+            # O app confere se o que roda no celular é o que ele espera
+            marcas = {}
+            for nome in ATUALIZAVEIS:
+                c = os.path.join(SA, nome)
+                marcas[nome] = (os.path.getsize(c) if os.path.exists(c) else 0)
+            return self.responder(200, {"ponte": 3, "comandos": sorted(PERMITIDOS),
+                                        "arquivos": marcas, "repo": REPO})
+
         if rota == "/comandos":
             return self.responder(200, {"comandos": sorted(PERMITIDOS)})
 
@@ -321,6 +393,9 @@ class Ponte(BaseHTTPRequestHandler):
 def main():
     if "--token" in sys.argv:
         print(TOKEN)
+        return
+    if "--atualizar" in sys.argv:
+        atualizar_se_mesma()
         return
     print("═" * 52)
     print("  PONTE ligada em http://127.0.0.1:%d" % PORTA)

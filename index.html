@@ -643,6 +643,7 @@
     <div class="chips-arq" id="anexos"></div>
     <div class="composer">
       <input type="file" id="arqInput" multiple style="display:none"
+        accept=".txt,.md,.csv,.tsv,.json,.xml,.html,.js,.py,.css,.yml,.yaml,.log,.sql,.sh,.docx,.xlsx,.xlsm,.pptx,.pdf,.zip,image/*"
              accept=".txt,.md,.csv,.json,.py,.js,.html,.xml,.log,.tsv,.yml,.yaml,.sql,image/*">
       <textarea id="input" rows="1" placeholder="Fala."></textarea>
       <div class="barra-acoes">
@@ -711,6 +712,7 @@
   <div class="ajGrupo">
     <button class="ajLinha" data-sub="motor"><span class="ajIc">◇</span><span class="ajTxt"><span class="ajT">Motor</span><span class="ajS" id="ls-motor">o cérebro que responde</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="motores"><span class="ajIc">≡</span><span class="ajTxt"><span class="ajT">Motores cadastrados</span><span class="ajS" id="ls-motores">trocar sem vir aqui</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="abertos"><span class="ajIc">◈</span><span class="ajTxt"><span class="ajT">Modelos abertos</span><span class="ajS">Qwen3, DeepSeek — dá pra auto-hospedar</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="local"><span class="ajIc">▣</span><span class="ajTxt"><span class="ajT">Motor local</span><span class="ajS" id="ls-local">funciona sem internet</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="custo"><span class="ajIc">$</span><span class="ajTxt"><span class="ajT">Gasto e limite</span><span class="ajS" id="ls-custo">quanto já foi usado</span></span><span class="ajSeta">›</span></button>
   </div>
@@ -729,6 +731,8 @@
   </div>
   <div class="ajGrupoCab">AVANÇADO</div>
   <div class="ajGrupo">
+    <button class="ajLinha" data-sub="treino"><span class="ajIc">◱</span><span class="ajTxt"><span class="ajT">Material de treino</span><span class="ajS" id="ls-treino">o que seu uso acumulou</span></span><span class="ajSeta">›</span></button>
+    <button class="ajLinha" data-sub="oficina"><span class="ajIc">⚒</span><span class="ajTxt"><span class="ajT">Oficina</span><span class="ajS">o app conserta o próprio código</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="varredura"><span class="ajIc">⌕</span><span class="ajTxt"><span class="ajT">Varredura</span><span class="ajS" id="ls-varredura">o app se examina inteiro</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="piloto"><span class="ajIc">◉</span><span class="ajTxt"><span class="ajT">Piloto automático</span><span class="ajS" id="ls-piloto">o sistema se vira sozinho</span></span><span class="ajSeta">›</span></button>
     <button class="ajLinha" data-sub="termux"><span class="ajIc">▸</span><span class="ajTxt"><span class="ajT">Termux</span><span class="ajS" id="ls-termux">ponte desligada</span></span><span class="ajSeta">›</span></button>
@@ -891,7 +895,29 @@
         oficial: confira no painel do fornecedor de vez em quando.</p>
       </div></div>
 
-      <div class="subpg" id="sub-local" data-tit="Motor local"><div class="card">
+      <div class="subpg" id="sub-abertos" data-tit="Modelos abertos">
+  <div class="card">
+    <div class="lbl">Pegar o melhor modelo pronto</div>
+    <p class="note" style="margin:0 0 12px">Estes são modelos <b>abertos</b> servidos por
+    API. Usar aqui não prende você: é o mesmo peso que dá pra auto-hospedar quando
+    tiver máquina — coisa que modelo fechado nunca permite. Toque para preencher
+    o motor; a chave você põe em Motor.</p>
+    <div class="ajGrupo" id="listaAbertos"></div>
+    <div id="estAbertos" class="note" style="margin-top:11px">escolha um acima</div>
+  </div>
+  <div class="card">
+    <div class="lbl">Por que MoE não roda no celular</div>
+    <p class="note" style="margin:0">MoE ativa só parte do modelo por token — o Qwen3
+    30B-A3B usa 3B de 30B, então responde na velocidade de um 3B. Mas os 30B precisam
+    estar <b>carregados</b>: cerca de 17 GB em Q4. Isso corta tempo de resposta, não
+    memória. Num aparelho de 4 GB, o caminho é modelo pequeno denso.</p>
+  </div>
+  <div class="card">
+    <div class="lbl">O que cabe aqui, offline</div>
+    <div class="ajGrupo" id="listaLocais"></div>
+  </div>
+</div>
+<div class="subpg" id="sub-local" data-tit="Motor local"><div class="card">
         <div class="lbl">Motor local (offline)</div>
         <p class="note" style="margin:0 0 10px">llama.cpp ou Ollama no Termux. Configurado, o app
         cai pra ele sozinho se a internet sumir.</p>
@@ -929,7 +955,32 @@
         </div>
       </div></div>
 
-      <div class="subpg" id="sub-varredura" data-tit="Varredura">
+      <div class="subpg" id="sub-treino" data-tit="Material de treino">
+  <div class="card">
+    <div class="lbl">O que seu uso já acumulou</div>
+    <p class="note" style="margin:0 0 12px">Toda resposta vira exemplo. Correção sua
+    vale dez vezes mais que um joinha — é o único sinal que diz não só que estava
+    errado, mas qual era o certo. Sem isto, usar o app não deixa nada para trás.</p>
+    <div class="ajGrupo" id="treinoNumeros"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="trExportar">Baixar JSONL</button>
+      <button class="ghost" id="trLimpar">Descartar os fracos</button>
+    </div>
+    <div id="trEstado" class="note" style="margin-top:11px"></div>
+  </div>
+</div>
+<div class="subpg" id="sub-oficina" data-tit="Oficina">
+  <div class="card">
+    <div class="lbl">A semente consertando a si mesma</div>
+    <p class="note" style="margin:0 0 12px">A Varredura acha o problema, a Oficina lê o
+    próprio código do app, propõe o conserto e valida o arquivo inteiro antes de te
+    mostrar. Você aprova, ele gera o <code>index.html</code>, você sobe no GitHub.
+    Nada é aplicado sem você.</p>
+    <div id="ofEstado" class="note">venha pela Varredura: toque em “pedir conserto” num problema</div>
+  </div>
+  <div id="ofResultado"></div>
+</div>
+<div class="subpg" id="sub-varredura" data-tit="Varredura">
   <div class="card">
     <div class="lbl">Varredura completa</div>
     <p class="note" style="margin:0 0 12px">Não conta o que existe — <b>executa</b>.
@@ -1152,6 +1203,7 @@ for nome, conteudo in arquivos.items():
   <button class="facao" data-facao="fixar"><span class="fic">📌</span> <span id="txtFixar">Fixar</span></button>
   <button class="facao" data-facao="mudar"><span class="fic">🗂</span> Mudar de projeto</button>
   <button class="facao" data-facao="copiar"><span class="fic">⧉</span> Copiar conversa</button>
+  <button class="facao" data-facao="exportar"><span class="fic">↓</span> Exportar em Markdown</button>
   <button class="facao perigo" data-facao="apagar"><span class="fic">🗑</span> Apagar</button>
 </div>
 
@@ -2977,11 +3029,36 @@ function lerArquivos(lista){
       return;
     }
 
+    /* Office e PDF: os leitores já existem no app (ZIP + XML nativos do
+       navegador). Antes o arquivo era recusado e você tinha que exportar
+       como CSV à mão — trabalho que a máquina faz melhor. */
     if(EXT_TEXTO.indexOf(ext) < 0){
-      alert("'" + file.name + "' não dá pra ler.\n\nTexto: " + EXT_TEXTO.join(", ") +
-            "\nImagem: " + EXT_IMAGEM.join(", ") +
-            ".\n\nPara Excel, exporte como CSV. Para PDF, copie o texto.");
-      if(--pendentes === 0){ sProjetos(); renderTudo(); }
+      const daPraLer = ["docx","xlsx","xlsm","pptx","pdf","zip"].indexOf(ext) >= 0;
+      if(!daPraLer){
+        alert("'" + file.name + "' não dá pra ler.\n\nLeio: " + EXT_TEXTO.join(", ") +
+              ", docx, xlsx, pptx, pdf, zip\nImagem: " + EXT_IMAGEM.join(", "));
+        if(--pendentes === 0){ sProjetos(); renderTudo(); }
+        return;
+      }
+      lerArquivo(file).then(function(res){
+        let txt = res.texto || "";
+        let cortado = false;
+        if(txt.length > LIMITE_ARQ){ txt = txt.slice(0, LIMITE_ARQ); cortado = true; }
+        if(!txt && res.aviso){
+          alert("'" + file.name + "': " + res.aviso);
+          if(--pendentes === 0){ sProjetos(); renderTudo(); }
+          return;
+        }
+        p.arquivos.push({id:"a-"+Date.now()+"-"+Math.random().toString(36).slice(2,6),
+          nome:file.name, ext:ext, tam:file.size, conteudo:txt, cortado:cortado,
+          resumo:(res.resumo || Math.round(file.size/1024) + " KB") +
+                 (cortado ? " · cortado" : ""),
+          tabela: res.tabela || null, planilhas: res.planilhas || null, anexado:true});
+        if(--pendentes === 0){ sProjetos(); renderTudo(); }
+      }).catch(function(err){
+        alert("'" + file.name + "': " + (err.message || err));
+        if(--pendentes === 0){ sProjetos(); renderTudo(); }
+      });
       return;
     }
     const r = new FileReader();
@@ -3268,9 +3345,12 @@ liga("#vdRodar", "click", async function(){
   res.innerHTML = "";
   try{
     await varreduraCompleta(function(t){ est.textContent = t; });
+    /* toda varredura entra no histórico: é a comparação que revela regressão */
+    try{ await auditar(true); }catch(e){}
     const r = resumoVarredura();
     est.textContent = r.ok + " de " + r.total + " passaram" +
-      (r.ruins ? " · " + r.ruins + " problema(s)" : " · nenhum problema");
+      (r.ruins ? " · " + r.ruins + " problema(s)" : " · nenhum problema") +
+      " · " + tendenciaAuditoria();
     const areas = {};
     VARREDURA.forEach(function(v){ (areas[v.area] = areas[v.area] || []).push(v); });
     res.innerHTML = Object.keys(areas).map(function(a){
@@ -3286,6 +3366,8 @@ liga("#vdRodar", "click", async function(){
             '<span class="ajS" style="white-space:normal">' + esc(v.detalhe) + '</span>' +
             (v.conserto ? '<span class="ajS" style="white-space:normal;color:#c0392b">' +
                esc(v.conserto) + '</span>' : "") +
+            (!v.ok ? '<button class="dtrad" style="margin-top:7px" data-consertar="' +
+               esc(v.area + "|" + v.item) + '">pedir conserto</button>' : "") +
             '</span></div>';
         }).join("") + '</div>';
     }).join("");
@@ -3304,6 +3386,989 @@ liga("#vdCopiar", "click", function(){
     "\n\n" + txt).then(function(){
     $("#vdEstado").textContent = "relatório copiado — cole onde precisar";
   }).catch(function(){ $("#vdEstado").textContent = "não consegui copiar"; });
+});
+
+
+
+
+
+/* O voto e a correção alimentam o Motor de Memória, não só a cara do botão */
+document.addEventListener("click", function(e){
+  const v = e.target.closest ? e.target.closest("[data-voto]") : null;
+  if(v){
+    const [idx, nota] = v.dataset.voto.split("|");
+    try{
+      /* cada item de hist já carrega pergunta e resposta juntas —
+         não precisa caçar a fala anterior */
+      const h = hist[parseInt(idx,10)];
+      if(h) registrarTreino({input: h.pergunta || "", output: h.resposta || "",
+        resultado:"entregue", feedback: parseInt(nota,10),
+        peso: parseInt(nota,10) === -1 ? 3 : 1});
+    }catch(err){}
+    return;
+  }
+  const cor = e.target.closest ? e.target.closest("[data-corrigir]") : null;
+  if(cor){
+    const idx = parseInt(cor.dataset.corrigir, 10);
+    abrirCorrecao(idx);
+  }
+});
+
+/* Caixa de correção: você escreve o que a resposta deveria ter sido */
+function abrirCorrecao(idx){
+  const veu = document.createElement("div");
+  veu.className = "veu on";
+  const cx = document.createElement("div");
+  cx.className = "dlgCor on";
+  cx.style.width = "min(460px,92vw)";
+  cx.innerHTML = '<h4>Qual era a resposta certa?</h4>' +
+    '<p class="note" style="margin:0 14px 10px">Isto vale dez vezes mais que um joinha: ' +
+    'guarda o errado e o certo lado a lado, e é o melhor material de treino que existe.</p>' +
+    '<textarea class="field" id="txtCorrecao" rows="6" style="margin:0 14px;width:calc(100% - 28px)" ' +
+    'placeholder="Escreva como a resposta deveria ter sido…"></textarea>' +
+    '<div class="row" style="margin:12px 14px 4px">' +
+    '<button class="primary" id="okCorrecao">Guardar correção</button>' +
+    '<button class="ghost" id="cancelaCorrecao">Cancelar</button></div>';
+  document.body.appendChild(veu); document.body.appendChild(cx);
+  const fecha = function(){ veu.remove(); cx.remove(); };
+  veu.addEventListener("click", fecha);
+  cx.querySelector("#cancelaCorrecao").addEventListener("click", fecha);
+  cx.querySelector("#okCorrecao").addEventListener("click", function(){
+    const t = cx.querySelector("#txtCorrecao").value.trim();
+    if(t){
+      const n = registrarCorrecao(idx, t);
+      avisoAcervo = "Correção guardada · " + n + " exemplos de treino acumulados.";
+      renderAcervo();
+    }
+    fecha();
+  });
+  setTimeout(function(){ cx.querySelector("#txtCorrecao").focus(); }, 120);
+}
+
+
+
+
+
+function renderTreino(){
+  const r = resumoTreino(), el = $("#treinoNumeros");
+  if(!el) return;
+  const linhas = [
+    ["Exemplos guardados", r.total, ""],
+    ["Correções suas", r.contas.corrigido || 0, "peso 10 — o mais valioso"],
+    ["Marcados como ruins", r.contas.negativo || 0, "peso 3"],
+    ["Marcados como bons", r.contas.positivo || 0, "peso 1"],
+    ["Peso somado", r.peso, "é isto que conta no treino, não a quantidade"]
+  ];
+  el.innerHTML = linhas.map(function(l){
+    return '<div class="ajLinha" style="cursor:default"><span class="ajIc">·</span>' +
+      '<span class="ajTxt"><span class="ajT">' + l[0] + '</span>' +
+      (l[2] ? '<span class="ajS">' + l[2] + '</span>' : '') + '</span>' +
+      '<span class="ajT" style="flex-shrink:0">' + l[1] + '</span></div>';
+  }).join("");
+  const s2 = $("#trEstado");
+  if(s2) s2.textContent = r.total < 200
+    ? "Fine-tuning útil pede algo entre algumas centenas e alguns milhares de " +
+      "exemplos bons. Você tem " + r.total + " — ainda é cedo, siga usando."
+    : "Volume já dá para um primeiro ciclo de LoRA.";
+  const l = $("#ls-treino");
+  if(l) l.textContent = r.total + " exemplos · peso " + r.peso;
+}
+liga("#trExportar", "click", function(){
+  const n = exportarJSONL();
+  $("#trEstado").textContent = n + " exemplos baixados em JSONL — formato que " +
+    "OpenAI e HuggingFace leem direto.";
+});
+liga("#trLimpar", "click", function(){
+  /* Aprendizado ativo: repetitivo e já certo não ajuda, só dilui. */
+  const antes = treino.length;
+  treino = treino.filter(function(t){
+    return t.peso > 1 || t.resultado === "corrigido" || t.feedback === -1;
+  });
+  sTreino(); renderTreino();
+  $("#trEstado").textContent = (antes - treino.length) +
+    " exemplos de peso baixo descartados. Sobrou o que carrega sinal.";
+});
+
+/* ═══ OFICINA — a tela onde Samuel aprova ═══ */
+let propostaAtual = null;
+
+document.addEventListener("click", async function(e){
+  const c = e.target.closest ? e.target.closest("[data-consertar]") : null;
+  if(!c) return;
+  const [area, item] = c.dataset.consertar.split("|");
+  const prob = VARREDURA.filter(function(v){ return v.area === area && v.item === item; })[0];
+  if(!prob) return;
+  abrirOficina(prob);
+});
+
+function abrirOficina(problema){
+  irPara("ajustes"); abrirSub("oficina");
+  const st = $("#ofEstado"), res = $("#ofResultado");
+  res.innerHTML = "";
+  st.textContent = "preparando…";
+  propostaAtual = null;
+  proporConserto(problema).then(function(p){
+    propostaAtual = p;
+    st.textContent = "proposta pronta — leia antes de aprovar";
+    res.innerHTML =
+      '<div class="card"><div class="lbl">O que ele achou</div>' +
+        '<p class="note" style="margin:0">' + esc(p.achou || "—") + '</p></div>' +
+      '<div class="card"><div class="lbl">Tira isto</div>' +
+        '<pre class="cod" style="border-color:#c0392b">' + esc(p.velho) + '</pre></div>' +
+      '<div class="card"><div class="lbl">Põe isto</div>' +
+        '<pre class="cod" style="border-color:var(--brass)">' + esc(p.novo) + '</pre></div>' +
+      '<div class="card"><div class="lbl">Risco que ele mesmo aponta</div>' +
+        '<p class="note" style="margin:0">' + esc(p.risco || "não informou") + '</p></div>' +
+      '<div class="card"><div class="lbl">Conferido antes de te mostrar</div>' +
+        '<p class="note" style="margin:0 0 8px">O arquivo inteiro compila · ' +
+        p.laudo.linhas.toLocaleString("pt-BR") + ' linhas · ' +
+        Math.round(p.laudo.tamanho/1024) + ' KB' +
+        (p.laudo.avisos.length ? '<br><span style="color:#c0392b">aviso: ' +
+           esc(p.laudo.avisos.join(" · ")) + '</span>' : '') + '</p>' +
+        '<div class="row"><button class="primary" id="ofAprovar">Aprovar e baixar index.html</button>' +
+        '<button class="ghost" id="ofRecusar">Recusar</button></div></div>';
+  }).catch(function(err){
+    st.textContent = "não deu: " + (err.message || err);
+  });
+}
+
+document.addEventListener("click", function(e){
+  if(e.target.id === "ofAprovar" && propostaAtual){
+    entregarVersao(propostaAtual);
+    $("#ofEstado").textContent = "index.html baixado. Suba no GitHub e recarregue o app.";
+    $("#ofResultado").innerHTML = "";
+    propostaAtual = null;
+  }
+  if(e.target.id === "ofRecusar" && propostaAtual){
+    registrarTreino({
+      input: "conserto recusado: " + propostaAtual.problema.item,
+      output: propostaAtual.novo, resultado: "erro",
+      feedback: "Samuel recusou", peso: 5
+    });
+    $("#ofEstado").textContent = "recusado — a recusa também virou material de treino.";
+    $("#ofResultado").innerHTML = "";
+    propostaAtual = null;
+  }
+});
+
+
+/* ═══ AUDITORIA CONTÍNUA — varredura com memória ═══
+   Varrer uma vez mostra o estado. Varrer sempre e COMPARAR mostra a direção:
+   o que foi consertado, o que voltou depois de consertado (regressão, o mais
+   grave), e o que está apodrecendo há semanas sem ninguém olhar. */
+
+let historicoAuditoria = [];
+
+async function carregarAuditoria(){
+  try{ historicoAuditoria = JSON.parse(await ler("sa:auditoria") || "[]"); }
+  catch(e){ historicoAuditoria = []; }
+}
+function sAuditoria(){
+  guardar("sa:auditoria", JSON.stringify(historicoAuditoria.slice(-60)));
+}
+
+function chaveFalha(v){ return v.area + "|" + v.item; }
+
+async function auditar(silenciosa){
+  await varreduraCompleta(silenciosa ? null : function(){});
+  const agora = {
+    quando: Date.now(),
+    total: VARREDURA.length,
+    falhas: VARREDURA.filter(function(v){ return !v.ok; })
+                     .map(function(v){ return {k: chaveFalha(v), d: v.detalhe}; })
+  };
+  const antes = historicoAuditoria[historicoAuditoria.length - 1];
+  const cmp = compararAuditoria(antes, agora);
+  agora.novos = cmp.novos.length;
+  agora.resolvidos = cmp.resolvidos.length;
+  agora.regressoes = cmp.regressoes.length;
+  historicoAuditoria.push(agora);
+  sAuditoria();
+
+  /* Regressão é o sinal mais grave: algo que já esteve certo quebrou de novo.
+     Vira alerta no Tabuleiro, não só linha num relatório. */
+  if(cmp.regressoes.length && typeof tabuleiro !== "undefined" && tabuleiro.alertas){
+    cmp.regressoes.forEach(function(k){
+      const txt = "Regressão: " + k.replace("|", " · ") + " voltou a falhar depois de resolvido";
+      if(!tabuleiro.alertas.some(function(a){ return a.txt === txt; })){
+        tabuleiro.alertas.push({nivel:"alta", txt: txt});
+      }
+    });
+    if(typeof sTabuleiro === "function") sTabuleiro();
+  }
+  return {estado: agora, cmp: cmp};
+}
+
+function compararAuditoria(antes, agora){
+  const kAgora = agora.falhas.map(function(f){ return f.k; });
+  const kAntes = antes ? antes.falhas.map(function(f){ return f.k; }) : [];
+  const novos = kAgora.filter(function(k){ return kAntes.indexOf(k) < 0; });
+  const resolvidos = kAntes.filter(function(k){ return kAgora.indexOf(k) < 0; });
+
+  /* regressão: falha atual que já apareceu, sumiu, e voltou */
+  const regressoes = [];
+  kAgora.forEach(function(k){
+    if(kAntes.indexOf(k) >= 0) return;               /* só continua falhando */
+    for(let i = historicoAuditoria.length - 2; i >= 0; i--){
+      const teve = historicoAuditoria[i].falhas.some(function(f){ return f.k === k; });
+      if(teve){ regressoes.push(k); break; }
+    }
+  });
+
+  /* teimosia: há quantas auditorias seguidas a mesma falha persiste */
+  const teimosas = {};
+  kAgora.forEach(function(k){
+    let n = 1;
+    for(let i = historicoAuditoria.length - 1; i >= 0; i--){
+      if(historicoAuditoria[i].falhas.some(function(f){ return f.k === k; })) n++;
+      else break;
+    }
+    if(n >= 3) teimosas[k] = n;
+  });
+
+  return {novos: novos, resolvidos: resolvidos, regressoes: regressoes, teimosas: teimosas};
+}
+
+function tendenciaAuditoria(){
+  if(historicoAuditoria.length < 2) return "ainda sem histórico para comparar";
+  const u = historicoAuditoria[historicoAuditoria.length - 1];
+  const p = historicoAuditoria[historicoAuditoria.length - 2];
+  const d = u.falhas.length - p.falhas.length;
+  return d === 0 ? "parado em " + u.falhas.length + " problema(s)"
+       : d < 0   ? "melhorando: " + Math.abs(d) + " a menos que na última"
+                 : "piorando: " + d + " a mais que na última";
+}
+
+/* ═══ OFICINA — a peça da Fábrica que constrói o resto dela ═══
+   O sistema de módulos escreve peça NOVA e isolada. A Oficina mexe no
+   PRÓPRIO código do app: lê a si mesmo, recebe o que a Varredura achou de
+   errado, propõe o conserto, valida o arquivo inteiro antes de oferecer, e
+   entrega o index.html pronto pra você subir. Samuel aprova sempre.
+   É o bootstrapping literal: a semente construindo a próxima versão de si. */
+
+let fonteApp = "", fonteOrigem = "";
+
+async function lerPropriaFonte(){
+  if(fonteApp) return fonteApp;
+  /* 1ª tentativa: o próprio endereço de onde o app foi servido */
+  try{
+    const r = await fetch(location.href, {cache:"no-store"});
+    if(r.ok){
+      const t = await r.text();
+      if(t.indexOf("<script") > 0){
+        fonteApp = t; fonteOrigem = "o endereço do próprio app";
+        return fonteApp;
+      }
+    }
+  }catch(e){}
+  /* 2ª: pela Ponte, que lê o arquivo em ~/sa sem trava de origem */
+  try{
+    const r = await ponteChamar("/texto", "POST",
+      {url: (localStorage.getItem("sa:repoRaw") ||
+             "https://raw.githubusercontent.com/samuelferreira24/sistema-absoluto/main") +
+             "/index.html"});
+    if(r.texto && r.texto.length > 5000){
+      fonteApp = r.texto; fonteOrigem = "o repositório, pela Ponte";
+      return fonteApp;
+    }
+  }catch(e){}
+  throw new Error("não consegui ler meu próprio código nem pelo endereço nem pela Ponte");
+}
+
+/* Manda pro motor só o pedaço relevante — o arquivo inteiro não cabe
+   na janela e não precisa: o conserto é local. */
+function recortarPerto(fonte, agulha, folga){
+  const i = fonte.indexOf(agulha);
+  if(i < 0) return null;
+  const ini = Math.max(0, i - (folga || 1800));
+  const fim = Math.min(fonte.length, i + agulha.length + (folga || 1800));
+  return {trecho: fonte.slice(ini, fim), ini: ini, fim: fim};
+}
+
+async function proporConserto(problema){
+  const st = $("#ofEstado");
+  const diz = function(t){ if(st) st.textContent = t; };
+  diz("lendo meu próprio código…");
+  const fonte = await lerPropriaFonte();
+
+  /* acha onde mexer: pelo id citado, ou pela função da área */
+  const pista = (problema.detalhe.match(/#([\w-]+)/) || [])[1] ||
+                problema.item.replace(/\s+/g, "");
+  let corte = recortarPerto(fonte, pista) ||
+              recortarPerto(fonte, problema.item) ||
+              recortarPerto(fonte, "function varreduraCompleta");
+  if(!corte) throw new Error("não achei onde mexer para: " + problema.item);
+
+  diz("pedindo o conserto ao motor…");
+  const p = [{papel:"user", texto:
+    "Você é o executor do Sistema Absoluto. A varredura do app encontrou este problema:\n\n" +
+    "ÁREA: " + problema.area + "\nITEM: " + problema.item +
+    "\nDETALHE: " + problema.detalhe + "\nDIAGNÓSTICO: " + (problema.conserto || "") +
+    "\n\nEste é o trecho do arquivo index.html onde o problema mora:\n\n```html\n" +
+    corte.trecho + "\n```\n\n" +
+    "Devolva SOMENTE JSON, sem markdown, neste formato:\n" +
+    '{"achou":"o que causa o problema em uma frase",' +
+    '"velho":"o trecho EXATO a substituir, copiado do código acima, curto e único",' +
+    '"novo":"o trecho corrigido","risco":"o que pode quebrar"}\n\n' +
+    "Regras: o campo velho tem que existir LITERALMENTE no trecho acima e aparecer " +
+    "uma vez só. Mude o mínimo. Não reescreva o arquivo. Não invente função que não existe. " +
+    "Comente o porquê no código só se ajudar quem for ler depois."}];
+
+  const r = await chamarMotor(p);
+  const o = parseJSON(r);
+  if(!o.velho || !o.novo) throw new Error("o motor não devolveu um conserto utilizável");
+
+  /* o trecho tem que existir mesmo, e uma vez só */
+  const ocorrencias = fonte.split(o.velho).length - 1;
+  if(ocorrencias === 0) throw new Error("o motor inventou um trecho que não existe no arquivo");
+  if(ocorrencias > 1) throw new Error("o trecho aparece " + ocorrencias +
+    " vezes — trocaria no lugar errado");
+
+  const novaFonte = fonte.replace(o.velho, o.novo);
+
+  /* valida o ARQUIVO INTEIRO, não só o pedaço */
+  const laudo = validarArquivoInteiro(novaFonte);
+  if(laudo.erro) throw new Error("o conserto quebra o app: " + laudo.erro);
+
+  return {achou: o.achou, velho: o.velho, novo: o.novo, risco: o.risco,
+          fonte: novaFonte, laudo: laudo, problema: problema};
+}
+
+/* Antes de te oferecer qualquer coisa, o arquivo inteiro tem que compilar. */
+function validarArquivoInteiro(html){
+  const m = html.match(/<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/);
+  if(!m) return {erro: "o bloco de script sumiu"};
+  try{ new Function(m[1]); }
+  catch(e){ return {erro: "erro de sintaxe — " + e.message}; }
+
+  /* o CSS não pode ter engolido código, o erro que já aconteceu duas vezes */
+  const estilo = html.slice(html.indexOf("<style>"), html.indexOf("</style>"));
+  if(/function\s+\w+\s*\(|=>\s*\{|await\s+/.test(estilo))
+    return {erro: "caiu código JavaScript dentro do <style>"};
+
+  /* Conta só o HTML antes do script: dentro do JS existem strings com
+     "<div" que não são marcação e davam alarme falso. */
+  const soHtml = html.slice(0, html.indexOf("<script"));
+  const abre = (soHtml.match(/<div\b/g) || []).length;
+  const fecha = (soHtml.match(/<\/div>/g) || []).length;
+  const avisos = [];
+  if(abre !== fecha) avisos.push("div desbalanceada: " + abre + " abre, " + fecha +
+    " fecha — foi o que já deixou seções invisíveis antes");
+  if(html.length < 100000) avisos.push("arquivo encolheu demais — pode ter perdido coisa");
+  return {erro: null, avisos: avisos, tamanho: html.length,
+          linhas: html.split("\n").length};
+}
+
+/* Aprovado por Samuel: gera o index.html pra ele subir no GitHub. */
+function entregarVersao(proposta){
+  baixarBlob(new Blob([proposta.fonte], {type:"text/html;charset=utf-8"}), "index.html");
+  registrarTreino({
+    input: "conserto: " + proposta.problema.area + "/" + proposta.problema.item +
+           " — " + proposta.problema.detalhe,
+    output: proposta.velho + "\n→\n" + proposta.novo,
+    resultado: "corrigido", feedback: "aprovado por Samuel", peso: 8
+  });
+}
+
+/* ═══ AUDITORIA DE CÓDIGO GERADO ═══
+   Samuel não programa, então não dá pra pedir que ele revise linha por linha.
+   Esta camada fica entre a IA escrever e o código rodar: recusa o que é
+   perigoso, avisa o que é suspeito, e deixa passar o resto com o laudo à vista. */
+function auditarCodigo(codigo){
+  const avisos = [];
+  let bloqueia = null;
+
+  /* 1. compila? código quebrado nem chega a ser discutido */
+  try{ new Function("api", codigo); }
+  catch(e){ return {bloqueia: "erro de sintaxe — " + e.message, avisos: []}; }
+
+  /* 2. o que nunca pode passar */
+  const proibido = [
+    [/\blocalStorage\s*\.\s*clear\b|\bindexedDB\s*\.\s*deleteDatabase\b/,
+     "apaga sua memória inteira"],
+    [/\bdocument\s*\.\s*write\b/, "reescreve a página por cima"],
+    [/\blocation\s*\.\s*(href|replace)\s*=/, "tira você do app sem avisar"],
+    [/\bcfg\s*\.\s*chave\b|sa:chave/, "toca na sua chave de API"],
+    [/\bfetch\s*\([^)]*(chave|token|apiKey|senha)/i, "manda credencial pra fora"],
+    [/while\s*\(\s*true\s*\)(?![\s\S]{0,200}break)/, "laço infinito sem saída"]
+  ];
+  for(const [re, motivo] of proibido){
+    if(re.test(codigo)){ bloqueia = motivo; break; }
+  }
+
+  /* 3. o que merece aviso, mas é decisão sua */
+  const suspeito = [
+    [/\bfetch\s*\(|XMLHttpRequest/, "acessa a internet"],
+    [/\beval\s*\(|new\s+Function\s*\(/, "executa código montado na hora"],
+    [/api\.termux\s*\(/, "roda comando no Termux"],
+    [/api\.gravar\s*\(/, "escreve na sua memória"],
+    [/setInterval\s*\(/, "fica rodando sozinho para sempre"],
+    [/navigator\.(geolocation|mediaDevices|clipboard)/, "usa sensor ou área de transferência"]
+  ];
+  suspeito.forEach(function(par){ if(par[0].test(codigo)) avisos.push(par[1]); });
+
+  return {bloqueia: bloqueia, avisos: avisos, linhas: codigo.split("\n").length};
+}
+
+
+/* ═══ MODELOS ABERTOS — pegar o melhor pronto, não construir do zero ═══
+   Qwen3, DeepSeek e Kimi são abertos e servidos por API. Usar por aqui não é
+   dependência: é o MESMO peso que você pode auto-hospedar depois, quando
+   tiver máquina. Modelo fechado (Claude, GPT) você nunca poderá hospedar.
+
+   MoE corta cálculo por token, não memória: o Qwen3-30B-A3B ativa 3B por vez
+   mas precisa dos 30B carregados — cerca de 17 GB em Q4. Não cabe em celular
+   de 4 GB. Por isso o caminho hoje é API; local fica com modelo pequeno denso. */
+
+const MODELOS_ABERTOS = [
+  {id:"qwen/qwen3-30b-a3b", nome:"Qwen3 30B-A3B (MoE)", via:"openrouter",
+   licenca:"Apache 2.0", nota:"3B ativos de 30B · pode auto-hospedar (~17GB)"},
+  {id:"qwen/qwen3-235b-a22b", nome:"Qwen3 235B-A22B (MoE)", via:"openrouter",
+   licenca:"Apache 2.0", nota:"o maior aberto da família · só via API"},
+  {id:"deepseek/deepseek-chat", nome:"DeepSeek V3 (MoE)", via:"openrouter",
+   licenca:"aberta", nota:"forte em raciocínio e código"},
+  {id:"qwen/qwen3-coder-30b-a3b-instruct", nome:"Qwen3 Coder 30B-A3B", via:"openrouter",
+   licenca:"Apache 2.0", nota:"especializado em código e agente"},
+  {id:"llama-3.3-70b-versatile", nome:"Llama 3.3 70B", via:"groq",
+   licenca:"Llama Community", nota:"muito rápido no Groq · exige aviso 'Built with Llama'"},
+  {id:"qwen/qwen3-32b", nome:"Qwen3 32B (denso)", via:"groq",
+   licenca:"Apache 2.0", nota:"denso · ~19GB em Q4 se auto-hospedar"}
+];
+
+/* Modelo pequeno que REALMENTE cabe no celular. Denso, não MoE. */
+const MODELOS_LOCAIS = [
+  {id:"qwen3-1.7b-q4", nome:"Qwen3 1.7B", tam:"~1,1 GB", licenca:"Apache 2.0"},
+  {id:"gemma-3-1b-q4",  nome:"Gemma 3 1B",  tam:"~0,8 GB", licenca:"Google (restritiva)"},
+  {id:"qwen3-4b-q4",    nome:"Qwen3 4B",    tam:"~2,4 GB", licenca:"Apache 2.0",
+   nota:"aperta num aparelho de 4 GB"}
+];
+
+function renderModelosAbertos(){
+  const el = $("#listaAbertos"); if(!el) return;
+  el.innerHTML = MODELOS_ABERTOS.map(function(m){
+    return '<div class="ajLinha" style="cursor:pointer" data-aberto="' + esc(m.id) + '">' +
+      '<span class="ajIc">◈</span><span class="ajTxt">' +
+      '<span class="ajT">' + esc(m.nome) + '</span>' +
+      '<span class="ajS" style="white-space:normal">' + esc(m.via) + ' · ' +
+        esc(m.licenca) + ' · ' + esc(m.nota) + '</span></span>' +
+      '<span class="ajSeta">›</span></div>';
+  }).join("");
+}
+
+document.addEventListener("click", function(e){
+  const a = e.target.closest ? e.target.closest("[data-aberto]") : null;
+  if(!a) return;
+  const m = MODELOS_ABERTOS.filter(function(x){ return x.id === a.dataset.aberto; })[0];
+  if(!m) return;
+  const est = $("#estAbertos");
+  const campoModelo = $("#modelo"), campoProv = $("#prov");
+  if(campoModelo) campoModelo.value = m.id;
+  if(campoProv) campoProv.value = m.via;
+  if(est) est.textContent = m.nome + " preenchido. Falta a chave de " + m.via +
+    " — depois toque em Salvar. Licença " + m.licenca + ".";
+});
+
+
+/* Refazer: reenvia o mesmo pedido. A resposta velha vira material de
+   comparação — duas saídas para a mesma pergunta é sinal de treino. */
+document.addEventListener("click", function(e){
+  const r = e.target.closest ? e.target.closest("[data-refazer]") : null;
+  if(!r) return;
+  const i = parseInt(r.dataset.refazer, 10);
+  const h = hist[i];
+  if(!h || !h.pergunta) return;
+  registrarTreino({input: h.pergunta, output: h.resposta || "",
+    resultado: "entregue", feedback: "refeito por Samuel", peso: 2});
+  hist = hist.slice(0, i);
+  const campo = $("#txt");
+  if(campo){ campo.value = h.pergunta; }
+  sHist(); renderFeed(); renderSub();
+  const enviar = $("#send");
+  if(enviar) enviar.click();
+});
+
+/* Exportar a conversa: markdown legível, para arquivar fora do app */
+function exportarConversa(){
+  const c = conv();
+  const nome = (c && c.nome) || "conversa";
+  const linhas = ["# " + nome, "",
+    "Exportado em " + new Date().toLocaleString("pt-BR"),
+    "Motor: " + ((typeof cfg !== "undefined" && cfg && cfg.modelo) || "—"), ""];
+  hist.forEach(function(h){
+    if(h.pergunta) linhas.push("## " + h.pergunta, "");
+    if(h.resposta) linhas.push(h.resposta, "");
+    if(h.ferramenta) linhas.push("_usou: " + h.ferramenta + "_", "");
+  });
+  baixarBlob(new Blob([linhas.join("\n")], {type:"text/markdown;charset=utf-8"}),
+    nome.replace(/[^\w\- À-ÿ]/g, "") + ".md");
+}
+document.addEventListener("click", function(e){
+  const b = e.target.closest ? e.target.closest('[data-facao="exportar"]') : null;
+  if(b){ exportarConversa(); if(typeof fecharAcoes === "function") fecharAcoes(); }
+});
+
+/* ═══ MOTOR DE MEMÓRIA — todo uso vira material de treino ═══
+   Conversa guardada como histórico morre no histórico. No formato JSONL
+   {input, output, resultado, feedback} ela vira dado de fine-tuning.
+   Correção manual de Samuel é o sinal mais valioso que existe: é a única
+   fonte que diz não só que estava errado, mas o que era o certo. */
+
+let treino = [];
+
+async function carregarTreino(){
+  try{ treino = JSON.parse(await ler("sa:treino") || "[]"); }catch(e){ treino = []; }
+}
+function sTreino(){ guardar("sa:treino", JSON.stringify(treino.slice(-4000))); }
+
+/* Toda resposta entregue já entra como exemplo; o voto e a correção
+   apenas ajustam o peso depois. Nada de uso real se perde. */
+function registrarTreino(reg){
+  treino.push({
+    quando: new Date().toISOString(),
+    input: String(reg.input || "").slice(0, 8000),
+    output: String(reg.output || "").slice(0, 12000),
+    resultado: reg.resultado || "entregue",   /* entregue | erro | corrigido */
+    feedback: reg.feedback || null,           /* +1 | -1 | texto da correção */
+    motor: reg.motor || (typeof cfg !== "undefined" && cfg ? cfg.modelo : "") || "",
+    ferramentas: reg.ferramentas || [],
+    projeto: (typeof proj === "function" && proj() ? proj().nome : "") || "",
+    peso: reg.peso || 1                       /* correção vale mais no treino */
+  });
+  sTreino();
+  return treino.length;
+}
+
+/* A correção é o ouro: guarda o errado E o certo lado a lado. */
+function registrarCorrecao(indice, textoCerto){
+  const h = hist[indice];
+  if(!h) return 0;
+  return registrarTreino({
+    input: h.pergunta || "",
+    output: textoCerto,
+    resultado: "corrigido",
+    feedback: "errado era: " + String(h.resposta || "").slice(0, 2000),
+    peso: 10        /* aprendizado ativo: correção humana vale 10x */
+  });
+}
+
+function resumoTreino(){
+  const c = {entregue:0, erro:0, corrigido:0, positivo:0, negativo:0};
+  treino.forEach(function(t){
+    c[t.resultado] = (c[t.resultado] || 0) + 1;
+    if(t.feedback === 1) c.positivo++;
+    if(t.feedback === -1) c.negativo++;
+  });
+  return {total: treino.length, contas: c,
+          peso: treino.reduce(function(a,t){ return a + (t.peso||1); }, 0)};
+}
+
+/* Exporta no formato que OpenAI e HuggingFace comem direto */
+function exportarJSONL(){
+  const linhas = treino.map(function(t){
+    return JSON.stringify({
+      messages: [
+        {role:"user", content: t.input},
+        {role:"assistant", content: t.output}
+      ],
+      metadata: {quando:t.quando, resultado:t.resultado, feedback:t.feedback,
+                 motor:t.motor, peso:t.peso, projeto:t.projeto}
+    });
+  }).join("\n");
+  const d = new Date();
+  baixarBlob(new Blob([linhas], {type:"application/jsonl"}),
+    "sistema-absoluto-treino-" + d.getFullYear() +
+    String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".jsonl");
+  return treino.length;
+}
+
+/* ═══ ARQUIVOS — ler e criar, sem biblioteca externa ═══
+   docx, xlsx e pptx são ZIP com XML dentro. O navegador já traz
+   DecompressionStream e CompressionStream nativos, então dá pra abrir e
+   montar esses arquivos sem baixar nada — funciona offline. */
+
+/* ── ZIP: leitura ── */
+async function zipAbrir(buffer){
+  const dv = new DataView(buffer), u8 = new Uint8Array(buffer);
+  /* o diretório central fica no fim; acha o marcador de trás pra frente */
+  let fim = -1;
+  for(let i = u8.length - 22; i >= 0 && i > u8.length - 66000; i--){
+    if(dv.getUint32(i, true) === 0x06054b50){ fim = i; break; }
+  }
+  if(fim < 0) throw new Error("não parece um arquivo ZIP");
+  const qtd = dv.getUint16(fim + 10, true);
+  let p = dv.getUint32(fim + 16, true);
+  const arquivos = {};
+  for(let n = 0; n < qtd; n++){
+    if(dv.getUint32(p, true) !== 0x02014b50) break;
+    const metodo = dv.getUint16(p + 10, true);
+    const tamComp = dv.getUint32(p + 20, true);
+    const tamNome = dv.getUint16(p + 28, true);
+    const tamExtra = dv.getUint16(p + 30, true);
+    const tamCom = dv.getUint16(p + 32, true);
+    const desloc = dv.getUint32(p + 42, true);
+    const nome = new TextDecoder().decode(u8.slice(p + 46, p + 46 + tamNome));
+    /* no cabeçalho local os campos extras têm outro tamanho */
+    const nomeLocal = dv.getUint16(desloc + 26, true);
+    const extraLocal = dv.getUint16(desloc + 28, true);
+    const ini = desloc + 30 + nomeLocal + extraLocal;
+    const bruto = u8.slice(ini, ini + tamComp);
+    arquivos[nome] = {metodo: metodo, dados: bruto};
+    p += 46 + tamNome + tamExtra + tamCom;
+  }
+  return {
+    lista: Object.keys(arquivos),
+    async texto(nome){
+      const a = arquivos[nome];
+      if(!a) return "";
+      if(a.metodo === 0) return new TextDecoder().decode(a.dados);
+      const ds = new DecompressionStream("deflate-raw");
+      const fluxo = new Blob([a.dados]).stream().pipeThrough(ds);
+      return await new Response(fluxo).text();
+    }
+  };
+}
+
+/* ── ZIP: escrita ── */
+function crc32(u8){
+  let c, tabela = crc32.t;
+  if(!tabela){
+    tabela = crc32.t = [];
+    for(let n = 0; n < 256; n++){
+      c = n;
+      for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+      tabela[n] = c >>> 0;
+    }
+  }
+  let r = 0xFFFFFFFF;
+  for(let i = 0; i < u8.length; i++) r = tabela[(r ^ u8[i]) & 0xFF] ^ (r >>> 8);
+  return (r ^ 0xFFFFFFFF) >>> 0;
+}
+async function zipCriar(entradas){
+  const partes = [], central = [];
+  let desloc = 0;
+  for(const [nome, conteudo] of Object.entries(entradas)){
+    const cru = typeof conteudo === "string"
+      ? new TextEncoder().encode(conteudo) : new Uint8Array(conteudo);
+    const cs = new CompressionStream("deflate-raw");
+    const comp = new Uint8Array(await new Response(
+      new Blob([cru]).stream().pipeThrough(cs)).arrayBuffer());
+    const nomeU8 = new TextEncoder().encode(nome);
+    const soma = crc32(cru);
+
+    const local = new DataView(new ArrayBuffer(30));
+    local.setUint32(0, 0x04034b50, true); local.setUint16(4, 20, true);
+    local.setUint16(6, 0x0800, true);     local.setUint16(8, 8, true);
+    local.setUint32(14, soma, true);      local.setUint32(18, comp.length, true);
+    local.setUint32(22, cru.length, true);local.setUint16(26, nomeU8.length, true);
+    partes.push(new Uint8Array(local.buffer), nomeU8, comp);
+
+    const cen = new DataView(new ArrayBuffer(46));
+    cen.setUint32(0, 0x02014b50, true);  cen.setUint16(4, 20, true);
+    cen.setUint16(6, 20, true);          cen.setUint16(8, 0x0800, true);
+    cen.setUint16(10, 8, true);          cen.setUint32(16, soma, true);
+    cen.setUint32(20, comp.length, true);cen.setUint32(24, cru.length, true);
+    cen.setUint16(28, nomeU8.length, true); cen.setUint32(42, desloc, true);
+    central.push(new Uint8Array(cen.buffer), nomeU8);
+    desloc += 30 + nomeU8.length + comp.length;
+  }
+  let tamCentral = 0;
+  central.forEach(function(x){ tamCentral += x.length; });
+  const fim = new DataView(new ArrayBuffer(22));
+  fim.setUint32(0, 0x06054b50, true);
+  fim.setUint16(8, Object.keys(entradas).length, true);
+  fim.setUint16(10, Object.keys(entradas).length, true);
+  fim.setUint32(12, tamCentral, true);
+  fim.setUint32(16, desloc, true);
+  return new Blob(partes.concat(central, [new Uint8Array(fim.buffer)]),
+                  {type: "application/octet-stream"});
+}
+
+const xmlEsc = function(t){
+  return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+                  .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+};
+
+
+/* ═══ LER QUALQUER ARQUIVO ═══ */
+async function lerArquivo(arquivo){
+  const nome = arquivo.name || "sem-nome";
+  const ext = (nome.split(".").pop() || "").toLowerCase();
+  const r = {nome: nome, ext: ext, bytes: arquivo.size, texto: "", aviso: ""};
+  try{
+    /* texto puro e formatos de dado */
+    if(["txt","md","csv","tsv","json","xml","html","htm","js","py","css","yml",
+        "yaml","log","sql","sh","ini","conf","srt","vtt"].indexOf(ext) >= 0){
+      r.texto = await arquivo.text();
+      if(ext === "csv" || ext === "tsv"){
+        const sep = ext === "tsv" ? "\t" : ",";
+        const linhas = r.texto.split(/\r?\n/).filter(Boolean);
+        r.tabela = linhas.slice(0, 500).map(function(l){ return l.split(sep); });
+        r.resumo = linhas.length + " linhas · " +
+          (r.tabela[0] ? r.tabela[0].length : 0) + " colunas";
+      }
+      return r;
+    }
+
+    /* Word */
+    if(ext === "docx"){
+      const z = await zipAbrir(await arquivo.arrayBuffer());
+      const xml = await z.texto("word/document.xml");
+      r.texto = xml.replace(/<w:p[ >]/g, "\n<w:p ")
+                   .replace(/<[^>]+>/g, "")
+                   .replace(/\n{3,}/g, "\n\n").trim();
+      r.resumo = r.texto.length + " caracteres";
+      return r;
+    }
+
+    /* Excel */
+    if(ext === "xlsx" || ext === "xlsm"){
+      const z = await zipAbrir(await arquivo.arrayBuffer());
+      /* o texto das células fica numa tabela compartilhada, à parte */
+      let compart = [];
+      if(z.lista.indexOf("xl/sharedStrings.xml") >= 0){
+        const sx = await z.texto("xl/sharedStrings.xml");
+        compart = (sx.match(/<si>[\s\S]*?<\/si>/g) || []).map(function(si){
+          return (si.match(/<t[^>]*>([\s\S]*?)<\/t>/g) || [])
+            .map(function(t){ return t.replace(/<[^>]+>/g, ""); }).join("");
+        });
+      }
+      const abas = z.lista.filter(function(n){ return /^xl\/worksheets\/sheet\d+\.xml$/.test(n); });
+      const fora = [];
+      for(const aba of abas){
+        const xs = await z.texto(aba);
+        const linhas = xs.match(/<row[\s\S]*?<\/row>/g) || [];
+        const t = linhas.slice(0, 400).map(function(ln){
+          return (ln.match(/<c[\s\S]*?(?:\/>|<\/c>)/g) || []).map(function(c){
+            const tipo = (c.match(/t="([^"]+)"/) || [])[1];
+            const v = (c.match(/<v>([\s\S]*?)<\/v>/) || [])[1];
+            if(v === undefined){
+              const inline = (c.match(/<t[^>]*>([\s\S]*?)<\/t>/) || [])[1];
+              return inline || "";
+            }
+            return tipo === "s" ? (compart[parseInt(v,10)] || "") : v;
+          });
+        });
+        fora.push({aba: aba.split("/").pop().replace(".xml",""), linhas: t});
+      }
+      r.planilhas = fora;
+      r.texto = fora.map(function(p){
+        return "### " + p.aba + "\n" + p.linhas.map(function(l){ return l.join(" | "); }).join("\n");
+      }).join("\n\n");
+      r.resumo = fora.length + " aba(s) · " +
+        fora.reduce(function(a,p){ return a + p.linhas.length; }, 0) + " linhas";
+      return r;
+    }
+
+    /* PowerPoint */
+    if(ext === "pptx"){
+      const z = await zipAbrir(await arquivo.arrayBuffer());
+      const slides = z.lista.filter(function(n){ return /^ppt\/slides\/slide\d+\.xml$/.test(n); })
+        .sort(function(a,b){
+          return parseInt(a.match(/\d+/)[0],10) - parseInt(b.match(/\d+/)[0],10); });
+      const fora = [];
+      for(let i = 0; i < slides.length; i++){
+        const sx = await z.texto(slides[i]);
+        const txt = (sx.match(/<a:t>[\s\S]*?<\/a:t>/g) || [])
+          .map(function(t){ return t.replace(/<[^>]+>/g, ""); }).join("\n");
+        fora.push("### Slide " + (i+1) + "\n" + txt);
+      }
+      r.texto = fora.join("\n\n");
+      r.resumo = slides.length + " slides";
+      return r;
+    }
+
+    /* PDF: sem interpretador embutido, extrai o que estiver em texto simples */
+    if(ext === "pdf"){
+      const buf = await arquivo.arrayBuffer();
+      const cru = new TextDecoder("latin1").decode(buf);
+      const pedacos = (cru.match(/\(((?:\\.|[^\\()])*)\)\s*Tj/g) || [])
+        .map(function(m){
+          return m.replace(/\)\s*Tj$/, "").replace(/^\(/, "")
+                  .replace(/\\([()\\])/g, "$1");
+        });
+      r.texto = pedacos.join(" ").replace(/\s{2,}/g, " ").trim();
+      r.resumo = (cru.match(/\/Type\s*\/Page[^s]/g) || []).length + " páginas";
+      if(r.texto.length < 80){
+        r.aviso = "PDF comprimido ou digitalizado: não consegui o texto aqui. " +
+          "Mande pela Ponte (ela usa o Python do Termux) ou use a fonte original.";
+      }
+      return r;
+    }
+
+    /* imagem: vai pro motor com visão */
+    if(["png","jpg","jpeg","webp","gif","bmp"].indexOf(ext) >= 0){
+      r.imagem = await new Promise(function(res){
+        const fr = new FileReader();
+        fr.onload = function(){ res(fr.result); };
+        fr.readAsDataURL(arquivo);
+      });
+      r.resumo = "imagem " + Math.round(arquivo.size/1024) + " KB";
+      r.aviso = "imagens dependem de o motor aceitar visão";
+      return r;
+    }
+
+    /* zip genérico: lista o que tem dentro */
+    if(ext === "zip"){
+      const z = await zipAbrir(await arquivo.arrayBuffer());
+      r.texto = z.lista.join("\n");
+      r.resumo = z.lista.length + " arquivos dentro";
+      return r;
+    }
+
+    /* desconhecido: tenta como texto */
+    const t = await arquivo.text();
+    const lixo = (t.match(/[\x00-\x08\x0E-\x1F]/g) || []).length;
+    if(lixo > t.length * 0.05){
+      r.aviso = "formato binário não reconhecido (" + ext + ")";
+    }else{
+      r.texto = t;
+    }
+    return r;
+  }catch(err){
+    r.aviso = "não consegui ler: " + (err.message || err);
+    return r;
+  }
+}
+
+/* ═══ CRIAR ARQUIVO ═══ */
+function baixarBlob(blob, nome){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+
+async function criarArquivo(tipo, nome, conteudo){
+  if(tipo === "txt" || tipo === "md" || tipo === "csv" || tipo === "json" ||
+     tipo === "html" || tipo === "xml"){
+    baixarBlob(new Blob([conteudo], {type:"text/plain;charset=utf-8"}), nome);
+    return nome;
+  }
+
+  if(tipo === "docx"){
+    const paras = String(conteudo).split(/\n/).map(function(l){
+      const titulo = /^#{1,3}\s/.test(l);
+      const t = l.replace(/^#{1,3}\s*/, "");
+      return '<w:p>' + (titulo ? '<w:pPr><w:pStyle w:val="Heading1"/></w:pPr>' : '') +
+             '<w:r><w:t xml:space="preserve">' + xmlEsc(t) + '</w:t></w:r></w:p>';
+    }).join("");
+    const blob = await zipCriar({
+      "[Content_Types].xml":
+        '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
+      "_rels/.rels":
+        '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
+      "word/document.xml":
+        '<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+        '<w:body>' + paras + '</w:body></w:document>'
+    });
+    baixarBlob(blob, nome); return nome;
+  }
+
+  if(tipo === "xlsx"){
+    const linhas = Array.isArray(conteudo) ? conteudo
+      : String(conteudo).split(/\n/).map(function(l){ return l.split(","); });
+    const col = function(n){ let s2 = ""; n++;
+      while(n > 0){ const m = (n - 1) % 26; s2 = String.fromCharCode(65 + m) + s2;
+        n = Math.floor((n - 1) / 26); } return s2; };
+    const xmlLinhas = linhas.map(function(l, i){
+      return '<row r="' + (i+1) + '">' + l.map(function(c, j){
+        const num = c !== "" && !isNaN(c);
+        return '<c r="' + col(j) + (i+1) + '"' + (num ? '' : ' t="inlineStr"') + '>' +
+          (num ? '<v>' + c + '</v>'
+               : '<is><t xml:space="preserve">' + xmlEsc(c) + '</t></is>') + '</c>';
+      }).join("") + '</row>';
+    }).join("");
+    const blob = await zipCriar({
+      "[Content_Types].xml":
+        '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+      "_rels/.rels":
+        '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+      "xl/workbook.xml":
+        '<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+        '<sheets><sheet name="Planilha1" sheetId="1" r:id="rId1"/></sheets></workbook>',
+      "xl/_rels/workbook.xml.rels":
+        '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>',
+      "xl/worksheets/sheet1.xml":
+        '<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+        '<sheetData>' + xmlLinhas + '</sheetData></worksheet>'
+    });
+    baixarBlob(blob, nome); return nome;
+  }
+
+  throw new Error("tipo não suportado: " + tipo);
+}
+
+/* ═══ ARMAZENAMENTO QUE NÃO SOME ═══
+   O Chrome descarta dados de site sem aviso quando o aparelho aperta. Era
+   por isso que token, piloto e ajustes voltavam ao zero. Duas defesas:
+   pedir armazenamento persistente, e espelhar os ajustes pequenos em
+   localStorage, que é o último a ser descartado. */
+
+async function fixarArmazenamento(){
+  try{
+    if(navigator.storage && navigator.storage.persist){
+      const jaEra = await navigator.storage.persisted();
+      const ok = jaEra || await navigator.storage.persist();
+      const q = navigator.storage.estimate ? await navigator.storage.estimate() : {};
+      console.log("armazenamento persistente:", ok,
+        q.usage ? Math.round(q.usage/1048576) + "MB de " +
+                  Math.round((q.quota||0)/1048576) + "MB" : "");
+      return ok;
+    }
+  }catch(e){ console.warn("persistência:", e.message); }
+  return false;
+}
+
+/* Ajuste pequeno e crítico vai também pro localStorage. Se o IndexedDB for
+   descartado, isto sobrevive — e o app volta configurado. */
+const CHAVES_CRITICAS = ["sa:ponte", "sa:modoCor", "sa:pilotoligado", "sa:motor",
+                         "sa:chave", "sa:tema", "sa:espaco", "sa:orqBase"];
+function espelharAjustes(){
+  try{
+    const cofre = {};
+    CHAVES_CRITICAS.forEach(function(k){
+      const v = localStorage.getItem(k);
+      if(v !== null) cofre[k] = v;
+    });
+    if(typeof cfg !== "undefined" && cfg) cofre["cfg"] = JSON.stringify(cfg);
+    localStorage.setItem("sa:cofre", JSON.stringify(cofre));
+  }catch(e){}
+}
+function restaurarAjustes(){
+  try{
+    const cofre = JSON.parse(localStorage.getItem("sa:cofre") || "{}");
+    let voltou = 0;
+    Object.keys(cofre).forEach(function(k){
+      if(k === "cfg") return;
+      if(localStorage.getItem(k) === null){ localStorage.setItem(k, cofre[k]); voltou++; }
+    });
+    if(cofre.cfg && typeof cfg !== "undefined"){
+      const c = JSON.parse(cofre.cfg);
+      Object.keys(c).forEach(function(k){
+        if(cfg[k] === undefined || cfg[k] === "" || cfg[k] === null){ cfg[k] = c[k]; voltou++; }
+      });
+    }
+    if(voltou) console.log("ajustes recuperados do cofre:", voltou);
+  }catch(e){}
+}
+restaurarAjustes();
+fixarArmazenamento();
+setInterval(espelharAjustes, 20000);
+window.addEventListener("beforeunload", espelharAjustes);
+window.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "hidden") espelharAjustes();
 });
 
 /* ═══ VARREDURA — o sistema se olha antes de perguntar à IA ═══ */
@@ -3514,6 +4579,30 @@ function buscarBiblio(termo){
 
 /* ═══ FERRAMENTAS — a IA executa, não só fala ═══ */
 const FERRAMENTAS = {
+  criar_arquivo: {
+    desc: "Cria um arquivo e entrega pra Samuel baixar. Tipos: md, txt, csv, json, " +
+          "html, docx (Word), xlsx (planilha). Para xlsx, mande conteudo como linhas " +
+          "separadas por quebra de linha e colunas por vírgula.",
+    exec: async function(a){
+      const tipo = String(a.tipo || "md").toLowerCase().replace(".", "");
+      const nome = String(a.nome || "arquivo").replace(/[^\w.\-À-ÿ ]/g, "") +
+                   (String(a.nome||"").indexOf(".") > 0 ? "" : "." + tipo);
+      const conteudo = a.conteudo || a.texto || "";
+      if(!conteudo) return "Faltou o conteúdo do arquivo.";
+      try{
+        if(tipo === "xlsx" && typeof conteudo === "string"){
+          await criarArquivo("xlsx", nome,
+            conteudo.split(/\n/).filter(Boolean).map(function(l){ return l.split(","); }));
+        }else{
+          await criarArquivo(tipo, nome, conteudo);
+        }
+        return "Pronto: " + nome + " (" +
+          (typeof conteudo === "string" ? conteudo.length : conteudo.length) +
+          (typeof conteudo === "string" ? " caracteres" : " linhas") +
+          "). Já foi pra pasta de downloads.";
+      }catch(e){ return "Não consegui criar: " + e.message; }
+    }
+  },
   buscar_biblioteca: {desc:"Busca na biblioteca coletada. args: {termo}", exec: a => {
     const r = buscarBiblio(a.termo || "").slice(0,12);
     return r.length ? r.map(d => "[" + TIERS[d.tier||3].rotulo + " · " + (d.fonte||"") + "] " +
@@ -4292,11 +5381,8 @@ let ultimaPergunta = "";
    conversa é mais confiável do que depender de quem chama montarContexto. */
 function lerUltimaPergunta(){
   try{
-    const c = conversaAtual && conversaAtual();
-    const blocos = (c && c.blocos) || [];
-    for(let i = blocos.length - 1; i >= 0; i--){
-      if(blocos[i].quem === "eu" || blocos[i].papel === "user")
-        return String(blocos[i].texto || "").slice(0, 400);
+    for(let i = hist.length - 1; i >= 0; i--){
+      if(hist[i] && hist[i].pergunta) return String(hist[i].pergunta).slice(0, 400);
     }
   }catch(e){}
   return ($("#txt") ? $("#txt").value : "") || "";
@@ -4598,6 +5684,8 @@ function renderFeed(){
       '<button class="ic" data-regenerar="' + i + '" title="Gerar de novo">↻</button>' +
       '<button class="ic ' + (h.voto === 1 ? "on" : "") + '" data-voto="' + i + '|1" title="Boa resposta">👍</button>' +
       '<button class="ic ' + (h.voto === -1 ? "on" : "") + '" data-voto="' + i + '|-1" title="Resposta ruim">👎</button>' +
+      '<button class="ic" data-corrigir="' + i + '" title="Escrever a resposta certa">✎</button>' +
+      '<button class="ic" data-refazer="' + i + '" title="Refazer com o mesmo pedido">↻</button>' +
       '</div>';
     const dec = h.temDecisao
       ? (h.decisao == null
@@ -5468,12 +6556,18 @@ async function gerarModulo(){
     const r = await chamarMotor(p);
     const o = parseJSON(r);
     if(!o.codigo) throw new Error("sem código");
-    try{ new Function("api", o.codigo); }
-    catch(e){ s.textContent = "a IA escreveu código com erro de sintaxe: " + e.message; return; }
-    modulos.push({id:"m-"+Date.now(), nome:o.nome || pedido.slice(0,40), codigo:o.codigo, ativo:false});
+    const laudo = auditarCodigo(o.codigo);
+    if(laudo.bloqueia){
+      s.textContent = "recusei o código: " + laudo.bloqueia;
+      return;
+    }
+    modulos.push({id:"m-"+Date.now(), nome:o.nome || pedido.slice(0,40),
+                  codigo:o.codigo, ativo:false, laudo:laudo});
     sModulos(); renderModulos();
     $("#pedidoModulo").value = "";
-    s.textContent = "pronto. leia o código antes de aprovar.";
+    s.textContent = "pronto — " + (laudo.avisos.length
+      ? laudo.avisos.length + " aviso(s): " + laudo.avisos.join(" · ")
+      : "nenhum aviso") + ". Leia o código antes de aprovar.";
   }catch(e){ s.textContent = "não consegui gerar (" + e.message + ")."; }
 }
 
@@ -6012,6 +7106,13 @@ async function restaurarDeArquivo(arquivo){
     Object.assign(textos,     d.textos    || {}); sTextos();
     Object.assign(traduzidos, d.traducoes || {}); sTraducoes();
     Object.assign(guardados,  d.guardados || {}); sGuardados();
+    if(Array.isArray(d.treino)){
+      const vistos = {};
+      treino.forEach(function(t){ vistos[t.quando + t.input.slice(0,40)] = 1; });
+      d.treino.forEach(function(t){
+        if(!vistos[t.quando + (t.input||"").slice(0,40)]) treino.push(t); });
+      sTreino();
+    }
     Object.assign(memTrad,    d.memtrad   || {});
     guardar("sa:memtrad", JSON.stringify(memTrad));
     if(d.dicionario && Object.keys(d.dicionario).length) guardarDicionario(d.dicionario);
@@ -6163,6 +7264,20 @@ async function varreduraCompleta(aoAndar){
   achado("memória", "acervo carregado", true,
     biblio.length + " itens · " + Object.keys(textos).length + " artigos inteiros · " +
     tamanhoMemTrad() + " frases traduzidas · " + tamanhoDicionario().conceitos + " conceitos");
+
+  /* ── 5b. O navegador pode descartar tudo? ── */
+  passo("conferindo se o navegador garante o armazenamento…");
+  try{
+    const fixo = navigator.storage && navigator.storage.persisted
+      ? await navigator.storage.persisted() : false;
+    const q = navigator.storage && navigator.storage.estimate
+      ? await navigator.storage.estimate() : {};
+    achado("memória", "armazenamento garantido", fixo,
+      (fixo ? "o navegador não vai descartar" : "SEM garantia — o Chrome pode apagar") +
+      (q.usage ? " · usando " + Math.round(q.usage/1048576) + "MB" : ""),
+      fixo ? "" : "é por isso que os ajustes voltam ao zero; instale como app (APK ou " +
+        "Adicionar à tela inicial) que a garantia é concedida");
+  }catch(e){ achado("memória", "armazenamento garantido", false, e.message); }
 
   /* ── 6. PONTE: viva? e as versões batem? ── */
   passo("falando com a Ponte…");
@@ -6350,6 +7465,23 @@ async function rodadaDoPiloto(){
       }catch(e){}
     }
 
+    /* 4b. AUDITAR — sem isso, problema novo só aparece quando te incomoda */
+    if(passou("auditoria", 12 * 60 * 60 * 1000)){
+      anotarPiloto("auditando o próprio app…");
+      try{
+        const a = await auditar(true);
+        marcarQuando("auditoria");
+        const c = a.cmp;
+        anotarPiloto("auditoria: " + a.estado.falhas.length + " problema(s)" +
+          (c.resolvidos.length ? " · " + c.resolvidos.length + " resolvido(s)" : "") +
+          (c.novos.length ? " · " + c.novos.length + " novo(s)" : "") +
+          (c.regressoes.length ? " · " + c.regressoes.length + " REGRESSÃO" : ""));
+        if(c.regressoes.length)
+          avisoAcervo = "Regressão detectada: " + c.regressoes.join(", ") +
+            ". Algo que já funcionava quebrou de novo.";
+      }catch(e){ anotarPiloto("auditoria falhou: " + (e.message || e)); }
+    }
+
     /* 5. GRAVAR — memória que só é salva quando alguém lembra, um dia não é */
     if(passou("memoria", PILOTO.memoria)){
       if(await salvarNoAparelho(true)){ marcarQuando("memoria"); }
@@ -6384,6 +7516,7 @@ function pacoteDaMemoria(){
     traducoes: traduzidos,
     guardados: guardados,
     memtrad: memTrad,
+    treino: treino,
     dicionario: dicMundo,
     conversas: (typeof conversas !== "undefined" ? conversas : []),
     extras: (typeof extras !== "undefined" ? extras : []),
@@ -6428,6 +7561,13 @@ async function restaurarDoAparelho(){
     Object.assign(textos,     d.textos    || {}); sTextos();
     Object.assign(traduzidos, d.traducoes || {}); sTraducoes();
     Object.assign(guardados,  d.guardados || {}); sGuardados();
+    if(Array.isArray(d.treino)){
+      const vistos = {};
+      treino.forEach(function(t){ vistos[t.quando + t.input.slice(0,40)] = 1; });
+      d.treino.forEach(function(t){
+        if(!vistos[t.quando + (t.input||"").slice(0,40)]) treino.push(t); });
+      sTreino();
+    }
     Object.assign(memTrad,    d.memtrad   || {});
     guardar("sa:memtrad", JSON.stringify(memTrad));
     if(d.dicionario && Object.keys(d.dicionario).length) guardarDicionario(d.dicionario);
@@ -6463,6 +7603,8 @@ async function carregarAcervoPermanente(){
   try{ guardados = JSON.parse(await ler("sa:guardados") || "{}"); }catch(e){ guardados = {}; }
   try{ memTrad   = JSON.parse(await ler("sa:memtrad")   || "{}"); }catch(e){ memTrad = {}; }
   try{ pilotoDiario = JSON.parse(await ler("sa:pilotodiario") || "[]"); }catch(e){ pilotoDiario = []; }
+  await carregarTreino();
+  await carregarAuditoria();
   try{ pilotoLigado = (await ler("sa:pilotoligado")) !== "0"; }catch(e){ pilotoLigado = true; }
 }
 function sTextos(){    guardar("sa:textos",    JSON.stringify(textos)); }
@@ -6752,6 +7894,7 @@ async function ponteTestar(){
 }
 liga("#ponteSalvar", "click", function(){
   localStorage.setItem("sa:ponte", ($("#ponteToken").value || "").trim());
+  espelharAjustes();
   ponteTestar();
 });
 liga("#ponteTestar", "click", ponteTestar);
@@ -6933,6 +8076,17 @@ function abrirSub(sid){
   if(sid==="espaco" && typeof medirEspaco==="function") medirEspaco();
   if(sid==="motores" && typeof renderMotores==="function") renderMotores();
   if(sid==="varredura"){ const e=$("#vdEstado"); if(e) e.textContent="toque em Varrer tudo"; }
+  if(sid==="treino"){ renderTreino(); }
+  if(sid==="abertos"){
+    renderModelosAbertos();
+    const ll=$("#listaLocais");
+    if(ll) ll.innerHTML = MODELOS_LOCAIS.map(function(m){
+      return '<div class="ajLinha" style="cursor:default"><span class="ajIc">▣</span>' +
+        '<span class="ajTxt"><span class="ajT">'+esc(m.nome)+'</span>' +
+        '<span class="ajS" style="white-space:normal">'+esc(m.tam)+' · '+esc(m.licenca)+
+        (m.nota? ' · '+esc(m.nota):'')+'</span></span></div>';
+    }).join("");
+  }
   if(sid==="piloto"){ renderPiloto(); }
   if(sid==="disco"){ const u=localStorage.getItem("sa:ultimoDisco");
     const e=$("#discoEstado"); if(e&&u) e.textContent="última gravação: "+new Date(u).toLocaleString("pt-BR"); }
@@ -7501,7 +8655,10 @@ liga("#projetos", "input", function(e){
   /* Troca só a lista, preservando o campo e o cursor — refazer tudo perderia o foco */
   const cursor = e.target.selectionStart;
   renderProjetos();
+  /* o campo pode não estar na tela quando isto roda — sem a guarda,
+     digitar na busca lançava erro e derrubava o resto do listener */
   const campo = $("#buscaConv");
+  if(!campo) return;
   campo.focus();
   campo.setSelectionRange(cursor, cursor);
 });
