@@ -41,7 +41,8 @@ MEMORIA = os.path.join(CASA, "sa-memoria")
 # atualizar o site NÃO atualiza estes arquivos. Por isso ela busca sozinha.
 REPO = os.environ.get("SA_REPO",
     "https://raw.githubusercontent.com/samuelferreira24/sistema-absoluto/main")
-ATUALIZAVEIS = ["ponte.py", "coletor.py", "orquestrador.py", "especialistas.py",
+ATUALIZAVEIS = ["index.html", "manifest.json", "sw.js",
+                "ponte.py", "coletor.py", "orquestrador.py", "especialistas.py",
                 "governanca.py", "jetro.py", "executor.py", "base.py",
                 "arranque.sh", "rodar-coleta.sh"]
 # Downloads é visível pelo gerenciador de arquivos: dá pra copiar pro PC,
@@ -269,6 +270,41 @@ class Ponte(BaseHTTPRequestHandler):
     def do_GET(self):
         rota = self.path.split("?")[0]
 
+        # ── O APP SERVIDO PELA PRÓPRIA PONTE ──
+        # Aberto em https://…github.io, o Chrome recusa chamada a 127.0.0.1.
+        # Servido daqui, app e Ponte ficam na MESMA origem: o bloqueio some,
+        # sem depender de APK e sem mexer em permissão do navegador.
+        if rota in ("/", "/app", "/index.html"):
+            alvo = os.path.join(SA, "index.html")
+            if not os.path.exists(alvo):
+                return self.responder(404, {"erro": "index.html não está em ~/sa"})
+            with open(alvo, "rb") as f:
+                corpo = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(corpo)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(corpo)
+            return
+
+        # arquivos de apoio do app (ícone, manifesto, service worker)
+        if rota.lstrip("/") in ("manifest.json", "sw.js", "icon-192.png", "icon-512.png"):
+            alvo = os.path.join(SA, rota.lstrip("/"))
+            if not os.path.exists(alvo):
+                return self.responder(404, {"erro": "não achei " + rota})
+            tipos = {".json": "application/json", ".js": "application/javascript",
+                     ".png": "image/png"}
+            with open(alvo, "rb") as f:
+                corpo = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type",
+                             tipos.get(os.path.splitext(alvo)[1], "application/octet-stream"))
+            self.send_header("Content-Length", str(len(corpo)))
+            self.end_headers()
+            self.wfile.write(corpo)
+            return
+
         # /saude responde sem token: o app usa pra saber se a Ponte existe
         if rota == "/saude":
             return self.responder(200, {"ok": True, "servico": "ponte", "versao": 1})
@@ -402,6 +438,10 @@ def main():
     print("  Token (cole uma vez em Ajustes → Termux):")
     print()
     print("     " + TOKEN)
+    print()
+    print("  ABRA O APP AQUI, no Chrome do celular:")
+    print("     http://127.0.0.1:%d" % PORTA)
+    print("  Assim app e Ponte ficam na mesma origem e o navegador não bloqueia.")
     print()
     print("  Só o próprio aparelho alcança. Deixe rodando com:")
     print("     termux-wake-lock && python ponte.py &")

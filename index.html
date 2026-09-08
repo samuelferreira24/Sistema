@@ -3304,7 +3304,7 @@ async function nuvemSubir(){
              "Content-Type":"application/json"},
     body: JSON.stringify({description:"Sistema Absoluto — " + espaco + " (cifrado)",
                           public:false, files})});
-  if(!r.ok) throw new Error("HTTP " + r.status);
+  if(!r.ok) throw await erroDaAPI(r);
   const d = await r.json();
   if(!nuvem.gist){ nuvem.gist = d.id; sNuvem(); $("#ghGist").value = d.id; }
   return d.id;
@@ -3313,7 +3313,7 @@ async function nuvemBaixar(){
   if(!nuvem.gist) throw new Error("sem ID de gist");
   const r = await fetch("https://api.github.com/gists/" + nuvem.gist, {
     headers:{"Authorization":"Bearer " + nuvem.token, "Accept":"application/vnd.github+json"}});
-  if(!r.ok) throw new Error("HTTP " + r.status);
+  if(!r.ok) throw await erroDaAPI(r);
   const d = await r.json();
   const f = d.files[arqNuvem()];
   if(!f) throw new Error("este gist não tem o arquivo de " + espaco);
@@ -4959,7 +4959,7 @@ async function chamarLocal(txt, aoStream){
   const r = await fetch(cfg.endpoint.trim(), {method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify(Object.assign({}, corpoL, {stream:false}))});
-  if(!r.ok) throw new Error("HTTP " + r.status);
+  if(!r.ok) throw await erroDaAPI(r);
   const d = await r.json();
   if(d.choices && d.choices[0]) return d.choices[0].message.content;
   if(d.content) return d.content;
@@ -4976,7 +4976,7 @@ async function comStream(url, corpo, cabecalhos, aoStream){
   try{
     const r = await fetch(url, {method:"POST", headers:cabecalhos, signal:ctrl.signal,
       body: JSON.stringify(Object.assign({}, corpo, {stream:true}))});
-    if(!r.ok) throw new Error("HTTP " + r.status);
+    if(!r.ok) throw await erroDaAPI(r);
     if(!r.body) throw new Error("SEM_STREAM");
 
     const leitor = r.body.getReader();
@@ -5014,6 +5014,33 @@ function pararResposta(){
   return false;
 }
 
+
+/* ═══ ERRO DE API COM O MOTIVO ═══
+   "HTTP 400" não diz nada. O provedor manda no corpo o que houve — nome de
+   modelo errado, chave inválida, cota estourada — e isso estava sendo jogado
+   fora. Uma sessão inteira foi gasta adivinhando um 400 por causa disso. */
+async function erroDaAPI(r){
+  let detalhe = "";
+  try{
+    const t = await r.clone().text();
+    try{
+      const j = JSON.parse(t);
+      detalhe = (j.error && (j.error.message || j.error.code)) ||
+                j.message || (j.detail && (j.detail.message || j.detail)) ||
+                t.slice(0, 220);
+    }catch(e){ detalhe = t.slice(0, 220); }
+  }catch(e){}
+  const dica =
+    r.status === 400 ? " — quase sempre nome de modelo errado ou corpo fora do formato do provedor"
+  : r.status === 401 ? " — chave inválida ou não enviada"
+  : r.status === 403 ? " — chave sem permissão para este modelo"
+  : r.status === 404 ? " — este modelo não existe nesta conta"
+  : r.status === 429 ? " — cota ou limite por minuto estourado"
+  : r.status >= 500  ? " — o provedor está fora do ar; tente outro motor"
+  : "";
+  return new Error("HTTP " + r.status + (detalhe ? ": " + detalhe : "") + dica);
+}
+
 async function chamarMotor(txt, forcar, aoStream){
   const alvo = forcar || motorAtivo();
   if(alvo === "local"){
@@ -5041,7 +5068,7 @@ async function chamarMotor(txt, forcar, aoStream){
       catch(e){ if(e.name === "AbortError") throw e; }
     }
     const r = await fetch(url, {method:"POST", headers:cab, body: JSON.stringify(corpo)});
-    if(!r.ok) throw new Error("HTTP " + r.status);
+    if(!r.ok) throw await erroDaAPI(r);
     const d = await r.json();
     registrarUso(d);
     if(d.choices && d.choices[0]) return d.choices[0].message.content;
@@ -5102,7 +5129,7 @@ async function chamarMotor(txt, forcar, aoStream){
       encodeURIComponent(modelo) + ":generateContent?key=" + encodeURIComponent(cfg.chave);
     const r = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify(corpoG)});
-    if(!r.ok) throw new Error("HTTP " + r.status);
+    if(!r.ok) throw await erroDaAPI(r);
     const d = await r.json();
     registrarUso(d);
     /* Resposta bloqueada por filtro vem sem candidates — avisar em vez de quebrar */
@@ -5125,7 +5152,7 @@ async function chamarMotor(txt, forcar, aoStream){
     catch(e){ if(e.name === "AbortError") throw e; }
   }
   const r = await fetch(url, {method:"POST", headers:cabR, body: JSON.stringify(corpoR)});
-  if(!r.ok) throw new Error("HTTP " + r.status);
+  if(!r.ok) throw await erroDaAPI(r);
   const d = await r.json();
   registrarUso(d);
   return d.choices[0].message.content;
@@ -7304,7 +7331,8 @@ async function varreduraCompleta(aoAndar){
     }catch(e){
       achado("ponte", "conectada", false, e.message,
         location.protocol === "https:"
-          ? "o Chrome bloqueia https chamando 127.0.0.1 — no APK isso some"
+          ? "abra o app em http://127.0.0.1:8099 — servido pela própria Ponte, " +
+            "mesma origem, sem bloqueio e sem APK"
           : "ligue no Termux: bash ~/sa/arranque.sh");
     }
   }
@@ -7879,10 +7907,11 @@ async function ponteTestar(){
     let msg;
     if(err && err.message && /Failed to fetch|NetworkError|Load failed/i.test(err.message)){
       msg = httpsBloqueando
-        ? "O navegador bloqueou a chamada porque o app está em https e a Ponte "
-          + "é http local. Duas saídas: usar o APK (não bloqueia), ou abrir o app "
-          + "em http://localhost. A Ponte pode estar ligada normalmente."
-        : "Não achei a Ponte. Ligue no Termux: python ~/sa/ponte.py &";
+        ? "O navegador bloqueou: o app está em https e a Ponte é http local. "
+          + "A saída mais simples é abrir o app PELA PRÓPRIA PONTE — no Chrome, "
+          + "vá em http://127.0.0.1:8099 . Aí os dois ficam na mesma origem e o "
+          + "bloqueio some, sem precisar de APK. A Ponte já está ligada."
+        : "Não achei a Ponte. Ligue no Termux: bash ~/sa/arranque.sh";
     } else if(err && /401|token/i.test(err.message || "")){
       msg = "A Ponte respondeu, mas recusou o token. Rode: python ~/sa/ponte.py --token";
     } else {
@@ -8805,7 +8834,7 @@ async function buscarPlantao(rota){
       }else{
         const r = await fetch(orqBase() + (rota || "/plantao"),
                               {signal: AbortSignal.timeout(rota === "/rodar" ? 180000 : 8000)});
-        if(!r.ok) throw new Error("HTTP " + r.status);
+        if(!r.ok) throw await erroDaAPI(r);
         d = await r.json();
       }
     }
@@ -8854,7 +8883,7 @@ async function enviarEstado(){
     const r = await fetch(orqBase() + "/estado", {method:"POST",
       headers:{"Content-Type":"application/json"}, body:corpo,
       signal: AbortSignal.timeout(8000)});
-    if(!r.ok) throw new Error("HTTP " + r.status);
+    if(!r.ok) throw await erroDaAPI(r);
     stOrq("estado enviado. O orquestrador para de trabalhar às cegas.");
   }catch(e){
     stOrq("não alcancei o orquestrador. Ele está rodando com --servir?");
