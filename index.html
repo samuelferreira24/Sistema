@@ -9529,6 +9529,109 @@ if("serviceWorker" in navigator)
   });
 })();
 
+
+/* ═══ CÉREBRO DIRETO — comunicação App ↔ Cérebro sem Termux ═══
+   O App pode manter um canal de polling com o Cérebro. O Cérebro enfileira
+   uma capacidade; o App executa usando seus próprios motores e devolve o
+   resultado. A ponte Termux continua independente e opcional. */
+(function(){
+  const qs = new URLSearchParams(location.search);
+  let ativo = localStorage.getItem("sa:cerebro:ativo") === "1" || qs.get("cerebro") === "1";
+  let endpoint = localStorage.getItem("sa:cerebro:endpoint") || qs.get("cerebroEndpoint") || "http://127.0.0.1:8787";
+  let token = localStorage.getItem("sa:cerebro:token") || qs.get("cerebroToken") || "";
+  let rodando = false;
+  let abortado = false;
+
+  function salvarConfig(){
+    localStorage.setItem("sa:cerebro:ativo", ativo ? "1" : "0");
+    localStorage.setItem("sa:cerebro:endpoint", endpoint);
+    if(token) localStorage.setItem("sa:cerebro:token", token);
+  }
+
+  async function chamar(path, options){
+    const o = options || {};
+    const headers = Object.assign({"Content-Type":"application/json"}, o.headers || {});
+    if(token) headers["X-Cerebro-Token"] = token;
+    return await fetch(endpoint.replace(/\/$/, "") + path, Object.assign({}, o, {headers:headers}));
+  }
+
+  async function devolver(id, dados){
+    const r = await chamar("/v1/trabalho/" + encodeURIComponent(id) + "/resultado", {
+      method:"POST",
+      body:JSON.stringify(dados)
+    });
+    if(!r.ok) throw new Error("Cérebro HTTP " + r.status);
+  }
+
+  async function processar(trabalho){
+    try{
+      if(trabalho.capacidade !== "inferencia"){
+        await devolver(trabalho.id, {
+          sucesso:false,
+          erro:"capacidade não suportada pelo App: " + trabalho.capacidade
+        });
+        return;
+      }
+
+      const p = trabalho.payload || {};
+      let mensagens = p.mensagens || p.messages || [];
+      if(!Array.isArray(mensagens) || !mensagens.length){
+        mensagens = [{papel:"user", texto:String(p.mensagem || p.prompt || "")}];
+      }
+
+      const resultado = await chamarMotor(mensagens);
+      await devolver(trabalho.id, {sucesso:true, resultado:resultado});
+    }catch(err){
+      await devolver(trabalho.id, {
+        sucesso:false,
+        erro:String((err && err.message) || err)
+      });
+    }
+  }
+
+  async function ciclo(){
+    if(!rodando || abortado) return;
+    try{
+      const r = await chamar("/v1/trabalho/proximo?timeout=15");
+      if(r.status === 200){
+        const trabalho = await r.json();
+        await processar(trabalho);
+      }else if(r.status !== 204){
+        throw new Error("Cérebro HTTP " + r.status);
+      }
+    }catch(err){
+      /* O App continua funcionando normalmente se o Cérebro estiver fora. */
+      await new Promise(function(resolve){ setTimeout(resolve, 1200); });
+    }
+    if(rodando && !abortado) ciclo();
+  }
+
+  window.sistemaAbsolutoCerebro = {
+    configurar:function(opcoes){
+      opcoes = opcoes || {};
+      if(opcoes.endpoint) endpoint = String(opcoes.endpoint).replace(/\/$/, "");
+      if(Object.prototype.hasOwnProperty.call(opcoes, "token")) token = String(opcoes.token || "");
+      if(Object.prototype.hasOwnProperty.call(opcoes, "ativo")) ativo = !!opcoes.ativo;
+      salvarConfig();
+      if(ativo) this.iniciar(); else this.parar();
+      return {ativo:ativo, endpoint:endpoint};
+    },
+    iniciar:function(){
+      ativo = true; abortado = false; salvarConfig();
+      if(rodando) return;
+      rodando = true;
+      ciclo();
+    },
+    parar:function(){
+      ativo = false; rodando = false; abortado = true; salvarConfig();
+    },
+    estado:function(){
+      return {ativo:ativo, rodando:rodando, endpoint:endpoint};
+    }
+  };
+
+  if(ativo) setTimeout(function(){ window.sistemaAbsolutoCerebro.iniciar(); }, 800);
+})();
 </script>
 </body>
 </html>
