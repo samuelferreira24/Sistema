@@ -9552,7 +9552,7 @@ if("serviceWorker" in navigator)
     const o = options || {};
     const headers = Object.assign({"Content-Type":"application/json"}, o.headers || {});
     if(token) headers["X-Cerebro-Token"] = token;
-    return await fetch(endpoint.replace(/\\/$/, "") + path, Object.assign({}, o, {headers:headers}));
+    return await fetch(endpoint.replace(/\/$/, "") + path, Object.assign({}, o, {headers:headers}));
   }
 
   async function devolver(id, dados){
@@ -9609,7 +9609,7 @@ if("serviceWorker" in navigator)
   window.sistemaAbsolutoCerebro = {
     configurar:function(opcoes){
       opcoes = opcoes || {};
-      if(opcoes.endpoint) endpoint = String(opcoes.endpoint).replace(/\\/$/, "");
+      if(opcoes.endpoint) endpoint = String(opcoes.endpoint).replace(/\/$/, "");
       if(Object.prototype.hasOwnProperty.call(opcoes, "token")) token = String(opcoes.token || "");
       if(Object.prototype.hasOwnProperty.call(opcoes, "ativo")) ativo = !!opcoes.ativo;
       salvarConfig();
