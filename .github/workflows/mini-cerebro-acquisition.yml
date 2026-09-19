@@ -1,0 +1,27 @@
+name: Mini-Cerebro acquisition export
+on:
+  push:
+    branches: [mini-cerebro-acquisition]
+permissions:
+  contents: read
+  actions: write
+jobs:
+  package-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Export historical source
+        run: |
+          mkdir -p mini-cerebro-source
+          cp sistema-absoluto.zip mini-cerebro-source/sistema-absoluto.zip
+          git ls-tree -r --name-only HEAD > mini-cerebro-source/repository-files.txt
+          git log --format='%H%x09%ad%x09%s' --date=iso-strict > mini-cerebro-source/git-history.txt
+          sha256sum mini-cerebro-source/sistema-absoluto.zip > mini-cerebro-source/SHA256SUMS
+      - name: Upload source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mini-cerebro-sistema-absoluto
+          path: mini-cerebro-source/
+          retention-days: 7
