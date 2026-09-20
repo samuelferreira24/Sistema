@@ -1,0 +1,4 @@
+DIAGNOSTICO GITHUB APP
+
+Teste de escrita realizado pelo GitHub App.
+Se este arquivo existir nesta branch, a escrita foi comprovada.
