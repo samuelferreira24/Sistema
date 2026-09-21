@@ -1,10 +1,8 @@
-# Runtime histórico — Sistema Absoluto
+# 10 — Runtime histórico
 
-Camada executável histórica do Sistema Absoluto.
+Código executável preservado do Sistema Absoluto anterior.
 
-- `python/` — módulos Python.
+- `python/` — componentes Python.
 - `shell/` — scripts de arranque, operação e coleta.
 
-Os arquivos foram agrupados por função sem alteração de conteúdo.
-
-**Importante:** este runtime é histórico. A presença de um módulo aqui não constitui prova de que a capacidade exista no ABS V1 atual.
+Este diretório é histórico. Reutilização exige validação no Projeto-Absoluto.
