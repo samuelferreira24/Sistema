@@ -1,7 +1,5 @@
-# Interface histórica
+# 20 — Interface histórica
 
-Camada visual/web do Sistema Absoluto histórico.
+Interface web/PWA preservada do Sistema anterior.
 
-- `web/` — PWA, service worker, manifesto e ícones.
-
-Esta camada representa uma casca histórica do sistema. A interface não é tratada como núcleo da arquitetura atual.
+A interface é uma camada de acesso e não define, por si só, as capacidades do sistema.
