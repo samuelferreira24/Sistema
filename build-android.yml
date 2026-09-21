@@ -14,6 +14,7 @@ on:
       - 'package.json'
       - 'icon-192.png'
       - 'icon-512.png'
+      - '20_interface/web/**'
 
 jobs:
   android:
