@@ -2,6 +2,6 @@
 
 Camada visual/web do Sistema Absoluto histórico.
 
-- `web/`: interface PWA e ativos visuais.
+- `web/` — PWA, service worker, manifesto e ícones.
 
-Os nomes históricos na raiz permanecem como links simbólicos de compatibilidade.
+Esta camada representa uma casca histórica do sistema. A interface não é tratada como núcleo da arquitetura atual.

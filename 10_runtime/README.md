@@ -1,12 +1,10 @@
 # Runtime histórico — Sistema Absoluto
 
-Esta pasta concentra o núcleo executável histórico do Sistema Absoluto.
+Camada executável histórica do Sistema Absoluto.
 
-## Classificação
-- `python/`: módulos Python do runtime histórico.
-- `shell/`: scripts de operação/arranque do runtime histórico.
+- `python/` — módulos Python.
+- `shell/` — scripts de arranque, operação e coleta.
 
-## Compatibilidade
-Os caminhos antigos na raiz foram preservados como links simbólicos para não quebrar comandos, imports e procedimentos históricos que ainda usam os nomes originais.
+Os arquivos foram agrupados por função sem alteração de conteúdo.
 
-O conteúdo dos arquivos não foi alterado nesta reorganização.
+**Importante:** este runtime é histórico. A presença de um módulo aqui não constitui prova de que a capacidade exista no ABS V1 atual.
